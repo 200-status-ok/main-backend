@@ -2,7 +2,7 @@ FROM golang:alpine3.17 AS build
 
 WORKDIR /app
 RUN go install github.com/cosmtrek/air@latest \
-    && go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+   && go install github.com/swaggo/swag/cmd/swag@latest
 
 COPY ../../go.mod .
 COPY ../../go.sum .

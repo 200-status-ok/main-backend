@@ -24,3 +24,6 @@ prune: ## Prune the docker hub
 
 logs: ## Show live logs
 	@$(DOCKER_COMP) logs --tail=0 --follow
+
+sh:
+	@$(DOCKER_COMP) exec app sh
