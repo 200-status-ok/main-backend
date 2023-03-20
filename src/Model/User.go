@@ -2,11 +2,41 @@ package Model
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type User struct {
 	gorm.Model
-	Name     string `gorm:"type:varchar(255)"`
-	Email    string `gorm:"type:varchar(255)"`
-	Password string `gorm:"type:varchar(255)"`
+	Username      string         `gorm:"type:varchar(50);not null;unique" json:"username"`
+	Posters       []Poster       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"posters"`
+	Conversations []Conversation `gorm:"foreignKey:User1Id;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"conversations"`
+	MarkedPosters []MarkedPoster `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"marked_posters"`
+}
+
+func (u *User) GetUsername() string {
+	return u.Username
+}
+
+func (u *User) SetUsername(username string) {
+	u.Username = username
+}
+
+func (u *User) GetID() uint {
+	return u.ID
+}
+
+func (u *User) GetCreatedAt() string {
+	return u.CreatedAt.String()
+}
+
+func (u *User) SetCreatedAt(createdAt time.Time) {
+	u.CreatedAt = createdAt
+}
+
+func (u *User) GetUpdatedAt() string {
+	return u.UpdatedAt.String()
+}
+
+func (u *User) SetUpdatedAt(updatedAt time.Time) {
+	u.UpdatedAt = updatedAt
 }

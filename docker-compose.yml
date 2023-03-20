@@ -4,7 +4,7 @@ services:
   database:
     env_file:
       - .env
-    image: postgres:alpine
+    image: postgres:alpine3.17
     container_name: main-db
     ports:
       - "5432:5432"
