@@ -27,3 +27,9 @@ logs: ## Show live logs
 
 sh:
 	@$(DOCKER_COMP) exec app sh
+
+migration:
+	@go run cmd/migrate/migration.go
+
+drop:
+	@go run cmd/migrate/drop.go
