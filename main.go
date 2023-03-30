@@ -18,10 +18,9 @@ import (
 // @BasePath /api/v1
 func main() {
 	r := gin.Default()
-	// set /api/v1 as base path for all routes
-	r.Group("/api/v1")
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	Controller.MainController(r)
+	server := Controller.Server{Router: r}
+	server.MainController()
 	r.Run(":8080")
 }

@@ -25,11 +25,22 @@ prune: ## Prune the docker hub
 logs: ## Show live logs
 	@$(DOCKER_COMP) logs --tail=0 --follow
 
-sh:
+sh: ## Open a shell in the app container
 	@$(DOCKER_COMP) exec app sh
 
-migration:
+bash: ## Open a bash in the app container
+	@$(DOCKER_COMP) exec app bash
+
+migration: ## Run migration
 	@go run cmd/migrate/migration.go
 
-drop:
+drop: ## Drop database
 	@go run cmd/migrate/drop.go
+
+init_swagger: ## Init swagger
+	@swag init --parseDependency --parseInternal
+
+swagger: ## Generate swagger docs
+	@rm -r docs
+	@swag init --parseDependency --parseInternal
+

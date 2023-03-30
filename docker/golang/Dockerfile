@@ -1,6 +1,9 @@
 FROM golang:alpine3.17 AS build
 
 WORKDIR /app
+
+RUN apk add --no-cache bash && apk add make
+
 RUN go install github.com/cosmtrek/air@latest \
    && go install github.com/swaggo/swag/cmd/swag@latest
 
