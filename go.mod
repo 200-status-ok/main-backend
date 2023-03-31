@@ -4,16 +4,20 @@ go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.9.0
+	github.com/golang-jwt/jwt/v5 v5.0.0-rc.2
+	github.com/pquerna/otp v1.4.0
 	github.com/spf13/viper v1.15.0
 	github.com/swaggo/files v1.0.0
 	github.com/swaggo/gin-swagger v1.5.3
 	github.com/swaggo/swag v1.8.10
+	github.com/twilio/twilio-go v1.4.0
 	gorm.io/driver/postgres v1.5.0
 	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
 )
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/bytedance/sonic v1.8.3 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -26,7 +30,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
@@ -44,6 +48,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.7 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

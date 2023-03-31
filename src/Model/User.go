@@ -7,7 +7,8 @@ import (
 
 type User struct {
 	gorm.Model
-	Username      string         `gorm:"type:varchar(50);not null;unique" json:"username"`
+	Username string `gorm:"type:varchar(50);not null;unique" json:"username"`
+	//SecretKey     string         `gorm:"type:varchar(70);not null;unique" json:"secret_key"`
 	Posters       []Poster       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"posters"`
 	Conversations []Conversation `gorm:"foreignKey:User1Id;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"conversations"`
 	MarkedPosters []MarkedPoster `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"marked_posters"`

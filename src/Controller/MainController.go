@@ -20,6 +20,13 @@ func (s *Server) MainController() {
 			poster.PATCH("/:id", Api.UpdatePoster)
 			poster.DELETE("/:id", Api.DeletePoster)
 		}
+		login := v1.Group("/login")
+		{
+			login.POST("/", Api.Login)
+			login.POST("/otp", Api.VerifyOtp)
+			login.GET("/", Api.Validate, Api.LogedIn)
+
+		}
 	}
 
 }
