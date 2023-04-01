@@ -2,30 +2,31 @@ package Controller
 
 import (
 	"github.com/403-access-denied/main-backend/src/Controller/Api"
+	"github.com/403-access-denied/main-backend/src/Middleware"
+	"github.com/403-access-denied/main-backend/src/Token"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	Router *gin.Engine
+	Router     *gin.Engine
+	TokenMaker Token.Maker
 }
 
 func (s *Server) MainController() {
 	v1 := s.Router.Group("/api/v1")
 	{
-		poster := v1.Group("/posters")
+		user := v1.Group("/users")
+		{
+			user.POST("/send-otp", Api.SendOTP)
+			user.POST("/login", Api.LoginUser)
+		}
+		poster := v1.Group("/posters").Use(Middleware.AuthMiddleware(s.TokenMaker))
 		{
 			poster.GET("/", Api.GetPosters)
 			poster.GET("/:id", Api.GetPoster)
 			poster.POST("/", Api.CreatePoster)
 			poster.PATCH("/:id", Api.UpdatePoster)
 			poster.DELETE("/:id", Api.DeletePoster)
-		}
-		login := v1.Group("/login")
-		{
-			login.POST("/", Api.Login)
-			login.POST("/otp", Api.VerifyOtp)
-			login.GET("/", Api.Validate, Api.LogedIn)
-
 		}
 	}
 

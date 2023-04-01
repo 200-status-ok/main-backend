@@ -1,68 +1,28 @@
 package Utils
 
 import (
-	"fmt"
-
-	"github.com/pquerna/otp"
-	"github.com/pquerna/otp/totp"
 	"github.com/twilio/twilio-go"
-	openapi "github.com/twilio/twilio-go/rest/verify/v2"
-	"os"
-	"time"
+	api "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
-var TWILIO_ACCOUNT_SID string = os.Getenv("TWILIO_ACCOUNT_SID")
-var TWILIO_AUTH_TOKEN string = os.Getenv("TWILIO_AUTH_TOKEN")
-var VERIFY_SERVICE_SID string = os.Getenv("VERIFY_SERVICE_SID")
+var accountSid, _ = ReadFromEnvFile(".env", "TWILIO_ACCOUNT_SID")
+var authToken, _ = ReadFromEnvFile(".env", "TWILIO_AUTH_TOKEN")
+var fromNumber, _ = ReadFromEnvFile(".env", "TWILIO_FROM_NUMBER")
+
 var client *twilio.RestClient = twilio.NewRestClientWithParams(twilio.ClientParams{
-	Username: TWILIO_ACCOUNT_SID,
-	Password: TWILIO_AUTH_TOKEN,
+	Username: accountSid,
+	Password: authToken,
 })
 
-func sendOtp(to string) {
-	params := &openapi.CreateVerificationParams{}
-	params.SetTo(to)
-	params.SetChannel("sms")
+func SendOTP(phoneNumber string, otp string) error {
+	params := &api.CreateMessageParams{}
+	params.SetFrom(fromNumber)
+	params.SetTo(phoneNumber)
+	params.SetBody("Your verification code is: " + otp)
 
-	resp, err := client.VerifyV2.CreateVerification(VERIFY_SERVICE_SID, params)
-
+	_, err := client.Api.CreateMessage(params)
 	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		fmt.Printf("Sent verification '%s'\n", *resp.Sid)
+		return err
 	}
-}
-
-func checkOtp(to string) {
-	var code string
-	fmt.Println("Please check your phone and enter the code:")
-	fmt.Scanln(&code)
-
-	params := &openapi.CreateVerificationCheckParams{}
-	params.SetTo(to)
-	params.SetCode(code)
-
-	resp, err := client.VerifyV2.CreateVerificationCheck(VERIFY_SERVICE_SID, params)
-
-	if err != nil {
-		fmt.Println(err.Error())
-	} else if *resp.Status == "approved" {
-		fmt.Println("Correct!")
-	} else {
-		fmt.Println("Incorrect!")
-	}
-}
-
-func generateOTP(secret string) string {
-	//code from secret key(6 digit)
-	oTTp, err := totp.GenerateCodeCustom(secret, time.Now(), totp.ValidateOpts{
-		Period:    100,
-		Skew:      1,
-		Digits:    otp.DigitsSix,
-		Algorithm: otp.AlgorithmSHA1,
-	})
-	if err != nil {
-		fmt.Println("Error generating code:", err)
-	}
-	return oTTp
+	return nil
 }

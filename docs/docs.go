@@ -209,6 +209,74 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/login": {
+            "post": {
+                "description": "login user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "login user",
+                "parameters": [
+                    {
+                        "description": "Verify OTP",
+                        "name": "poster",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.VerifyOTPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.VerifyOTPRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/send-otp": {
+            "post": {
+                "description": "send otp to user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "send otp to user",
+                "parameters": [
+                    {
+                        "description": "Send OTP",
+                        "name": "poster",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.SendOTPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.SendOTPRequest"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -560,6 +628,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Poster"
                     }
                 },
+                "secret_key": {
+                    "type": "string"
+                },
                 "updatedAt": {
                     "type": "string"
                 },
@@ -595,6 +666,19 @@ const docTemplate = `{
                 }
             }
         },
+        "UseCase.SendOTPRequest": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "minLength": 11
+                }
+            }
+        },
         "UseCase.UpdatePosterRequest": {
             "type": "object",
             "required": [
@@ -619,6 +703,23 @@ const docTemplate = `{
                 },
                 "poster": {
                     "$ref": "#/definitions/DTO.PosterDTO"
+                }
+            }
+        },
+        "UseCase.VerifyOTPRequest": {
+            "type": "object",
+            "required": [
+                "otp",
+                "username"
+            ],
+            "properties": {
+                "otp": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "minLength": 11
                 }
             }
         },

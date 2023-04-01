@@ -5,58 +5,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SendOTP LoginUser godoc
+// @Summary send otp to user
+// @Description send otp to user
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param poster body UseCase.SendOTPRequest true "Send OTP"
+// @Success 200 {object} UseCase.SendOTPRequest
+// @Router /users/send-otp [post]
+func SendOTP(c *gin.Context) {
+	UseCase.SendOTPResponse(c)
+}
+
 // LoginUser godoc
-// @Summary Create a poster
-// @Description Creates a poster
-// @Tags posters
+// @Summary login user
+// @Description login user
+// @Tags users
 // @Accept  json
 // @Produce  json
-// @Param poster body UseCase.CreatePosterRequest true "Poster"
-// @Success 200 {object} View.PosterView
-// @Router /posters [post]
-
-func Login(c *gin.Context) {
-	UseCase.LoginResponse(c)
-}
-
-// VerifyOtp godoc
-// @Summary Create a poster
-// @Description Creates a poster
-// @Tags posters
-// @Accept  json
-// @Produce  json
-// @Param poster body UseCase.CreatePosterRequest true "Poster"
-// @Success 200 {object} View.PosterView
-// @Router /posters [post]
-
-func VerifyOtp(c *gin.Context) {
+// @Param poster body UseCase.VerifyOTPRequest true "Verify OTP"
+// @Success 200 {object} View.UserView
+// @Router /users/login [post]
+func LoginUser(c *gin.Context) {
 	UseCase.VerifyOtpResponse(c)
-}
-
-// Validate godoc
-// @Summary Create a poster
-// @Description Creates a poster
-// @Tags posters
-// @Accept  json
-// @Produce  json
-// @Param poster body UseCase.CreatePosterRequest true "Poster"
-// @Success 200 {object} View.PosterView
-// @Router /posters [post]
-
-func Validate(c *gin.Context) {
-	UseCase.ValidateResponse(c)
-}
-
-// LogedIn godoc
-// @Summary Create a poster
-// @Description Creates a poster
-// @Tags posters
-// @Accept  json
-// @Produce  json
-// @Param poster body UseCase.CreatePosterRequest true "Poster"
-// @Success 200 {object} View.PosterView
-// @Router /posters [post]
-
-func LogedIn(c *gin.Context) {
-	UseCase.LogedInResponse(c)
 }

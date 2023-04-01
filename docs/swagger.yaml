@@ -237,6 +237,8 @@ definitions:
         items:
           $ref: '#/definitions/Model.Poster'
         type: array
+      secret_key:
+        type: string
       updatedAt:
         type: string
       username:
@@ -260,6 +262,15 @@ definitions:
     - categories
     - img_urls
     type: object
+  UseCase.SendOTPRequest:
+    properties:
+      username:
+        maxLength: 15
+        minLength: 11
+        type: string
+    required:
+    - username
+    type: object
   UseCase.UpdatePosterRequest:
     properties:
       address:
@@ -277,6 +288,18 @@ definitions:
     required:
     - categories
     - img_urls
+    type: object
+  UseCase.VerifyOTPRequest:
+    properties:
+      otp:
+        type: string
+      username:
+        maxLength: 15
+        minLength: 11
+        type: string
+    required:
+    - otp
+    - username
     type: object
   View.PosterView:
     properties:
@@ -448,4 +471,48 @@ paths:
       summary: Update a poster by ID
       tags:
       - posters
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: login user
+      parameters:
+      - description: Verify OTP
+        in: body
+        name: poster
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UseCase.VerifyOTPRequest'
+      summary: login user
+      tags:
+      - users
+  /users/send-otp:
+    post:
+      consumes:
+      - application/json
+      description: send otp to user
+      parameters:
+      - description: Send OTP
+        in: body
+        name: poster
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.SendOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UseCase.SendOTPRequest'
+      summary: send otp to user
+      tags:
+      - users
 swagger: "2.0"
