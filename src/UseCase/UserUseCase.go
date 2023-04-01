@@ -68,10 +68,18 @@ func SendOTPResponse(c *gin.Context) {
 		return
 	}
 	otp, _ := totp.GenerateCode(userExist.SecretKey, time.Now())
-	err = Utils.SendOTP(user.Username, otp)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	if Utils.UsernameValidation(user.Username) == 0 {
+		err = Utils.SendEmail(user.Username, otp)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		err = Utils.SendOTP(user.Username, otp)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to registered email/phone"})
 	return
