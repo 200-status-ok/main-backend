@@ -226,7 +226,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Verify OTP",
-                        "name": "poster",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -238,7 +238,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/UseCase.VerifyOTPRequest"
+                            "$ref": "#/definitions/View.UserView"
                         }
                     }
                 }
@@ -260,7 +260,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Send OTP",
-                        "name": "poster",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -272,7 +272,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/UseCase.SendOTPRequest"
+                            "$ref": "#/definitions/View.MessageView"
                         }
                     }
                 }
@@ -674,7 +674,7 @@ const docTemplate = `{
             "properties": {
                 "username": {
                     "type": "string",
-                    "maxLength": 15,
+                    "maxLength": 30,
                     "minLength": 11
                 }
             }
@@ -718,8 +718,16 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "maxLength": 15,
+                    "maxLength": 30,
                     "minLength": 11
+                }
+            }
+        },
+        "View.MessageView": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -758,6 +766,17 @@ const docTemplate = `{
                 },
                 "user": {
                     "type": "integer"
+                }
+            }
+        },
+        "View.UserView": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },

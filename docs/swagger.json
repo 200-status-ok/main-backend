@@ -217,7 +217,7 @@
                 "parameters": [
                     {
                         "description": "Verify OTP",
-                        "name": "poster",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -229,7 +229,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/UseCase.VerifyOTPRequest"
+                            "$ref": "#/definitions/View.UserView"
                         }
                     }
                 }
@@ -251,7 +251,7 @@
                 "parameters": [
                     {
                         "description": "Send OTP",
-                        "name": "poster",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -263,7 +263,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/UseCase.SendOTPRequest"
+                            "$ref": "#/definitions/View.MessageView"
                         }
                     }
                 }
@@ -665,7 +665,7 @@
             "properties": {
                 "username": {
                     "type": "string",
-                    "maxLength": 15,
+                    "maxLength": 30,
                     "minLength": 11
                 }
             }
@@ -709,8 +709,16 @@
                 },
                 "username": {
                     "type": "string",
-                    "maxLength": 15,
+                    "maxLength": 30,
                     "minLength": 11
+                }
+            }
+        },
+        "View.MessageView": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -749,6 +757,17 @@
                 },
                 "user": {
                     "type": "integer"
+                }
+            }
+        },
+        "View.UserView": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },

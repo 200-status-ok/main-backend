@@ -11,8 +11,8 @@ import (
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Param poster body UseCase.SendOTPRequest true "Send OTP"
-// @Success 200 {object} UseCase.SendOTPRequest
+// @Param user body UseCase.SendOTPRequest true "Send OTP"
+// @Success 200 {object} View.MessageView
 // @Router /users/send-otp [post]
 func SendOTP(c *gin.Context) {
 	UseCase.SendOTPResponse(c)
@@ -24,7 +24,7 @@ func SendOTP(c *gin.Context) {
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Param poster body UseCase.VerifyOTPRequest true "Verify OTP"
+// @Param user body UseCase.VerifyOTPRequest true "Verify OTP"
 // @Success 200 {object} View.UserView
 // @Router /users/login [post]
 func LoginUser(c *gin.Context) {

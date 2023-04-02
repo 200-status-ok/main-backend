@@ -265,7 +265,7 @@ definitions:
   UseCase.SendOTPRequest:
     properties:
       username:
-        maxLength: 15
+        maxLength: 30
         minLength: 11
         type: string
     required:
@@ -294,12 +294,17 @@ definitions:
       otp:
         type: string
       username:
-        maxLength: 15
+        maxLength: 30
         minLength: 11
         type: string
     required:
     - otp
     - username
+    type: object
+  View.MessageView:
+    properties:
+      message:
+        type: string
     type: object
   View.PosterView:
     properties:
@@ -325,6 +330,13 @@ definitions:
         type: string
       user:
         type: integer
+    type: object
+  View.UserView:
+    properties:
+      message:
+        type: string
+      token:
+        type: string
     type: object
   gorm.DeletedAt:
     properties:
@@ -479,7 +491,7 @@ paths:
       parameters:
       - description: Verify OTP
         in: body
-        name: poster
+        name: user
         required: true
         schema:
           $ref: '#/definitions/UseCase.VerifyOTPRequest'
@@ -489,7 +501,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/UseCase.VerifyOTPRequest'
+            $ref: '#/definitions/View.UserView'
       summary: login user
       tags:
       - users
@@ -501,7 +513,7 @@ paths:
       parameters:
       - description: Send OTP
         in: body
-        name: poster
+        name: user
         required: true
         schema:
           $ref: '#/definitions/UseCase.SendOTPRequest'
@@ -511,7 +523,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/UseCase.SendOTPRequest'
+            $ref: '#/definitions/View.MessageView'
       summary: send otp to user
       tags:
       - users

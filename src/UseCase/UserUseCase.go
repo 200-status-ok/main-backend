@@ -23,7 +23,7 @@ func generateSecretKeyForNewUser(user string) (string, error) {
 }
 
 type SendOTPRequest struct {
-	Username string `json:"username" binding:"required,min=11,max=15"`
+	Username string `json:"username" binding:"required,min=11,max=30"`
 }
 
 func SendOTPResponse(c *gin.Context) {
@@ -59,12 +59,20 @@ func SendOTPResponse(c *gin.Context) {
 			return
 		}
 		otp, _ := totp.GenerateCode(secretKey, time.Now())
-		err = Utils.SendOTP(user.Username, otp)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+		if Utils.UsernameValidation(user.Username) == 0 {
+			err = Utils.SendEmail(user.Username, otp)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+		} else {
+			err = Utils.SendOTP(user.Username, otp)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "OTP sent to registered email/phone"})
+		View.LoginMessageView("OTP sent to registered email/phone", c)
 		return
 	}
 	otp, _ := totp.GenerateCode(userExist.SecretKey, time.Now())
@@ -81,12 +89,12 @@ func SendOTPResponse(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to registered email/phone"})
+	View.LoginMessageView("OTP sent to registered email/phone", c)
 	return
 }
 
 type VerifyOTPRequest struct {
-	Username string `json:"username" binding:"required,min=11,max=15"`
+	Username string `json:"username" binding:"required,min=11,max=30"`
 	OTP      string `json:"otp" binding:"required,len=6"`
 }
 
