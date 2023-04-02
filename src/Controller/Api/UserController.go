@@ -30,3 +30,25 @@ func SendOTP(c *gin.Context) {
 func LoginUser(c *gin.Context) {
 	UseCase.VerifyOtpResponse(c)
 }
+
+// OAuth2Login godoc
+// @Summary login user with oauth2
+// @Description login user with oauth2
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Router /users/auth/google/login [get]
+func OAuth2Login(c *gin.Context) {
+	UseCase.OAuth2LoginResponse(c)
+}
+
+// GoogleCallback godoc
+// @Summary google callback
+// @Description google callback
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Router /users/auth/google/callback [get]
+func GoogleCallback(c *gin.Context) {
+	UseCase.GoogleCallbackResponse(c)
+}

@@ -201,6 +201,38 @@
                 }
             }
         },
+        "/users/auth/google/callback": {
+            "get": {
+                "description": "google callback",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "google callback",
+                "responses": {}
+            }
+        },
+        "/users/auth/google/login": {
+            "get": {
+                "description": "login user with oauth2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "login user with oauth2",
+                "responses": {}
+            }
+        },
         "/users/login": {
             "post": {
                 "description": "login user",

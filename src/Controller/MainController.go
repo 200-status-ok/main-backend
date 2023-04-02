@@ -19,6 +19,8 @@ func (s *Server) MainController() {
 		{
 			user.POST("/send-otp", Api.SendOTP)
 			user.POST("/login", Api.LoginUser)
+			user.GET("/auth/google/login", Api.OAuth2Login)
+			user.GET("/auth/google/callback", Api.GoogleCallback)
 		}
 		poster := v1.Group("/posters").Use(Middleware.AuthMiddleware(s.TokenMaker))
 		{

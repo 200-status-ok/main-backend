@@ -483,6 +483,28 @@ paths:
       summary: Update a poster by ID
       tags:
       - posters
+  /users/auth/google/callback:
+    get:
+      consumes:
+      - application/json
+      description: google callback
+      produces:
+      - application/json
+      responses: {}
+      summary: google callback
+      tags:
+      - users
+  /users/auth/google/login:
+    get:
+      consumes:
+      - application/json
+      description: login user with oauth2
+      produces:
+      - application/json
+      responses: {}
+      summary: login user with oauth2
+      tags:
+      - users
   /users/login:
     post:
       consumes:

@@ -1,6 +1,7 @@
 package UseCase
 
 import (
+	"encoding/json"
 	"github.com/403-access-denied/main-backend/src/DBConfiguration"
 	"github.com/403-access-denied/main-backend/src/Model"
 	"github.com/403-access-denied/main-backend/src/Repository"
@@ -138,4 +139,34 @@ func VerifyOtpResponse(c *gin.Context) {
 	}
 	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
 	View.LoginUserView(token, c)
+}
+
+func OAuth2LoginResponse(c *gin.Context) {
+	url := Utils.GetGoogleAuthURL("random-state")
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+type GoogleCallbackRes struct {
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	VerifiedEmail bool   `json:"verified_email"`
+	Picture       string `json:"picture"`
+}
+
+func GoogleCallbackResponse(c *gin.Context) {
+	code := c.Query("code")
+	state := c.Query("state")
+	response, err := Utils.GetGoogleUserInfo(code, state, c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var googleRes GoogleCallbackRes
+	err = json.Unmarshal(response, &googleRes)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"response": googleRes})
 }
