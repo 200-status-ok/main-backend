@@ -14,7 +14,7 @@ var googleClientId, _ = ReadFromEnvFile(".env", "GOOGLE_CLIENT_ID")
 var googleClientSecret, _ = ReadFromEnvFile(".env", "GOOGLE_CLIENT_SECRET")
 
 var googleOauthConfig = &oauth2.Config{
-	RedirectURL:  "http://localhost:8080/api/v1/users/auth/google/callback",
+	RedirectURL:  "https://main-backend.iran.liara.run/api/v1/users/auth/google/callback",
 	ClientID:     googleClientId,
 	ClientSecret: googleClientSecret,
 	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},

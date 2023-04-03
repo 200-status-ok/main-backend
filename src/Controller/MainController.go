@@ -17,8 +17,8 @@ func (s *Server) MainController() {
 	{
 		user := v1.Group("/users")
 		{
-			user.POST("/send-otp", Api.SendOTP)
-			user.POST("/login", Api.LoginUser)
+			user.POST("/auth/otp/send", Api.SendOTP)
+			user.POST("/auth/otp/login", Api.LoginUser)
 			user.GET("/auth/google/login", Api.OAuth2Login)
 			user.GET("/auth/google/callback", Api.GoogleCallback)
 		}

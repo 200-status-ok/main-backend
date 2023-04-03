@@ -505,7 +505,7 @@ paths:
       summary: login user with oauth2
       tags:
       - users
-  /users/login:
+  /users/auth/otp/login:
     post:
       consumes:
       - application/json
@@ -527,7 +527,7 @@ paths:
       summary: login user
       tags:
       - users
-  /users/send-otp:
+  /users/auth/otp/send:
     post:
       consumes:
       - application/json

@@ -242,7 +242,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/users/login": {
+        "/users/auth/otp/login": {
             "post": {
                 "description": "login user",
                 "consumes": [
@@ -276,7 +276,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/send-otp": {
+        "/users/auth/otp/send": {
             "post": {
                 "description": "send otp to user",
                 "consumes": [
