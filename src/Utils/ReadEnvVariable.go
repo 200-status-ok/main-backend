@@ -1,6 +1,8 @@
 package Utils
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+)
 
 func ReadFromEnvFile(path string, key string) (string, string) {
 	viper.SetConfigFile(path)
