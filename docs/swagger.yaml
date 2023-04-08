@@ -237,6 +237,8 @@ definitions:
         items:
           $ref: '#/definitions/Model.Poster'
         type: array
+      secret_key:
+        type: string
       updatedAt:
         type: string
       username:
@@ -260,6 +262,15 @@ definitions:
     - categories
     - img_urls
     type: object
+  UseCase.SendOTPRequest:
+    properties:
+      username:
+        maxLength: 30
+        minLength: 11
+        type: string
+    required:
+    - username
+    type: object
   UseCase.UpdatePosterRequest:
     properties:
       address:
@@ -277,6 +288,23 @@ definitions:
     required:
     - categories
     - img_urls
+    type: object
+  UseCase.VerifyOTPRequest:
+    properties:
+      otp:
+        type: string
+      username:
+        maxLength: 30
+        minLength: 11
+        type: string
+    required:
+    - otp
+    - username
+    type: object
+  View.MessageView:
+    properties:
+      message:
+        type: string
     type: object
   View.PosterView:
     properties:
@@ -302,6 +330,13 @@ definitions:
         type: string
       user:
         type: integer
+    type: object
+  View.UserView:
+    properties:
+      message:
+        type: string
+      token:
+        type: string
     type: object
   gorm.DeletedAt:
     properties:
@@ -448,4 +483,70 @@ paths:
       summary: Update a poster by ID
       tags:
       - posters
+  /users/auth/google/callback:
+    get:
+      consumes:
+      - application/json
+      description: google callback
+      produces:
+      - application/json
+      responses: {}
+      summary: google callback
+      tags:
+      - users
+  /users/auth/google/login:
+    get:
+      consumes:
+      - application/json
+      description: login user with oauth2
+      produces:
+      - application/json
+      responses: {}
+      summary: login user with oauth2
+      tags:
+      - users
+  /users/auth/otp/login:
+    post:
+      consumes:
+      - application/json
+      description: login user
+      parameters:
+      - description: Verify OTP
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserView'
+      summary: login user
+      tags:
+      - users
+  /users/auth/otp/send:
+    post:
+      consumes:
+      - application/json
+      description: send otp to user
+      parameters:
+      - description: Send OTP
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.SendOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.MessageView'
+      summary: send otp to user
+      tags:
+      - users
 swagger: "2.0"

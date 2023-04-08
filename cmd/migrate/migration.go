@@ -6,6 +6,10 @@ import (
 )
 
 func main() {
+	Migration()
+}
+
+func Migration() {
 	var models []interface{}
 	// add the model to migrate the database
 	models = append(models, &Model.User{})

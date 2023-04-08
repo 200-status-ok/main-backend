@@ -4,6 +4,7 @@ import (
 	"github.com/403-access-denied/main-backend/src/Utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
 )
 
 var db *gorm.DB
@@ -13,8 +14,14 @@ func connectDB(connection string) (*gorm.DB, error) {
 }
 
 func InitDB() {
-	connection, _ := Utils.ReadFromEnvFile(".env", "DATABASE_URL")
-	db, _ = connectDB(connection)
+	appEnv := os.Getenv("APP_ENV")
+	if appEnv == "development" {
+		connection, _ := Utils.ReadFromEnvFile(".env", "LOCAL_DATABASE_URL")
+		db, _ = connectDB(connection)
+	} else if appEnv == "production" {
+		connection, _ := Utils.ReadFromEnvFile(".env", "PRODUCTION_DATABASE_URL")
+		db, _ = connectDB(connection)
+	}
 }
 
 func MigrateModel(model []interface{}) error {

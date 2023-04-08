@@ -209,6 +209,106 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/auth/google/callback": {
+            "get": {
+                "description": "google callback",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "google callback",
+                "responses": {}
+            }
+        },
+        "/users/auth/google/login": {
+            "get": {
+                "description": "login user with oauth2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "login user with oauth2",
+                "responses": {}
+            }
+        },
+        "/users/auth/otp/login": {
+            "post": {
+                "description": "login user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "login user",
+                "parameters": [
+                    {
+                        "description": "Verify OTP",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.VerifyOTPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.UserView"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/auth/otp/send": {
+            "post": {
+                "description": "send otp to user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "send otp to user",
+                "parameters": [
+                    {
+                        "description": "Send OTP",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.SendOTPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.MessageView"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -560,6 +660,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Poster"
                     }
                 },
+                "secret_key": {
+                    "type": "string"
+                },
                 "updatedAt": {
                     "type": "string"
                 },
@@ -595,6 +698,19 @@ const docTemplate = `{
                 }
             }
         },
+        "UseCase.SendOTPRequest": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 11
+                }
+            }
+        },
         "UseCase.UpdatePosterRequest": {
             "type": "object",
             "required": [
@@ -619,6 +735,31 @@ const docTemplate = `{
                 },
                 "poster": {
                     "$ref": "#/definitions/DTO.PosterDTO"
+                }
+            }
+        },
+        "UseCase.VerifyOTPRequest": {
+            "type": "object",
+            "required": [
+                "otp",
+                "username"
+            ],
+            "properties": {
+                "otp": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 11
+                }
+            }
+        },
+        "View.MessageView": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -657,6 +798,17 @@ const docTemplate = `{
                 },
                 "user": {
                     "type": "integer"
+                }
+            }
+        },
+        "View.UserView": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },
