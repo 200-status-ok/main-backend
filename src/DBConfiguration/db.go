@@ -14,7 +14,7 @@ func connectDB(connection string) (*gorm.DB, error) {
 }
 
 func InitDB() {
-	appEnv := os.Getenv("APP_ENV")
+	appEnv := os.Getenv("APP_ENV2")
 	if appEnv == "development" {
 		connection, _ := Utils.ReadFromEnvFile(".env", "LOCAL_DATABASE_URL")
 		db, _ = connectDB(connection)

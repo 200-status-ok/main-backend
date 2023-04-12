@@ -17,7 +17,7 @@ func NewPosterRepository(db *gorm.DB) *PosterRepository {
 
 func (r *PosterRepository) GetAllPosters(limit, offset int, sort, sortBy string) ([]Model.Poster, error) {
 	var posters []Model.Poster
-	result := r.db.Preload("Address").Preload("Images").Preload("Categories").Preload("User").
+	result := r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
 		Limit(limit).Offset(offset).Order(sortBy + " " + sort).Find(&posters)
 	DBConfiguration.CloseDB()
 	if result.Error != nil {
@@ -28,7 +28,7 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sort, sortBy string)
 
 func (r *PosterRepository) GetPosterById(id int) (Model.Poster, error) {
 	var poster Model.Poster
-	result := r.db.Preload("Address").Preload("Images").Preload("Categories").Preload("User").
+	result := r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
 		First(&poster, "id = ?", id)
 	DBConfiguration.CloseDB()
 	if result.Error != nil {
@@ -43,7 +43,7 @@ func (r *PosterRepository) DeletePosterById(id int) error {
 	if result.Error != nil {
 		return result.Error
 	}
-	if err := r.db.Delete(&poster.Address, "poster_id = ?", id).Error; err != nil {
+	if err := r.db.Delete(&poster.Addresses, "poster_id = ?", id).Error; err != nil {
 		return err
 	}
 	result = r.db.Where("poster_id = ?", id).Delete(&Model.Image{})
@@ -57,7 +57,7 @@ func (r *PosterRepository) DeletePosterById(id int) error {
 	return nil
 }
 
-func (r *PosterRepository) CreatePoster(poster DTO.PosterDTO, address DTO.AddressDTO, imageUrl []string, categories []int) (
+func (r *PosterRepository) CreatePoster(poster DTO.PosterDTO, addresses []DTO.AddressDTO, imageUrl []string, categories []int) (
 	Model.Poster, error) {
 	var posterModel Model.Poster
 	var categoriesModel []Model.Category
@@ -85,7 +85,7 @@ func (r *PosterRepository) CreatePoster(poster DTO.PosterDTO, address DTO.Addres
 	}
 
 	posterID := posterModel.GetID()
-	newAddress, err := NewAddressRepository(r.db).CreateAddress(address, posterID)
+	newAddress, err := NewAddressRepository(r.db).CreateAddress(addresses, posterID)
 	if err != nil {
 		return Model.Poster{}, err
 	}
@@ -99,10 +99,10 @@ func (r *PosterRepository) CreatePoster(poster DTO.PosterDTO, address DTO.Addres
 	return posterModel, nil
 }
 
-func (r *PosterRepository) UpdatePoster(id int, poster DTO.PosterDTO, address DTO.AddressDTO, imageUrl []string, categories []int) (
+func (r *PosterRepository) UpdatePoster(id int, poster DTO.PosterDTO, addresses []DTO.AddressDTO, imageUrl []string, categories []int) (
 	Model.Poster, error) {
 	var posterModel Model.Poster
-	result := r.db.Preload("Address").Preload("Images").Preload("Categories").Preload("User").
+	result := r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
 		First(&posterModel, "id = ?", id)
 	if result.Error != nil {
 		return Model.Poster{}, result.Error
@@ -132,7 +132,7 @@ func (r *PosterRepository) UpdatePoster(id int, poster DTO.PosterDTO, address DT
 	}
 
 	posterID := posterModel.GetID()
-	updatedAddress, err := NewAddressRepository(r.db).UpdateAddress(address, posterID)
+	updatedAddress, err := NewAddressRepository(r.db).UpdateAddress(addresses, posterID)
 	if err != nil {
 		return Model.Poster{}, err
 	}

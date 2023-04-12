@@ -11,7 +11,7 @@ type PosterView struct {
 	ID          uint             `json:"id"`
 	Title       string           `json:"title"`
 	Description string           `json:"description"`
-	Address     Model.Address    `json:"address"`
+	Addresses   []Model.Address  `json:"address"`
 	Images      []Model.Image    `json:"images"`
 	Categories  []Model.Category `json:"categories"`
 	User        uint             `json:"user"`
@@ -26,7 +26,7 @@ func GetPostersView(posters []Model.Poster, c *gin.Context) {
 			ID:          poster.ID,
 			Title:       poster.Title,
 			Description: poster.Description,
-			Address:     poster.Address,
+			Addresses:   poster.Addresses,
 			Images:      poster.Images,
 			Categories:  poster.Categories,
 			User:        poster.UserID,
@@ -42,7 +42,7 @@ func GetPosterByIdView(poster Model.Poster, c *gin.Context) {
 		ID:          poster.ID,
 		Title:       poster.Title,
 		Description: poster.Description,
-		Address:     poster.Address,
+		Addresses:   poster.Addresses,
 		Images:      poster.Images,
 		Categories:  poster.Categories,
 		User:        poster.UserID,
@@ -57,7 +57,7 @@ func CreatePosterView(poster Model.Poster, c *gin.Context) {
 		ID:          poster.ID,
 		Title:       poster.Title,
 		Description: poster.Description,
-		Address:     poster.Address,
+		Addresses:   poster.Addresses,
 		Images:      poster.Images,
 		Categories:  poster.Categories,
 		User:        poster.UserID,
@@ -72,7 +72,7 @@ func UpdatePosterView(poster Model.Poster, c *gin.Context) {
 		ID:          poster.ID,
 		Title:       poster.Title,
 		Description: poster.Description,
-		Address:     poster.Address,
+		Addresses:   poster.Addresses,
 		Images:      poster.Images,
 		Categories:  poster.Categories,
 		User:        poster.UserID,

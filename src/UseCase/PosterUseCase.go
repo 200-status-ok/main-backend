@@ -79,7 +79,7 @@ func DeletePosterByIdResponse(c *gin.Context) {
 
 type CreatePosterRequest struct {
 	Poster     DTO.PosterDTO
-	Address    DTO.AddressDTO
+	Addresses  []DTO.AddressDTO
 	ImgUrls    []string `json:"img_urls" binding:"required"`
 	Categories []int    `json:"categories" binding:"required"`
 }
@@ -91,7 +91,7 @@ func CreatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	poster, err := posterRepository.CreatePoster(request.Poster, request.Address, request.ImgUrls, request.Categories)
+	poster, err := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Categories)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -102,7 +102,7 @@ func CreatePosterResponse(c *gin.Context) {
 
 type UpdatePosterRequest struct {
 	Poster     DTO.PosterDTO
-	Address    DTO.AddressDTO
+	Addresses  []DTO.AddressDTO
 	ImgUrls    []string `json:"img_urls" binding:"required"`
 	Categories []int    `json:"categories" binding:"required"`
 }
@@ -123,7 +123,7 @@ func UpdatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	poster, err := posterRepository.UpdatePoster(id.ID, request.Poster, request.Address, request.ImgUrls,
+	poster, err := posterRepository.UpdatePoster(id.ID, request.Poster, request.Addresses, request.ImgUrls,
 		request.Categories)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -2,7 +2,7 @@ FROM golang:alpine3.17 AS build
 
 WORKDIR /app
 
-ENV APP_ENV=production
+ENV APP_ENV2=production
 COPY go.mod .
 COPY go.sum .
 

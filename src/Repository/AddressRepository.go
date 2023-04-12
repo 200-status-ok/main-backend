@@ -24,37 +24,42 @@ func (r *AddressRepository) GetAddressById(id int) (Model.Address, error) {
 	return address, nil
 }
 
-func (r *AddressRepository) CreateAddress(address DTO.AddressDTO, posterID uint) (Model.Address, error) {
-	var addressModel Model.Address
-	addressModel.SetPosterId(uint(posterID))
-	addressModel.SetProvince(address.Province)
-	addressModel.SetCity(address.City)
-	addressModel.SetAddressDetail(address.AddressDetail)
-	addressModel.SetLatitude(address.Latitude)
-	addressModel.SetLongitude(address.Longitude)
-	result := r.db.Create(&addressModel)
+func (r *AddressRepository) CreateAddress(addresses []DTO.AddressDTO, posterID uint) ([]Model.Address, error) {
+	var addressesModel []Model.Address
+	for _, address := range addresses {
+		addressesModel = append(addressesModel, Model.Address{
+			Province:      address.Province,
+			City:          address.City,
+			AddressDetail: address.AddressDetail,
+			Latitude:      address.Latitude,
+			Longitude:     address.Longitude,
+			PosterId:      posterID,
+		})
+	}
+	result := r.db.Create(&addressesModel)
 	if result.Error != nil {
-		return Model.Address{}, result.Error
+		return []Model.Address{}, result.Error
 	}
 
-	return addressModel, nil
+	return addressesModel, nil
 }
 
-func (r *AddressRepository) UpdateAddress(address DTO.AddressDTO, posterID uint) (Model.Address, error) {
-	var addressModel Model.Address
-	result := r.db.First(&addressModel, "poster_id = ?", posterID)
-	if result.Error != nil {
-		return Model.Address{}, result.Error
+func (r *AddressRepository) UpdateAddress(addresses []DTO.AddressDTO, posterID uint) ([]Model.Address, error) {
+	var addressesModel []Model.Address
+	for _, address := range addresses {
+		addressesModel = append(addressesModel, Model.Address{
+			Province:      address.Province,
+			City:          address.City,
+			AddressDetail: address.AddressDetail,
+			Latitude:      address.Latitude,
+			Longitude:     address.Longitude,
+			PosterId:      posterID,
+		})
 	}
-	addressModel.SetProvince(address.Province)
-	addressModel.SetCity(address.City)
-	addressModel.SetAddressDetail(address.AddressDetail)
-	addressModel.SetLatitude(address.Latitude)
-	addressModel.SetLongitude(address.Longitude)
-	result = r.db.Save(&addressModel)
+	result := r.db.Save(&addressesModel)
 	if result.Error != nil {
-		return Model.Address{}, result.Error
+		return []Model.Address{}, result.Error
 	}
 
-	return addressModel, nil
+	return addressesModel, nil
 }
