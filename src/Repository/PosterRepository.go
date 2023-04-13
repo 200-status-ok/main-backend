@@ -4,6 +4,7 @@ import (
 	"github.com/403-access-denied/main-backend/src/DBConfiguration"
 	"github.com/403-access-denied/main-backend/src/DTO"
 	"github.com/403-access-denied/main-backend/src/Model"
+	"github.com/403-access-denied/main-backend/src/Utils"
 	"gorm.io/gorm"
 )
 
@@ -15,10 +16,34 @@ func NewPosterRepository(db *gorm.DB) *PosterRepository {
 	return &PosterRepository{db: db}
 }
 
-func (r *PosterRepository) GetAllPosters(limit, offset int, sort, sortBy string) ([]Model.Poster, error) {
+func (r *PosterRepository) GetAllPosters(limit, offset int, sort, sortBy string, filterObject DTO.FilterObject) ([]Model.Poster, error) {
 	var posters []Model.Poster
+
 	result := r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
-		Limit(limit).Offset(offset).Order(sortBy + " " + sort).Find(&posters)
+		Limit(limit).Offset(offset).Order(sortBy + " " + sort)
+
+	if filterObject.Status != "" && filterObject.Status != "both" { // todo use enum maybe?
+		result = result.Where("status = ?", filterObject.Status)
+	}
+
+	if filterObject.SearchPhrase != "" {
+		result = result.Where("title LIKE ?", "%"+filterObject.SearchPhrase+"%")
+	}
+
+	if filterObject.Lat != 0 && filterObject.Lon != 0 {
+		result = result.Where("Lat BETWEEN ? AND ?", filterObject.Lat-Utils.BaseLocationRadarRadius, filterObject.Lat+Utils.BaseLocationRadarRadius).
+			Where("Lon BETWEEN ? AND ?", filterObject.Lon-Utils.BaseLocationRadarRadius, filterObject.Lon+Utils.BaseLocationRadarRadius) // todo change logic maybe
+	}
+
+	if filterObject.TimeStart != 0 && filterObject.TimeEnd != 0 {
+		result = result.Where("created_at BETWEEN ? AND ?", filterObject.TimeStart, filterObject.TimeEnd)
+	}
+
+	if filterObject.OnlyRewards {
+		result = result.Where("only_awards = ?", filterObject.OnlyRewards)
+	}
+
+	result.Find(&posters)
 	DBConfiguration.CloseDB()
 	if result.Error != nil {
 		return nil, result.Error
