@@ -28,7 +28,7 @@ func main() {
 
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	secretKey, _ := Utils.ReadFromEnvFile(".env", "JWT_SECRET")
+	secretKey := Utils.ReadFromEnvFile(".env", "JWT_SECRET")
 	token, _ := Token.NewJWTMaker(secretKey)
 	server := Controller.Server{Router: r, TokenMaker: token}
 	server.MainController()
