@@ -8,15 +8,16 @@ import (
 )
 
 type PosterView struct {
-	ID          uint             `json:"id"`
-	Title       string           `json:"title"`
-	Description string           `json:"description"`
-	Addresses   []Model.Address  `json:"address"`
-	Images      []Model.Image    `json:"images"`
-	Categories  []Model.Category `json:"categories"`
-	User        uint             `json:"user"`
-	CreatedAt   time.Time        `json:"created_at"`
-	UpdatedAt   time.Time        `json:"updated_at"`
+	ID          uint               `json:"id"`
+	Title       string             `json:"title"`
+	Status      Model.PosterStatus `json:"status"`
+	Description string             `json:"description"`
+	Addresses   []Model.Address    `json:"address"`
+	Images      []Model.Image      `json:"images"`
+	Categories  []Model.Category   `json:"categories"`
+	User        uint               `json:"user"`
+	CreatedAt   time.Time          `json:"created_at"`
+	UpdatedAt   time.Time          `json:"updated_at"`
 }
 
 func GetPostersView(posters []Model.Poster, c *gin.Context) {
@@ -28,6 +29,7 @@ func GetPostersView(posters []Model.Poster, c *gin.Context) {
 			Description: poster.Description,
 			Addresses:   poster.Addresses,
 			Images:      poster.Images,
+			Status:      poster.Status,
 			Categories:  poster.Categories,
 			User:        poster.UserID,
 			CreatedAt:   poster.CreatedAt,

@@ -239,8 +239,6 @@ definitions:
         items:
           $ref: '#/definitions/Model.Poster'
         type: array
-      secret_key:
-        type: string
       updatedAt:
         type: string
       username:
@@ -393,6 +391,35 @@ paths:
         in: query
         name: sort_by
         type: string
+      - description: Search phrase
+        in: query
+        name: search_phrase
+        type: string
+      - default: both
+        description: Status
+        in: query
+        name: status
+        type: string
+      - description: Time start
+        in: query
+        name: time_start
+        type: integer
+      - description: Time end
+        in: query
+        name: time_end
+        type: integer
+      - description: Only rewards
+        in: query
+        name: only_rewards
+        type: boolean
+      - description: Latitude
+        in: query
+        name: lat
+        type: number
+      - description: Longitude
+        in: query
+        name: lon
+        type: number
       produces:
       - application/json
       responses:

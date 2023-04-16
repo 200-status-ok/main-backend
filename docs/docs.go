@@ -65,6 +65,49 @@ const docTemplate = `{
                         "description": "Sort by",
                         "name": "sort_by",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search phrase",
+                        "name": "search_phrase",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "both",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Time start",
+                        "name": "time_start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Time end",
+                        "name": "time_end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Only rewards",
+                        "name": "only_rewards",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Latitude",
+                        "name": "lat",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Longitude",
+                        "name": "lon",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -662,9 +705,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Model.Poster"
                     }
-                },
-                "secret_key": {
-                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"

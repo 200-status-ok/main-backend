@@ -10,17 +10,17 @@ import (
 )
 
 type getPostersRequest struct {
-	PageID       int     `form:"page_id" binding:"required,min=1,max=10"`
+	PageID       int     `form:"page_id" binding:"required,min=1"`
 	PageSize     int     `form:"page_size" binding:"required,min=5,max=10"`
 	Sort         string  `form:"sort,omitempty" binding:"omitempty,oneof=asc desc"`
 	SortBy       string  `form:"sort_by,omitempty" binding:"omitempty,oneof=created_at updated_at id"`
-	Status       string  `form:"status,omitempty" binding:"max=1,oneof=lost found both"`
-	SearchPhrase string  `form:"search_phrase,omitempty" binding:"max=1"`
-	TimeStart    int64   `form:"time_start,omitempty" binding:"max=1"`
-	TimeEnd      int64   `form:"time_end,omitempty" binding:"max=1"`
-	onlyRewards  bool    `form:"only_rewards,omitempty" binding:"max=1,oneof=true false"`
-	Lat          float64 `form:"lat,omitempty" binding:"max=1"`
-	Lon          float64 `form:"lon,omitempty" binding:"max=1"`
+	Status       string  `form:"status,omitempty" binding:"oneof=lost found both"`
+	SearchPhrase string  `form:"search_phrase,omitempty"`
+	TimeStart    int64   `form:"time_start,omitempty"`
+	TimeEnd      int64   `form:"time_end,omitempty"`
+	onlyRewards  bool    `form:"only_rewards,omitempty" binding:"oneof=true false"`
+	Lat          float64 `form:"lat,omitempty"`
+	Lon          float64 `form:"lon,omitempty"`
 }
 
 func GetPostersResponse(c *gin.Context) {

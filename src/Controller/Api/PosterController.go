@@ -15,6 +15,13 @@ import (
 // @Param page_size query int true "Page size" minimum(1) default(10)
 // @Param sort query string false "Sort direction" enum(asc, desc) default(asc)
 // @Param sort_by query string false "Sort by" enum(id, updated_at, created_at) default(created_at)
+// @Param search_phrase query string false "Search phrase"
+// @Param status query string false "Status" enum(lost, found, both) default(both)
+// @Param time_start query int false "Time start"
+// @Param time_end query int false "Time end"
+// @Param only_rewards query bool false "Only rewards"
+// @Param lat query float64 false "Latitude"
+// @Param lon query float64 false "Longitude"
 // @Success 200 {array} View.PosterView
 // @Router /posters [get]
 func GetPosters(c *gin.Context) {

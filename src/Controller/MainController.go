@@ -2,7 +2,6 @@ package Controller
 
 import (
 	"github.com/403-access-denied/main-backend/src/Controller/Api"
-	"github.com/403-access-denied/main-backend/src/Middleware"
 	"github.com/403-access-denied/main-backend/src/Token"
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +21,8 @@ func (s *Server) MainController() {
 			user.GET("/auth/google/login", Api.OAuth2Login)
 			user.GET("/auth/google/callback", Api.GoogleCallback)
 		}
-		poster := v1.Group("/posters").Use(Middleware.AuthMiddleware(s.TokenMaker))
+		// TODO add auth middleware
+		poster := v1.Group("/posters")
 		{
 			poster.GET("/", Api.GetPosters)
 			poster.GET("/:id", Api.GetPoster)
