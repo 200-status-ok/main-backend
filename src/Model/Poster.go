@@ -21,7 +21,7 @@ type Poster struct {
 	UserID      uint         `gorm:"type:int;" json:"user_id"`
 	Categories  []Category   `gorm:"many2many:poster_categories;" json:"categories"`
 	Images      []Image      `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"image"`
-	Address     Address      `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
+	Addresses   []Address    `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
 	User        User         `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"user"`
 }
 
@@ -89,12 +89,12 @@ func (p *Poster) SetImages(images []Image) {
 	p.Images = images
 }
 
-func (p *Poster) GetAddress() Address {
-	return p.Address
+func (p *Poster) GetAddress() []Address {
+	return p.Addresses
 }
 
-func (p *Poster) SetAddress(address Address) {
-	p.Address = address
+func (p *Poster) SetAddress(address []Address) {
+	p.Addresses = address
 }
 
 func (p *Poster) GetTelegramID() string {

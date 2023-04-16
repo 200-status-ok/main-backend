@@ -9,7 +9,7 @@ type Address struct {
 	AddressDetail string  `gorm:"type:text;" json:"address_detail"`
 	Latitude      float64 `gorm:"type:decimal;" json:"latitude"`
 	Longitude     float64 `gorm:"type:decimal;" json:"longitude"`
-	PosterId      uint    `gorm:"type:int;unique" json:"address_id"`
+	PosterId      uint    `gorm:"type:int" json:"address_id"`
 }
 
 func (a *Address) GetProvince() string {

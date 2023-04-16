@@ -2,7 +2,7 @@ FROM golang:alpine3.17 AS build
 
 WORKDIR /app
 
-ENV APP_ENV=development
+ENV APP_ENV2=development
 RUN apk add --no-cache bash && apk add make
 
 RUN go install github.com/cosmtrek/air@latest \

@@ -173,7 +173,9 @@ definitions:
   Model.Poster:
     properties:
       address:
-        $ref: '#/definitions/Model.Address'
+        items:
+          $ref: '#/definitions/Model.Address'
+        type: array
       award:
         type: number
       categories:
@@ -246,8 +248,10 @@ definitions:
     type: object
   UseCase.CreatePosterRequest:
     properties:
-      address:
-        $ref: '#/definitions/DTO.AddressDTO'
+      addresses:
+        items:
+          $ref: '#/definitions/DTO.AddressDTO'
+        type: array
       categories:
         items:
           type: integer
@@ -273,8 +277,10 @@ definitions:
     type: object
   UseCase.UpdatePosterRequest:
     properties:
-      address:
-        $ref: '#/definitions/DTO.AddressDTO'
+      addresses:
+        items:
+          $ref: '#/definitions/DTO.AddressDTO'
+        type: array
       categories:
         items:
           type: integer
@@ -309,7 +315,9 @@ definitions:
   View.PosterView:
     properties:
       address:
-        $ref: '#/definitions/Model.Address'
+        items:
+          $ref: '#/definitions/Model.Address'
+        type: array
       categories:
         items:
           $ref: '#/definitions/Model.Category'

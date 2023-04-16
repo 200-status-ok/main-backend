@@ -555,7 +555,10 @@
             "type": "object",
             "properties": {
                 "address": {
-                    "$ref": "#/definitions/Model.Address"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Address"
+                    }
                 },
                 "award": {
                     "type": "number"
@@ -669,8 +672,11 @@
                 "img_urls"
             ],
             "properties": {
-                "address": {
-                    "$ref": "#/definitions/DTO.AddressDTO"
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DTO.AddressDTO"
+                    }
                 },
                 "categories": {
                     "type": "array",
@@ -709,8 +715,11 @@
                 "img_urls"
             ],
             "properties": {
-                "address": {
-                    "$ref": "#/definitions/DTO.AddressDTO"
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DTO.AddressDTO"
+                    }
                 },
                 "categories": {
                     "type": "array",
@@ -758,7 +767,10 @@
             "type": "object",
             "properties": {
                 "address": {
-                    "$ref": "#/definitions/Model.Address"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Address"
+                    }
                 },
                 "categories": {
                     "type": "array",

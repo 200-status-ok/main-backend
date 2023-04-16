@@ -564,7 +564,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "address": {
-                    "$ref": "#/definitions/Model.Address"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Address"
+                    }
                 },
                 "award": {
                     "type": "number"
@@ -678,8 +681,11 @@ const docTemplate = `{
                 "img_urls"
             ],
             "properties": {
-                "address": {
-                    "$ref": "#/definitions/DTO.AddressDTO"
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DTO.AddressDTO"
+                    }
                 },
                 "categories": {
                     "type": "array",
@@ -718,8 +724,11 @@ const docTemplate = `{
                 "img_urls"
             ],
             "properties": {
-                "address": {
-                    "$ref": "#/definitions/DTO.AddressDTO"
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DTO.AddressDTO"
+                    }
                 },
                 "categories": {
                     "type": "array",
@@ -767,7 +776,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "address": {
-                    "$ref": "#/definitions/Model.Address"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Address"
+                    }
                 },
                 "categories": {
                     "type": "array",
