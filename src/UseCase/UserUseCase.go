@@ -56,14 +56,26 @@ func SendOTPResponse(c *gin.Context) {
 	})
 
 	if Utils.UsernameValidation(user.Username) == 0 {
-		emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", user.Username,
-			"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+OTP,
-			Utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
-		err := emailService.SendEmailWithGoogle()
+		//emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", user.Username,
+		//	"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+OTP,
+		//	Utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
+		//err := emailService.SendEmailWithGoogle()
+		//if err != nil {
+		//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		//	return
+		//}
+		messageBroker := Utils.MessageClient{}
+		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_DEFAULT_CONNECTION"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(err)
 		}
+		msg := "کد تایید ورود به سامانه همینجا: " + OTP
+		err = messageBroker.PublishOnQueue([]byte(msg), "notification")
+		if err != nil {
+			panic(err)
+		}
+		messageBroker.Close()
+
 	} else {
 		pattern := map[string]string{
 			"code": OTP,
