@@ -9,6 +9,7 @@ import (
 	"github.com/403-access-denied/main-backend/src/Utils"
 	"github.com/403-access-denied/main-backend/src/View"
 	"github.com/gin-gonic/gin"
+	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"net/http"
 	"time"
@@ -28,8 +29,8 @@ type SendOTPRequest struct {
 }
 
 func SendOTPResponse(c *gin.Context) {
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
 	var user SendOTPRequest
+	redisClient := Utils.NewRedisClient("redis", "6379", "", 0)
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -40,58 +41,41 @@ func SendOTPResponse(c *gin.Context) {
 		return
 	}
 
-	userExist, err := userRepository.FindByUsername(user.Username)
-	if err != nil && err.Error() != "user not found" {
+	secretKey, _ := generateSecretKeyForNewUser(user.Username)
+	err := redisClient.Set(user.Username, secretKey)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if userExist == nil {
-		secretKey, _ := generateSecretKeyForNewUser(user.Username)
-		newUser := &Model.User{
-			Username:      user.Username,
-			SecretKey:     secretKey,
-			Posters:       nil,
-			MarkedPosters: nil,
-			Conversations: nil,
-		}
-		err := userRepository.UserCreate(newUser)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		otp, _ := totp.GenerateCode(secretKey, time.Now())
-		if Utils.UsernameValidation(user.Username) == 0 {
-			err = Utils.SendEmail(user.Username, otp)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-		} else {
-			err = Utils.SendOTP(user.Username, otp)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-		}
-		View.LoginMessageView("OTP sent to registered email/phone", c)
-		return
-	}
-	otp, _ := totp.GenerateCode(userExist.SecretKey, time.Now())
+
+	OTP, _ := totp.GenerateCodeCustom(secretKey, time.Now(), totp.ValidateOpts{
+		Period:    120,
+		Skew:      1,
+		Digits:    otp.DigitsSix,
+		Algorithm: otp.AlgorithmSHA1,
+	})
+
 	if Utils.UsernameValidation(user.Username) == 0 {
-		err = Utils.SendEmail(user.Username, otp)
+		emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", user.Username,
+			"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+OTP,
+			Utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
+		err := emailService.SendEmailWithGoogle()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	} else {
-		err = Utils.SendOTP(user.Username, otp)
+		pattern := map[string]string{
+			"code": OTP,
+		}
+		otpSms := Utils.NewSMS(Utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
+		err := otpSms.SendSMSWithPattern(user.Username, Utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	}
 	View.LoginMessageView("OTP sent to registered email/phone", c)
-	return
 }
 
 type VerifyOTPRequest struct {
@@ -101,6 +85,7 @@ type VerifyOTPRequest struct {
 
 func VerifyOtpResponse(c *gin.Context) {
 	var verifyReq VerifyOTPRequest
+	redisClient := Utils.NewRedisClient("redis", "6379", "", 0)
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
 	if err := c.ShouldBindJSON(&verifyReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -111,33 +96,58 @@ func VerifyOtpResponse(c *gin.Context) {
 		return
 	}
 
-	user, err := userRepository.FindByUsername(verifyReq.Username)
+	userExist, err := userRepository.FindByUsername(verifyReq.Username)
+	if err != nil && err.Error() != "user not found" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	secretKey, err := redisClient.Get(verifyReq.Username)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if user.ID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
-		return
-	}
-	secretKey := user.SecretKey
-	valid := totp.Validate(verifyReq.OTP, secretKey)
+
+	valid, _ := totp.ValidateCustom(
+		verifyReq.OTP,
+		secretKey,
+		time.Now().UTC(),
+		totp.ValidateOpts{
+			Period:    120,
+			Skew:      1,
+			Digits:    otp.DigitsSix,
+			Algorithm: otp.AlgorithmSHA1,
+		},
+	)
 	if !valid {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid OTP"})
 		return
 	}
-	jwtSecret, _ := Utils.ReadFromEnvFile(".env", "JWT_SECRET")
-	jwtMaker, err := Token.NewJWTMaker(jwtSecret)
+
+	if userExist == nil {
+		newUser := &Model.User{
+			Username:      verifyReq.Username,
+			Posters:       nil,
+			MarkedPosters: nil,
+			Conversations: nil,
+		}
+		err = userRepository.UserCreate(newUser)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	jwtMaker, err := Token.NewJWTMaker(Utils.ReadFromEnvFile(".env", "JWT_SECRET"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	token, _, err := jwtMaker.MakeToken(user.Username, time.Now().Add(time.Hour*24).Unix())
+	token, _, err := jwtMaker.MakeToken(verifyReq.Username, time.Now().Add(time.Hour*24).Unix())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.SetCookie("token", token, 86400, "/", "localhost", false, true)
 	View.LoginUserView(token, c)
 }
 

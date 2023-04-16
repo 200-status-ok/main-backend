@@ -10,8 +10,8 @@ import (
 	"net/http"
 )
 
-var googleClientId, _ = ReadFromEnvFile(".env", "GOOGLE_CLIENT_ID")
-var googleClientSecret, _ = ReadFromEnvFile(".env", "GOOGLE_CLIENT_SECRET")
+var googleClientId = ReadFromEnvFile(".env", "GOOGLE_CLIENT_ID")
+var googleClientSecret = ReadFromEnvFile(".env", "GOOGLE_CLIENT_SECRET")
 
 var googleOauthConfig = &oauth2.Config{
 	RedirectURL:  "https://main-backend.iran.liara.run/api/v1/users/auth/google/callback",

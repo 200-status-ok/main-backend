@@ -31,6 +31,16 @@ services:
     networks:
       - main-network
 
+  redis:
+    image: redis:alpine3.17
+    container_name: main-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./docker/redis/data:/data
+    networks:
+      - main-network
+
 networks:
   main-network:
     driver: bridge
