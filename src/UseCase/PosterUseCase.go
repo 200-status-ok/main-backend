@@ -10,29 +10,52 @@ import (
 )
 
 type getPostersRequest struct {
-	PageID   int    `form:"page_id" binding:"required,min=1,max=10"`
-	PageSize int    `form:"page_size" binding:"required,min=5,max=10"`
-	Sort     string `form:"sort,omitempty" binding:"omitempty,oneof=asc desc"`
-	SortBy   string `form:"sort_by,omitempty" binding:"omitempty,oneof=created_at updated_at id"`
+	PageID       int     `form:"page_id" binding:"required,min=1,max=10"`
+	PageSize     int     `form:"page_size" binding:"required,min=5,max=10"`
+	Sort         string  `form:"sort,omitempty" binding:"omitempty,oneof=asc desc"`
+	SortBy       string  `form:"sort_by,omitempty" binding:"omitempty,oneof=created_at updated_at id"`
+	Status       string  `form:"status,omitempty" binding:"max=1,oneof=lost found both"`
+	SearchPhrase string  `form:"search_phrase,omitempty" binding:"max=1"`
+	TimeStart    int64   `form:"time_start,omitempty" binding:"max=1"`
+	TimeEnd      int64   `form:"time_end,omitempty" binding:"max=1"`
+	onlyRewards  bool    `form:"only_rewards,omitempty" binding:"max=1,oneof=true false"`
+	Lat          float64 `form:"lat,omitempty" binding:"max=1"`
+	Lon          float64 `form:"lon,omitempty" binding:"max=1"`
 }
 
 func GetPostersResponse(c *gin.Context) {
 	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+
 	var request getPostersRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	offset := (request.PageID - 1) * request.PageSize
 	request.Sort = c.DefaultQuery("sort", "asc")
 	request.SortBy = c.DefaultQuery("sort_by", "created_at")
-	offset := (request.PageID - 1) * request.PageSize
+	request.Status = c.DefaultQuery("status", "both")
+	request.SearchPhrase = c.DefaultQuery("search_phrase", "")
+	//todo add other fields
 
-	posters, err := posterRepository.GetAllPosters(request.PageSize, offset, request.Sort, request.SortBy)
+	filterObject := DTO.FilterObject{
+		Status:       request.Status,
+		SearchPhrase: request.SearchPhrase,
+		TimeStart:    request.TimeStart,
+		TimeEnd:      request.TimeEnd,
+		OnlyRewards:  request.onlyRewards,
+		Lat:          request.Lat,
+		Lon:          request.Lon,
+	}
+
+	posters, err := posterRepository.GetAllPosters(request.PageSize, offset, request.Sort, request.SortBy, filterObject)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	DBConfiguration.CloseDB()
 	View.GetPostersView(posters, c)
 }

@@ -10,3 +10,13 @@ type PosterDTO struct {
 	Award       float64 `json:"award"`
 	UserID      uint    `json:"user_id" binding:"required,min=1"`
 }
+
+type FilterObject struct { //todo move this to another file
+	Status       string
+	SearchPhrase string
+	TimeStart    int64
+	TimeEnd      int64
+	OnlyRewards  bool
+	Lat          float64
+	Lon          float64
+}
