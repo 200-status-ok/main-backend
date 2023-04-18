@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  database:
+    env_file:
+      - .env
+    image: postgres:alpine3.17
+    container_name: main-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    networks:
+      - main-network
+
+  app:
+    container_name: main-app
+    build:
+      context: .
+      dockerfile: docker/golang/Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - main-network
+
+  redis:
+    image: redis:alpine3.17
+    container_name: main-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./docker/redis/data:/data
+    networks:
+      - main-network
+
+  rabbitmq:
+    image: rabbitmq:3.9.9-management-alpine
+    container_name: main-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./docker/rabbitmq/data:/var/lib/rabbitmq
+    networks:
+      - main-network
+
+networks:
+  main-network:
+    driver: bridge
