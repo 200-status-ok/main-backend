@@ -54,7 +54,11 @@ func SendOTPResponse(c *gin.Context) {
 		Digits:    otp.DigitsSix,
 		Algorithm: otp.AlgorithmSHA1,
 	})
-
+	messageBroker := Utils.MessageClient{}
+	err = messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_DEFAULT_CONNECTION"))
+	if err != nil {
+		panic(err)
+	}
 	if Utils.UsernameValidation(user.Username) == 0 {
 		//emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", user.Username,
 		//	"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+OTP,
@@ -64,29 +68,28 @@ func SendOTPResponse(c *gin.Context) {
 		//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		//	return
 		//}
-		messageBroker := Utils.MessageClient{}
-		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_DEFAULT_CONNECTION"))
+		msg := "email/" + OTP + "/" + user.Username
+		err = messageBroker.PublishOnQueue([]byte(msg), "email_notification")
 		if err != nil {
 			panic(err)
 		}
-		msg := "کد تایید ورود به سامانه همینجا: " + OTP
-		err = messageBroker.PublishOnQueue([]byte(msg), "notification")
-		if err != nil {
-			panic(err)
-		}
-		messageBroker.Close()
-
 	} else {
-		pattern := map[string]string{
-			"code": OTP,
-		}
-		otpSms := Utils.NewSMS(Utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
-		err := otpSms.SendSMSWithPattern(user.Username, Utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
+		msg := "sms/" + OTP + "/" + user.Username
+		err = messageBroker.PublishOnQueue([]byte(msg), "sms_notification")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(err)
 		}
+		//pattern := map[string]string{
+		//	"code": OTP,
+		//}
+		//otpSms := Utils.NewSMS(Utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
+		//err := otpSms.SendSMSWithPattern(user.Username, Utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
+		//if err != nil {
+		//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		//	return
+		//}
 	}
+	messageBroker.Close()
 	View.LoginMessageView("OTP sent to registered email/phone", c)
 }
 

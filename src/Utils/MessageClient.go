@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"strings"
 	"time"
 )
 
@@ -188,7 +189,7 @@ func (client *MessageClient) Subscribe(exchangeName string, exchangeType string,
 	<-forever
 	return nil
 }
-
+type CustomArray []string
 func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName string) error {
 	if client.Connection == nil {
 		return errors.New("connection is nil")
@@ -224,13 +225,13 @@ func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName str
 	if err != nil {
 		return err
 	}
-	// TODO: refactor this
-	fmt.Println(len(msgs))
 	var forever = make(chan struct{})
 	go func() {
 		for d := range msgs {
 			fmt.Println("Received a message: ", string(d.Body))
-			time.Sleep(20 * time.Second)
+			arr := CustomArray{}
+			arr = strings.Split(string(d.Body), "/")
+			arr.SendingNotification()
 		}
 	}()
 	fmt.Println(" [*] Waiting for messages. To exit press CTRL+C")
@@ -241,5 +242,28 @@ func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName str
 func (client *MessageClient) Close() {
 	if client.Connection != nil {
 		client.Connection.Close()
+	}
+}
+
+func (a CustomArray) SendingNotification() {
+	if a[0] == "email" {
+		emailService := NewEmail("mhmdrzsmip@gmail.com", a[2],
+			"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+a[1],
+			ReadFromEnvFile(".env", "GOOGLE_SECRET"))
+		err := emailService.SendEmailWithGoogle()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else if a[0] == "sms" {
+		pattern := map[string]string{
+			"code": a[1],
+		}
+		otpSms := NewSMS(ReadFromEnvFile(".env", "API_KEY"), pattern)
+		err := otpSms.SendSMSWithPattern(a[2], ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }
