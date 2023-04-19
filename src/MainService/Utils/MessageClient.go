@@ -112,3 +112,9 @@ func (client *MessageClient) PublishOnQueue(msg []byte, queueName string) error 
 	}
 	return nil
 }
+
+func (client *MessageClient) Close() {
+	if client.Connection != nil {
+		client.Connection.Close()
+	}
+}
