@@ -7,9 +7,9 @@ COPY src/MainService/go.mod .
 COPY src/MainService/go.sum .
 
 RUN go mod tidy && go mod download
-COPY . .
+COPY ./src/MainService .
 
-RUN go build -o main ./src/MainService && go build -o migrate .src/MainService/cmd/migrate/migration.go
+RUN go build -o main . && go build -o migrate ./cmd/migrate/migration.go
 #RUN go run cmd/migrate/migration.go
 
 EXPOSE 8080
