@@ -3,14 +3,23 @@ package UseCase
 import (
 	"fmt"
 	Utils2 "github.com/403-access-denied/main-backend/src/NotificationService/Utils"
+	"os"
 	"sync"
 )
 
 func SendToUser() {
 	messageBroker := Utils2.MessageClient{}
-	err := messageBroker.ConnectBroker("amqp://guest:guest@rabbitmq:5672/")
-	if err != nil {
-		panic(err)
+	appEnv := os.Getenv("APP_ENV3")
+	if appEnv == "development" {
+		err := messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+		if err != nil {
+			panic(err)
+		}
+	} else if appEnv == "production" {
+		err := messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	var wg sync.WaitGroup
