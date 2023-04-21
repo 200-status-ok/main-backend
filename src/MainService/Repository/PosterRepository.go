@@ -6,6 +6,8 @@ import (
 	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"gorm.io/gorm"
+	"sort"
+	"strings"
 )
 
 type PosterRepository struct {
@@ -16,34 +18,101 @@ func NewPosterRepository(db *gorm.DB) *PosterRepository {
 	return &PosterRepository{db: db}
 }
 
-func (r *PosterRepository) GetAllPosters(limit, offset int, sort, sortBy string, filterObject DTO2.FilterObject) ([]Model2.Poster, error) {
+type ScoredPoster struct {
+	poster Model2.Poster
+	score  int
+}
+
+func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy string, filterObject DTO2.FilterObject) ([]Model2.Poster, error) {
 	var posters []Model2.Poster
 
-	result := r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
-		Limit(limit).Offset(offset).Order(sortBy + " " + sort)
+	var result *gorm.DB
+	if filterObject.SearchPhrase != "" || filterObject.TagIds != nil {
+		result = r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
+			Order(sortBy + " " + sortType)
+	} else {
+		result = r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
+			Limit(limit).Offset(offset).Order(sortBy + " " + sortType)
+	}
 
-	if filterObject.Status != "" && filterObject.Status != "both" { // todo use enum maybe?
+	if filterObject.Status != "" && filterObject.Status != "both" {
 		result = result.Where("status = ?", filterObject.Status)
 	}
 
-	if filterObject.SearchPhrase != "" {
-		result = result.Where("title LIKE ?", "%"+filterObject.SearchPhrase+"%")
-	}
-
-	if filterObject.Lat != 0 && filterObject.Lon != 0 {
-		result = result.Where("Lat BETWEEN ? AND ?", filterObject.Lat-Utils.BaseLocationRadarRadius, filterObject.Lat+Utils.BaseLocationRadarRadius).
-			Where("Lon BETWEEN ? AND ?", filterObject.Lon-Utils.BaseLocationRadarRadius, filterObject.Lon+Utils.BaseLocationRadarRadius) // todo change logic maybe
+	if filterObject.OnlyRewards == true {
+		result = result.Where("award > 0")
 	}
 
 	if filterObject.TimeStart != 0 && filterObject.TimeEnd != 0 {
-		result = result.Where("created_at BETWEEN ? AND ?", filterObject.TimeStart, filterObject.TimeEnd)
+		result = result.Where("extract(epoch from posters.created_at) BETWEEN ? AND ?", filterObject.TimeStart, filterObject.TimeEnd)
 	}
 
-	if filterObject.OnlyRewards {
-		result = result.Where("only_awards = ?", filterObject.OnlyRewards)
+	if filterObject.Lat != 0 && filterObject.Lon != 0 {
+		result = result.Select("posters.*").Joins("LEFT JOIN addresses ON posters.id = addresses.poster_id AND addresses.deleted_at IS NULL").
+			Where("Addresses.latitude BETWEEN ? AND ? AND Addresses.longitude BETWEEN ? AND ? AND posters.deleted_at IS NULL",
+				filterObject.Lat-Utils.BaseLocationRadarRadius, filterObject.Lat+Utils.BaseLocationRadarRadius,
+				filterObject.Lon-Utils.BaseLocationRadarRadius, filterObject.Lon+Utils.BaseLocationRadarRadius)
 	}
 
 	result.Find(&posters)
+
+	if filterObject.SearchPhrase != "" || filterObject.TagIds != nil {
+
+		var validPosters []ScoredPoster
+
+		for _, poster := range posters {
+			searchScore := 0
+
+			if filterObject.SearchPhrase != "" {
+
+				if strings.Contains(filterObject.SearchPhrase, poster.Title) || strings.Contains(poster.Title, filterObject.SearchPhrase) {
+					searchScore += 3
+				}
+
+				if strings.Contains(poster.Description, filterObject.SearchPhrase) {
+					searchScore += 1
+				}
+
+				for _, category := range poster.Categories {
+					if strings.Contains(category.Name, filterObject.SearchPhrase) || strings.Contains(filterObject.SearchPhrase, category.Name) {
+						searchScore += 1
+					}
+				}
+			}
+
+			if filterObject.TagIds != nil {
+				for _, tagId := range filterObject.TagIds {
+					for _, category := range poster.Categories {
+						if tagId == int(category.ID) {
+							searchScore += 1
+						}
+					}
+				}
+			}
+			if searchScore != 0 {
+				validPosters = append(validPosters, ScoredPoster{
+					poster: poster,
+					score:  searchScore,
+				})
+			}
+		}
+
+		sort.Slice(validPosters, func(i, j int) bool {
+			return validPosters[i].score < validPosters[j].score
+		})
+
+		var sortedPosters []Model2.Poster
+		for _, s := range validPosters {
+			sortedPosters = append(sortedPosters, s.poster)
+		}
+
+		if offset+limit > len(sortedPosters) {
+			return sortedPosters[offset:], nil
+		} else {
+			return sortedPosters[offset : offset+limit], nil
+		}
+	}
+
 	DBConfiguration.CloseDB()
 	if result.Error != nil {
 		return nil, result.Error

@@ -19,4 +19,5 @@ type FilterObject struct { //todo move this to another file
 	OnlyRewards  bool
 	Lat          float64
 	Lon          float64
+	TagIds       []int
 }

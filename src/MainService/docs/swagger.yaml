@@ -422,6 +422,13 @@ paths:
         in: query
         name: lon
         type: number
+      - collectionFormat: multi
+        description: TagIds
+        in: query
+        items:
+          type: integer
+        name: tag_ids
+        type: array
       produces:
       - application/json
       responses:

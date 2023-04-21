@@ -108,6 +108,16 @@ const docTemplate = `{
                         "description": "Longitude",
                         "name": "lon",
                         "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "TagIds",
+                        "name": "tag_ids",
+                        "in": "query"
                     }
                 ],
                 "responses": {
