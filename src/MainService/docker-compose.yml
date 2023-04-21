@@ -30,6 +30,7 @@ services:
       - database
     networks:
       - main-network
+      - notification-network
 
   redis:
     image: redis:alpine3.17
@@ -41,17 +42,9 @@ services:
     networks:
       - main-network
 
-  rabbitmq:
-    image: rabbitmq:3.9.9-management-alpine
-    container_name: main-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - ./docker/rabbitmq/data:/var/lib/rabbitmq
-    networks:
-      - main-network
-
 networks:
   main-network:
     driver: bridge
+  notification-network:
+    name: rabbitmq_network
+    external: true
