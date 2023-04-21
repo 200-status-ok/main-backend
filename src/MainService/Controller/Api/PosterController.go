@@ -22,6 +22,7 @@ import (
 // @Param only_rewards query bool false "Only rewards"
 // @Param lat query float64 false "Latitude"
 // @Param lon query float64 false "Longitude"
+// @Param tag_ids query []int false "TagIds" collectionFormat(multi) example(1,2,3)
 // @Success 200 {array} View.PosterView
 // @Router /posters [get]
 func GetPosters(c *gin.Context) {

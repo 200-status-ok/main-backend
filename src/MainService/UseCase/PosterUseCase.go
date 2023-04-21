@@ -18,9 +18,10 @@ type getPostersRequest struct {
 	SearchPhrase string  `form:"search_phrase,omitempty"`
 	TimeStart    int64   `form:"time_start,omitempty"`
 	TimeEnd      int64   `form:"time_end,omitempty"`
-	onlyRewards  bool    `form:"only_rewards,omitempty" binding:"oneof=true false"`
+	OnlyRewards  bool    `form:"only_rewards,omitempty"`
 	Lat          float64 `form:"lat,omitempty"`
 	Lon          float64 `form:"lon,omitempty"`
+	TagIds       []int   `form:"tag_ids,omitempty" swaggertype:"array,int"`
 }
 
 func GetPostersResponse(c *gin.Context) {
@@ -44,9 +45,10 @@ func GetPostersResponse(c *gin.Context) {
 		SearchPhrase: request.SearchPhrase,
 		TimeStart:    request.TimeStart,
 		TimeEnd:      request.TimeEnd,
-		OnlyRewards:  request.onlyRewards,
+		OnlyRewards:  request.OnlyRewards,
 		Lat:          request.Lat,
 		Lon:          request.Lon,
+		TagIds:       request.TagIds,
 	}
 
 	posters, err := posterRepository.GetAllPosters(request.PageSize, offset, request.Sort, request.SortBy, filterObject)
