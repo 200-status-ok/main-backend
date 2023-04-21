@@ -1,19 +1,17 @@
 FROM golang:alpine3.17 AS build
 
-WORKDIR /app
+WORKDIR /app2
 
-ENV APP_ENV2=development
+ENV APP_ENV3=development
 RUN apk add --no-cache bash && apk add make
-
-RUN go install github.com/cosmtrek/air@latest \
-   && go install github.com/swaggo/swag/cmd/swag@latest
 
 COPY ../../go.mod .
 COPY ../../go.sum .
 
 RUN go mod tidy && go mod download
 COPY ../../. .
+RUN go build -o main .
 
-EXPOSE 8080
+RUN chmod +x main
 
-ENTRYPOINT air
+ENTRYPOINT ["./main"]

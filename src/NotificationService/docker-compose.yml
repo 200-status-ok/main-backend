@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  notif-app:
+    container_name: notification-app
+    build:
+      context: .
+      dockerfile: docker/golang/Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    networks:
+      - notification-network
+
+
+networks:
+  notification-network:
+    name: rabbitmq_network
+    external: true

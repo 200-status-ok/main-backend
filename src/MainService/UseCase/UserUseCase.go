@@ -12,6 +12,7 @@ import (
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -30,7 +31,19 @@ type SendOTPRequest struct {
 
 func SendOTPResponse(c *gin.Context) {
 	var user SendOTPRequest
-	redisClient := Utils2.NewRedisClient("redis", "6379", "", 0)
+	var redisClient *Utils2.RedisClient
+	appEnv := os.Getenv("APP_ENV2")
+
+	if appEnv == "development" {
+		redisClient = Utils2.NewRedisClient(Utils2.ReadFromEnvFile(".env", "LOCAL_REDIS_HOST"),
+			Utils2.ReadFromEnvFile(".env", "LOCAL_REDIS_PORT"),
+			"", 0)
+	} else if appEnv == "production" {
+		redisClient = Utils2.NewRedisClient(Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_HOST"),
+			Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PORT"),
+			Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PASSWORD"), 0)
+	}
+
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -55,39 +68,34 @@ func SendOTPResponse(c *gin.Context) {
 		Algorithm: otp.AlgorithmSHA1,
 	})
 	messageBroker := Utils2.MessageClient{}
-	err = messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_DEFAULT_CONNECTION"))
-	if err != nil {
-		panic(err)
+	if appEnv == "development" {
+		err = messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	} else if appEnv == "production" {
+		err = messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 	}
+
 	if Utils2.UsernameValidation(user.Username) == 0 {
-		//emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", user.Username,
-		//	"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+OTP,
-		//	Utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
-		//err := emailService.SendEmailWithGoogle()
-		//if err != nil {
-		//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		//	return
-		//}
 		msg := "email/" + OTP + "/" + user.Username
 		err = messageBroker.PublishOnQueue([]byte(msg), "email_notification")
 		if err != nil {
-			panic(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 	} else {
 		msg := "sms/" + OTP + "/" + user.Username
 		err = messageBroker.PublishOnQueue([]byte(msg), "sms_notification")
 		if err != nil {
-			panic(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
-		//pattern := map[string]string{
-		//	"code": OTP,
-		//}
-		//otpSms := Utils.NewSMS(Utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
-		//err := otpSms.SendSMSWithPattern(user.Username, Utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
-		//if err != nil {
-		//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		//	return
-		//}
 	}
 	messageBroker.Close()
 	View.LoginMessageView("OTP sent to registered email/phone", c)
@@ -100,7 +108,19 @@ type VerifyOTPRequest struct {
 
 func VerifyOtpResponse(c *gin.Context) {
 	var verifyReq VerifyOTPRequest
-	redisClient := Utils2.NewRedisClient("redis", "6379", "", 0)
+	var redisClient *Utils2.RedisClient
+	appEnv := os.Getenv("APP_ENV2")
+
+	if appEnv == "development" {
+		redisClient = Utils2.NewRedisClient(Utils2.ReadFromEnvFile(".env", "LOCAL_REDIS_HOST"),
+			Utils2.ReadFromEnvFile(".env", "LOCAL_REDIS_PORT"),
+			"", 0)
+	} else if appEnv == "production" {
+		redisClient = Utils2.NewRedisClient(Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_HOST"),
+			Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PORT"),
+			Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PASSWORD"), 0)
+	}
+
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
 	if err := c.ShouldBindJSON(&verifyReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
