@@ -264,6 +264,15 @@ definitions:
     - categories
     - img_urls
     type: object
+  UseCase.CreateTagRequest:
+    properties:
+      name:
+        maxLength: 30
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
   UseCase.SendOTPRequest:
     properties:
       username:
@@ -293,6 +302,15 @@ definitions:
     - categories
     - img_urls
     type: object
+  UseCase.UpdateTagRequest:
+    properties:
+      name:
+        maxLength: 30
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
   UseCase.VerifyOTPRequest:
     properties:
       otp:
@@ -304,6 +322,13 @@ definitions:
     required:
     - otp
     - username
+    type: object
+  View.CategoryView:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   View.MessageView:
     properties:
@@ -527,6 +552,109 @@ paths:
       summary: Update a poster by ID
       tags:
       - posters
+  /tags:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves Tags
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/View.CategoryView'
+            type: array
+      summary: Get a Tags
+      tags:
+      - Tags
+    post:
+      consumes:
+      - application/json
+      description: Creates a Tag by ID
+      parameters:
+      - description: Tag
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.CreateTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.CategoryView'
+      summary: Create a Tag by ID
+      tags:
+      - Tags
+  /tags/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a Tag by ID
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete a Tag by ID
+      tags:
+      - Tags
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a Tag by ID
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.CategoryView'
+      summary: Get a Tag by ID
+      tags:
+      - Tags
+    patch:
+      consumes:
+      - application/json
+      description: Updates a Tag by ID
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Tag
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.UpdateTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.CategoryView'
+      summary: Update a Tag by ID
+      tags:
+      - Tags
   /users/auth/google/callback:
     get:
       consumes:
