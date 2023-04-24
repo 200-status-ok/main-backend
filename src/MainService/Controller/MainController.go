@@ -30,6 +30,14 @@ func (s *Server) MainController() {
 			poster.PATCH("/:id", Api2.UpdatePoster)
 			poster.DELETE("/:id", Api2.DeletePoster)
 		}
+		tags := v1.Group("/tags")
+		{
+			tags.GET("/", Api2.GetTags)
+			tags.GET("/:id", Api2.GetTag)
+			tags.PATCH("/:id", Api2.UpdateTag)
+			tags.POST("/", Api2.CreateTag)
+			tags.DELETE("/:id", Api2.DeleteTag)
+		}
 	}
 
 }
