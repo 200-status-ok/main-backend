@@ -166,7 +166,7 @@ func VerifyOtpResponse(c *gin.Context) {
 			MarkedPosters: nil,
 			Conversations: nil,
 		}
-		err = userRepository.UserCreate(newUser)
+		_, err = userRepository.UserCreate(newUser)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -214,4 +214,110 @@ func GoogleCallbackResponse(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"response": googleRes})
+}
+
+type GetUserByIdRequest struct {
+	ID uint `uri:"id" binding:"required,min=1"`
+}
+
+func GetUserByIdResponse(c *gin.Context) {
+	var getUserReq GetUserByIdRequest
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	if err := c.ShouldBindUri(&getUserReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	user, err := userRepository.FindById(getUserReq.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	View.GetUserByIdView(*user, c)
+}
+
+func GetUsersResponse(c *gin.Context) {
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	users, err := userRepository.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	View.GetUsersView(*users, c)
+}
+
+type UpdateUserRequest struct {
+	Username string `json:"username" binding:"required,min=11,max=30"`
+}
+type UpdateUserByIdRequest struct {
+	ID uint `uri:"id" binding:"required,min=1"`
+}
+
+func UpdateUserByIdResponse(c *gin.Context) {
+	var updateUserReq UpdateUserRequest
+	var updateUserByIdReq UpdateUserByIdRequest
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	if err := c.ShouldBindUri(&updateUserByIdReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := c.ShouldBindJSON(&updateUserReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if Utils2.UsernameValidation(updateUserReq.Username) == -1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username"})
+		return
+	}
+	user, err := userRepository.UserUpdate(&Model.User{
+		Username: updateUserReq.Username,
+	}, updateUserByIdReq.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	View.GetUserByIdView(*user, c)
+}
+
+type CreateUserRequest struct {
+	Username string `json:"username" binding:"required,min=11,max=30"`
+}
+
+func CreateUserResponse(c *gin.Context) {
+	var createUserReq CreateUserRequest
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	if err := c.ShouldBindJSON(&createUserReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if Utils2.UsernameValidation(createUserReq.Username) == -1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username"})
+		return
+	}
+	user, err := userRepository.UserCreate(&Model.User{
+		Username: createUserReq.Username,
+	})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	View.GetUserByIdView(*user, c)
+}
+
+type DeleteUserByIdRequest struct {
+	ID uint `uri:"id" binding:"required,min=1"`
+}
+
+func DeleteUserByIdResponse(c *gin.Context) {
+	var deleteUserByIdReq DeleteUserByIdRequest
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	if err := c.ShouldBindUri(&deleteUserByIdReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := userRepository.DeleteUser(deleteUserByIdReq.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"response": "user deleted"})
 }

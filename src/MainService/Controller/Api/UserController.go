@@ -52,3 +52,68 @@ func OAuth2Login(c *gin.Context) {
 func GoogleCallback(c *gin.Context) {
 	UseCase.GoogleCallbackResponse(c)
 }
+
+// GetUser godoc
+// @Summary Get a User by ID
+// @Description Retrieves a User by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200 {object} View.UserViewID
+// @Router /users/{id} [get]
+func GetUser(c *gin.Context) {
+	UseCase.GetUserByIdResponse(c)
+}
+
+// GetUsers godoc
+// @Summary Get a Users
+// @Description Retrieves Users
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} View.UserViewID
+// @Router /users [get]
+func GetUsers(c *gin.Context) {
+	UseCase.GetUsersResponse(c)
+}
+
+// UpdateUser godoc
+// @Summary Update a User by ID
+// @Description Updates a User by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Param user body UseCase.UpdateUserRequest true "User"
+// @Success 200 {object} View.UserViewID
+// @Router /users/{id} [patch]
+func UpdateUser(c *gin.Context) {
+	UseCase.UpdateUserByIdResponse(c)
+}
+
+// CreateUser godoc
+// @Summary Create a User
+// @Description Create a User
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param user body UseCase.CreateUserRequest true "User"
+// @Success 200 {object} View.UserViewID
+// @Router /users [post]
+func CreateUser(c *gin.Context) {
+	UseCase.CreateUserResponse(c)
+}
+
+// DeleteUser godoc
+// @Summary Delete a User by ID
+// @Description Deletes a User by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200
+// @Router /users/{id} [delete]
+func DeleteUser(c *gin.Context) {
+	UseCase.DeleteUserByIdResponse(c)
+}

@@ -57,11 +57,10 @@ func (r *CategoryRepository) UpdateCategory(id uint, category Model.Category) (M
 
 func (r *CategoryRepository) DeleteCategory(id uint) error {
 	var categoryModel Model.Category
-	result := r.db.Find(&categoryModel, "id = ?", id)
-	if result.Error != nil {
-		return result.Error
+	if err := r.db.Where("id = ?", id).First(&categoryModel).Error; err != nil {
+		return err
 	}
-	result = r.db.Where("poster_id = ?", id).Delete(&Model2.Image{})
+	result := r.db.Delete(&categoryModel, id)
 	if result.Error != nil {
 		return result.Error
 	}
