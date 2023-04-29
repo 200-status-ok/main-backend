@@ -163,6 +163,7 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 	posterModel.SetTelegramID(poster.TelID)
 	posterModel.SetHasAlert(poster.Alert)
 	posterModel.SetAward(poster.Award)
+	posterModel.HasChat = poster.Chat
 
 	for _, category := range categories {
 		categoryModel, err := NewCategoryRepository(r.db).GetCategoryById(category)
@@ -179,6 +180,17 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 	}
 
 	posterID := posterModel.GetID()
+
+	if posterModel.HasChat {
+		var chatRoomModel Model2.ChatRoom
+		chatRoomModel.PosterID = posterID
+		chatRoomModel.Owner = poster.UserID
+		err := NewChatRepository(r.db).CreateChatRoom(chatRoomModel)
+		if err != nil {
+			return Model2.Poster{}, err
+		}
+	}
+
 	newAddress, err := NewAddressRepository(r.db).CreateAddress(addresses, posterID)
 	if err != nil {
 		return Model2.Poster{}, err

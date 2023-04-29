@@ -401,6 +401,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "alert",
+                "chat",
                 "status",
                 "title",
                 "user_id"
@@ -411,6 +412,9 @@ const docTemplate = `{
                 },
                 "award": {
                     "type": "number"
+                },
+                "chat": {
+                    "type": "boolean"
                 },
                 "description": {
                     "type": "string",
@@ -506,6 +510,35 @@ const docTemplate = `{
                 }
             }
         },
+        "Model.ChatRoom": {
+            "type": "object",
+            "properties": {
+                "conversations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Conversation"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "owner": {
+                    "type": "integer"
+                },
+                "poster_id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "Model.Conversation": {
             "type": "object",
             "properties": {
@@ -518,20 +551,20 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "member_id": {
+                    "type": "integer"
+                },
                 "messages": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Model.Message"
                     }
                 },
+                "room_id": {
+                    "type": "integer"
+                },
                 "updatedAt": {
                     "type": "string"
-                },
-                "user_1_id": {
-                    "type": "integer"
-                },
-                "user_2_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -643,6 +676,9 @@ const docTemplate = `{
                 "has_alert": {
                     "type": "boolean"
                 },
+                "has_chat": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -689,6 +725,12 @@ const docTemplate = `{
         "Model.User": {
             "type": "object",
             "properties": {
+                "chat_rooms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.ChatRoom"
+                    }
+                },
                 "conversations": {
                     "type": "array",
                     "items": {

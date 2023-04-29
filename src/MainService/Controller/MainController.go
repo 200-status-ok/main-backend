@@ -30,6 +30,10 @@ func (s *Server) MainController() {
 			poster.PATCH("/:id", Api2.UpdatePoster)
 			poster.DELETE("/:id", Api2.DeletePoster)
 		}
+		//chats := v1.Group("/chats")
+		//{
+		//
+		//}
 	}
 
 }

@@ -41,6 +41,6 @@ init_swagger: ## Init swagger
 	@swag init --parseDependency --parseInternal
 
 swagger: ## Generate swagger docs
-	@rm -r src/MainService/docs
+	@rm -r docs
 	@swag init --parseDependency --parseInternal
 
