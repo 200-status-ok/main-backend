@@ -132,10 +132,9 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 
 	apiKey := "acc_52760e43313cc5e"
 	apiSecret := "eab29250d009f3ae079998c5b3e6c83d"
-	imageUrl := "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Car_keys.jpg/300px-Car_keys.jpg"
 
-	fmt.Println("modar Generating info...")
-	fmt.Println("modar image url: " + request.ImageUrl)
+	fmt.Println("Generating info...")
+	fmt.Println("image url: " + request.ImageUrl)
 
 	go func() {
 
@@ -144,7 +143,10 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 		client := &http.Client{}
 
 		reqUrl := "https://api.imagga.com/v2/tags?image_url=" +
-			imageUrl
+			request.ImageUrl +
+			"&language=fa" +
+			"&limit=10" +
+			"&threshold=15"
 
 		req, _ := http.NewRequest("GET", reqUrl, nil)
 		req.SetBasicAuth(apiKey, apiSecret)
@@ -166,7 +168,7 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("modar Generating Tags response:", generatedPosterTags)
+		fmt.Println("Generating Tags response:", generatedPosterTags)
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -179,12 +181,13 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 
 	go func() {
 
-		fmt.Println("modar Generating Colors...")
+		fmt.Println("Generating Colors...")
 
 		client := &http.Client{}
 
 		reqUrl := "https://api.imagga.com/v2/colors?image_url=" +
-			imageUrl
+			request.ImageUrl +
+			"&extract_overall_colors=0"
 
 		req, _ := http.NewRequest("GET", reqUrl, nil)
 		req.SetBasicAuth(apiKey, apiSecret)
@@ -206,16 +209,16 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("modar Generating Colors response:", generatedPosterColors)
+		fmt.Println("Generating Colors response:", generatedPosterColors)
 
 		c2 <- generatedPosterColors
 	}()
 
-	fmt.Println("modar Waiting for info...")
+	fmt.Println("Waiting for info...")
 	generatedTagsResult := <-c1
 	generatedColorsResult := <-c2
 
-	fmt.Println("modar Info generated successfully!")
+	fmt.Println("Info generated successfully!")
 
 	View.GeneratePosterInfoView(generatedTagsResult, generatedColorsResult, c)
 }
