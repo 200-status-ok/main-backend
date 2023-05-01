@@ -20,6 +20,66 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/ai/predict": {
+            "post": {
+                "description": "Get photo nsfw AI",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Get photo nsfw AI",
+                "parameters": [
+                    {
+                        "description": "Image Url",
+                        "name": "image_url",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.GetPhotoAiNSFWRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/ai/predict_txt": {
+            "get": {
+                "description": "Get text nsfw",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Get text nsfw",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Text",
+                        "name": "text",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api-call/generatePosterInfo": {
             "get": {
                 "description": "Generates info for a poster",
@@ -451,6 +511,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/users": {
+            "get": {
+                "description": "Retrieves Users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a Users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/View.UserViewID"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a User",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create a User",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.UserViewID"
+                        }
+                    }
+                }
+            }
+        },
         "/users/auth/google/callback": {
             "get": {
                 "description": "google callback",
@@ -546,6 +664,104 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/View.MessageView"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Retrieves a User by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a User by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.UserViewID"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a User by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete a User by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates a User by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update a User by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.UserViewIDs"
                         }
                     }
                 }
@@ -955,6 +1171,30 @@ const docTemplate = `{
                 }
             }
         },
+        "UseCase.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 11
+                }
+            }
+        },
+        "UseCase.GetPhotoAiNSFWRequest": {
+            "type": "object",
+            "required": [
+                "image_url"
+            ],
+            "properties": {
+                "image_url": {
+                    "type": "string"
+                }
+            }
+        },
         "UseCase.SendOTPRequest": {
             "type": "object",
             "required": [
@@ -1011,6 +1251,19 @@ const docTemplate = `{
                 }
             }
         },
+        "UseCase.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 11
+                }
+            }
+        },
         "UseCase.VerifyOTPRequest": {
             "type": "object",
             "required": [
@@ -1047,6 +1300,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "description": {
+                    "type": "string"
                 },
                 "tags": {
                     "type": "array",
@@ -1121,6 +1377,40 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "View.UserViewID": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "marked_posters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.MarkedPoster"
+                    }
+                },
+                "posters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Poster"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "View.UserViewIDs": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
                     "type": "string"
                 }
             }

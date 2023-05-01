@@ -273,6 +273,22 @@ definitions:
     required:
     - name
     type: object
+  UseCase.CreateUserRequest:
+    properties:
+      username:
+        maxLength: 30
+        minLength: 11
+        type: string
+    required:
+    - username
+    type: object
+  UseCase.GetPhotoAiNSFWRequest:
+    properties:
+      image_url:
+        type: string
+    required:
+    - image_url
+    type: object
   UseCase.SendOTPRequest:
     properties:
       username:
@@ -311,6 +327,15 @@ definitions:
     required:
     - name
     type: object
+  UseCase.UpdateUserRequest:
+    properties:
+      username:
+        maxLength: 30
+        minLength: 11
+        type: string
+    required:
+    - username
+    type: object
   UseCase.VerifyOTPRequest:
     properties:
       otp:
@@ -336,6 +361,8 @@ definitions:
         items:
           type: string
         type: array
+      description:
+        type: string
       tags:
         items:
           type: string
@@ -386,6 +413,28 @@ definitions:
       token:
         type: string
     type: object
+  View.UserViewID:
+    properties:
+      id:
+        type: integer
+      marked_posters:
+        items:
+          $ref: '#/definitions/Model.MarkedPoster'
+        type: array
+      posters:
+        items:
+          $ref: '#/definitions/Model.Poster'
+        type: array
+      username:
+        type: string
+    type: object
+  View.UserViewIDs:
+    properties:
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
   gorm.DeletedAt:
     properties:
       time:
@@ -402,6 +451,45 @@ info:
   title: Swagger Documentation for Golang web API(Gin framework)
   version: "1.0"
 paths:
+  /ai/predict:
+    post:
+      consumes:
+      - application/json
+      description: Get photo nsfw AI
+      parameters:
+      - description: Image Url
+        in: body
+        name: image_url
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.GetPhotoAiNSFWRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get photo nsfw AI
+      tags:
+      - AI
+  /ai/predict_txt:
+    get:
+      consumes:
+      - application/json
+      description: Get text nsfw
+      parameters:
+      - description: Text
+        in: query
+        name: text
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get text nsfw
+      tags:
+      - AI
   /api-call/generatePosterInfo:
     get:
       consumes:
@@ -691,6 +779,109 @@ paths:
       summary: Update a Tag by ID
       tags:
       - Tags
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves Users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/View.UserViewID'
+            type: array
+      summary: Get a Users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a User
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewID'
+      summary: Create a User
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete a User by ID
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewID'
+      summary: Get a User by ID
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Updates a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewIDs'
+      summary: Update a User by ID
+      tags:
+      - users
   /users/auth/google/callback:
     get:
       consumes:

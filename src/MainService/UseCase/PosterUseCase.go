@@ -1,12 +1,16 @@
 package UseCase
 
 import (
+	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type getPostersRequest struct {
@@ -156,4 +160,141 @@ func UpdatePosterResponse(c *gin.Context) {
 	}
 	DBConfiguration.CloseDB()
 	View.UpdatePosterView(poster, c)
+}
+
+type GetPhotoAiNSFWRequest struct {
+	ImageUrl string `json:"image_url" binding:"required"`
+}
+
+func GetPhotoAiNSFWResponse(c *gin.Context) {
+	var request GetPhotoAiNSFWRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	boolean := false
+	_ = boolean
+	PhotoUrl := request.ImageUrl
+	fmt.Println(PhotoUrl)
+	channel := make(chan bool)
+	go func() {
+
+		url := fmt.Sprintf("https://api.apilayer.com/nudity_detection/url?url=%s", PhotoUrl)
+		fmt.Println(url)
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", url, nil)
+		req.Header.Set("apikey", "z232GHVwPAec88LzsqdBjUhL5BZDgvGp")
+
+		if err != nil {
+			fmt.Println(err)
+		}
+		res, err := client.Do(req)
+		if res.Body != nil {
+			defer res.Body.Close()
+		}
+		body, err := ioutil.ReadAll(res.Body)
+		splitStr := strings.Split(string(body), ",")
+		splitStr2 := strings.Split(splitStr[0], ": ")
+		a, err := strconv.Atoi(splitStr2[1])
+		fmt.Println(a)
+		if a > 1 {
+			boolean = true
+		}
+		channel <- true
+	}()
+	fmt.Println("continue ...")
+	<-channel
+	if boolean {
+		c.JSON(http.StatusOK, gin.H{"message": "nsfw"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"message": "sfw"})
+	}
+
+	//body := []byte(fmt.Sprintf(`{"version": "9a34a6339872a03f45236f114321fb51fc7aa8269d38ae0ce5334969981e4cd8", "input": {"image": "%s"}}`, PhotoUrl))
+	//url := "https://api.replicate.com/v1/predictions"
+	//req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//req.Header.Set("Content-Type", "application/json")
+	//req.Header.Set("Authorization", "Token r8_bGcNjdhhzNRBctXTTfmhbipfPGQGPhj1zO2Xc")
+	//client := &http.Client{}
+	//resp, err := client.Do(req)
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//defer resp.Body.Close()
+	//responseBody, err := ioutil.ReadAll(resp.Body)
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//splitStr := strings.Split(string(responseBody), ",")
+	//splitStrForID := strings.Split(splitStr[3], ":")
+	//
+	//time.Sleep(2 * time.Second)
+	//
+	//url1 := "https://api.replicate.com/v1/predictions/" + removeQuoteFromString(splitStrForID[1])
+	//req1, err := http.NewRequest("GET", url1, nil)
+	//
+	//// Add headers to the request
+	//req1.Header.Set("Content-Type", "application/json")
+	//req1.Header.Set("Authorization", "Token r8_bGcNjdhhzNRBctXTTfmhbipfPGQGPhj1zO2Xc")
+	//
+	//// Send the request
+	//client1 := &http.Client{}
+	//resp1, err := client1.Do(req1)
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//defer resp1.Body.Close()
+	//
+	//body1, err := ioutil.ReadAll(resp1.Body)
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//splitStr22 := strings.Split(string(body1), ",")
+	//splitStrForID = strings.Split(splitStr22[7], ":")
+	//fmt.Println(splitStrForID)
+	//
+	//c.JSON(http.StatusOK, gin.H{"message": removeQuoteFromString(splitStrForID[1])})
+
+}
+
+type GetTextNSFWRequest struct {
+	Text string `form:"text" binding:"required"`
+}
+
+func GetTextNSFWResponse(c *gin.Context) {
+	var request GetTextNSFWRequest
+	if err := c.ShouldBindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	file, err := ioutil.ReadFile("Utils/data.txt")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	boolean := false
+	_ = boolean
+	newString := strings.ReplaceAll(string(file), "\n", "")
+	newString2 := strings.ReplaceAll(newString, "\"", "")
+	newString3 := strings.ReplaceAll(newString2, "\r", "")
+	splitStr := strings.Split(newString3, ",")
+	text := request.Text
+	for i, _ := range splitStr {
+		if strings.Contains(text, splitStr[i]) {
+			boolean = true
+		}
+	}
+	if boolean {
+		c.JSON(http.StatusOK, gin.H{"message": "nsfw"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"message": "sfw"})
+	}
 }
