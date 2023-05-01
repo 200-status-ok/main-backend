@@ -1,3 +1,3 @@
 package Utils
 
-const BaseLocationRadarRadius = 200
+const BaseLocationRadarRadius = 0.002
