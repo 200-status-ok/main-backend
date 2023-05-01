@@ -164,6 +164,7 @@ func VerifyOtpResponse(c *gin.Context) {
 			Username:      verifyReq.Username,
 			Posters:       nil,
 			MarkedPosters: nil,
+			ChatRooms:     nil,
 			Conversations: nil,
 		}
 		_, err = userRepository.UserCreate(newUser)

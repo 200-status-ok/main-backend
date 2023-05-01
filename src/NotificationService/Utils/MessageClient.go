@@ -135,7 +135,6 @@ func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName str
 			arr.SendingNotification()
 		}
 	}()
-	fmt.Println(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
 	return nil
 }

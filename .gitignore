@@ -19,4 +19,6 @@
 .vscode
 .DS_Store
 
+src/MainService/docs
+
 tmp/
