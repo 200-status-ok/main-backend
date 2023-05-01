@@ -29,7 +29,7 @@ var ColorParentsToPersian = map[string]string{
 	"pink":        "صورتی",
 	"olive green": "زیتونی",
 	"greige":      "گریژ", //todo
-	"light gray":  "خاکستری روشن",
+	"light grey":  "خاکستری روشن",
 	"plum":        "آلویی",
 	"skin":        "پوستی",
 	"grey":        "خاکستری",
