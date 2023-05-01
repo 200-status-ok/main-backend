@@ -182,10 +182,7 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 	posterID := posterModel.GetID()
 
 	if posterModel.HasChat {
-		var chatRoomModel Model2.ChatRoom
-		chatRoomModel.PosterID = posterID
-		chatRoomModel.Owner = poster.UserID
-		err := NewChatRepository(r.db).CreateChatRoom(chatRoomModel)
+		err := NewChatRepository(r.db).CreateChatRoom(posterID, poster.UserID)
 		if err != nil {
 			return Model2.Poster{}, err
 		}

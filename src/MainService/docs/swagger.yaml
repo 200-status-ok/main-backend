@@ -115,7 +115,9 @@ definitions:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
-      owner:
+      name:
+        type: string
+      owner_id:
         type: integer
       poster_id:
         type: integer
@@ -272,6 +274,22 @@ definitions:
       username:
         type: string
     type: object
+  UseCase.CreateConversation:
+    properties:
+      client_id:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      poster_id:
+        type: integer
+    required:
+    - client_id
+    - id
+    - name
+    - poster_id
+    type: object
   UseCase.CreatePosterRequest:
     properties:
       addresses:
@@ -390,6 +408,54 @@ info:
   title: Swagger Documentation for Golang web API(Gin framework)
   version: "1.0"
 paths:
+  /chats/create-conversation:
+    post:
+      consumes:
+      - application/json
+      description: Create a chat conversation
+      parameters:
+      - description: ChatConversation
+        in: body
+        name: room
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.CreateConversation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Create a chat conversation for two users
+      tags:
+      - Chat
+  /chats/join:
+    get:
+      consumes:
+      - application/json
+      description: JoinConversation a chat room
+      parameters:
+      - description: Chat ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Client ID
+        in: query
+        name: client_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: JoinConversation a chat room
+      tags:
+      - Chat
   /posters:
     get:
       consumes:

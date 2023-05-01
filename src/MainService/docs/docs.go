@@ -20,6 +20,79 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/chats/create-conversation": {
+            "post": {
+                "description": "Create a chat conversation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Create a chat conversation for two users",
+                "parameters": [
+                    {
+                        "description": "ChatConversation",
+                        "name": "room",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.CreateConversation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/join": {
+            "get": {
+                "description": "JoinConversation a chat room",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "JoinConversation a chat room",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Chat ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Client ID",
+                        "name": "client_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/posters": {
             "get": {
                 "description": "Retrieves a list of all posters, sorted and paginated according to the given parameters",
@@ -528,7 +601,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "owner": {
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
                     "type": "integer"
                 },
                 "poster_id": {
@@ -763,6 +839,29 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "UseCase.CreateConversation": {
+            "type": "object",
+            "required": [
+                "client_id",
+                "id",
+                "name",
+                "poster_id"
+            ],
+            "properties": {
+                "client_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "poster_id": {
+                    "type": "integer"
                 }
             }
         },

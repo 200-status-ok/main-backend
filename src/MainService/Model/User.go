@@ -9,7 +9,7 @@ type User struct {
 	gorm.Model
 	Username      string         `gorm:"type:varchar(50);not null;unique" json:"username"`
 	Posters       []Poster       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"posters"`
-	ChatRooms     []ChatRoom     `gorm:"foreignKey:Owner;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"chat_rooms"`
+	ChatRooms     []ChatRoom     `gorm:"foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"chat_rooms"`
 	Conversations []Conversation `gorm:"foreignKey:MemberID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"conversations"`
 	MarkedPosters []MarkedPoster `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"marked_posters"`
 }
