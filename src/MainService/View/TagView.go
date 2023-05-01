@@ -34,9 +34,10 @@ func GetAllTagView(tags []Model2.Category, c *gin.Context) {
 }
 
 type GeneratedPosterInfoView struct {
-	Titles []string `json:"titles"`
-	Tags   []string `json:"tags"`
-	Colors []string `json:"colors"`
+	Titles      []string `json:"titles"`
+	Tags        []string `json:"tags"`
+	Colors      []string `json:"colors"`
+	Description string   `json:"description"`
 }
 
 func GeneratePosterInfoView(generatedTags DTO.GeneratedPosterTags, generatedColors DTO.GeneratedPosterColors, c *gin.Context) {
@@ -56,9 +57,12 @@ func GeneratePosterInfoView(generatedTags DTO.GeneratedPosterTags, generatedColo
 		colorsResult = append(colorsResult, Utils.ColorParentsToPersian[color.ClosestPaletteColorParent])
 	}
 
+	description := " من یک " + tagsResult[0] + " با رنگ " + colorsResult[0] + " گم کرده ام "
+
 	c.JSON(http.StatusOK, GeneratedPosterInfoView{
-		Titles: titlesResult,
-		Tags:   tagsResult,
-		Colors: colorsResult,
+		Titles:      titlesResult,
+		Tags:        tagsResult,
+		Colors:      colorsResult,
+		Description: description,
 	})
 }

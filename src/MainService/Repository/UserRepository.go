@@ -23,18 +23,57 @@ func (r *UserRepository) FindByUsername(username string) (*Model.User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) UserUpdate(user *Model.User) error {
-	err := r.db.Model(&user).Updates(user).Error
-	if err != nil {
-		return errors.New("error while updating user")
+func (r *UserRepository) UserUpdate(user *Model.User, id uint) (*Model.User, error) {
+	var userModel Model.User
+	result := r.db.First(&userModel, id)
+	if result.Error != nil {
+		return nil, result.Error
 	}
-	return nil
+	userModel.SetUsername(user.GetUsername())
+	result = r.db.Save(&userModel)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &userModel, nil
 }
 
-func (r *UserRepository) UserCreate(user *Model.User) error {
-	err := r.db.Create(&user).Error
+func (r *UserRepository) UserCreate(user *Model.User) (*Model.User, error) {
+	result := r.db.Create(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return user, nil
+}
+
+func (r *UserRepository) FindById(id uint) (*Model.User, error) {
+	var user Model.User
+	err := r.db.Where("id = ?", id).First(&user).Error
 	if err != nil {
-		return errors.New("error while creating user")
+		return nil, errors.New("user not found")
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) GetAllUsers() (*[]Model.User, error) {
+	var users []Model.User
+	err := r.db.Find(&users).Error
+	if err != nil {
+		return nil, errors.New("error while getting all users")
+	}
+	return &users, nil
+}
+
+func (r *UserRepository) DeleteUser(id uint) error {
+	var user Model.User
+	if err := r.db.Delete(&user.Posters, "user_id = ?", id).Error; err != nil {
+		return err
+	}
+	if err := r.db.Delete(&user.MarkedPosters, "user_id = ?", id).Error; err != nil {
+		return err
+	}
+	err := r.db.Where("id = ?", id).Delete(&user).Error
+	if err != nil {
+		return errors.New("error while deleting user")
 	}
 	return nil
 }

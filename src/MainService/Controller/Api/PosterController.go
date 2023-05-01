@@ -81,3 +81,29 @@ func UpdatePoster(c *gin.Context) {
 func DeletePoster(c *gin.Context) {
 	UseCase.DeletePosterByIdResponse(c)
 }
+
+// GetPhotoNSFWAi godoc
+// @Summary Get photo nsfw AI
+// @Description Get photo nsfw AI
+// @Tags AI
+// @Accept  json
+// @Produce  json
+// @Param image_url body UseCase.GetPhotoAiNSFWRequest true "Image Url"
+// @Success 200
+// @Router /ai/predict [post]
+func GetPhotoNSFWAi(c *gin.Context) {
+	UseCase.GetPhotoAiNSFWResponse(c)
+}
+
+// GetTextNSFW godoc
+// @Summary Get text nsfw
+// @Description Get text nsfw
+// @Tags AI
+// @Accept  json
+// @Produce  json
+// @Param text query string true "Text"
+// @Success 200
+// @Router /ai/predict_txt [GET]
+func GetTextNSFW(c *gin.Context) {
+	UseCase.GetTextNSFWResponse(c)
+}
