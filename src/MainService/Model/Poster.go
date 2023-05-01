@@ -17,6 +17,7 @@ type Poster struct {
 	UserPhone   string       `gorm:"type:varchar(15);" json:"user_phone"`
 	TelegramID  string       `gorm:"type:varchar(50);" json:"telegram_id"`
 	HasAlert    bool         `gorm:"type:bool;not null;default:false" json:"has_alert"`
+	HasChat     bool         `gorm:"type:bool;not null;default:false" json:"has_chat"`
 	Award       float64      `gorm:"type:decimal" json:"award"`
 	UserID      uint         `gorm:"type:int;" json:"user_id"`
 	Categories  []Category   `gorm:"many2many:poster_categories;" json:"categories"`
