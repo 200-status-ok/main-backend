@@ -20,6 +20,38 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api-call/generatePosterInfo": {
+            "get": {
+                "description": "Generates info for a poster",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiCall"
+                ],
+                "summary": "Generate poster info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Image Url",
+                        "name": "image_url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.GeneratedPosterInfoView"
+                        }
+                    }
+                }
+            }
+        },
         "/posters": {
             "get": {
                 "description": "Retrieves a list of all posters, sorted and paginated according to the given parameters",
@@ -1004,6 +1036,29 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "View.GeneratedPosterInfoView": {
+            "type": "object",
+            "properties": {
+                "colors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "titles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
