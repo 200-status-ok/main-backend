@@ -404,6 +404,13 @@ definitions:
       username:
         type: string
     type: object
+  View.UserViewIDs:
+    properties:
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
   gorm.DeletedAt:
     properties:
       time:
@@ -420,6 +427,44 @@ info:
   title: Swagger Documentation for Golang web API(Gin framework)
   version: "1.0"
 paths:
+  /ai/predict:
+    get:
+      consumes:
+      - application/json
+      description: Get photo nsfw AI
+      parameters:
+      - description: Image Url
+        in: query
+        name: image_url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get photo nsfw AI
+      tags:
+      - AI
+  /ai/predict_txt:
+    get:
+      consumes:
+      - application/json
+      description: Get text nsfw
+      parameters:
+      - description: Text
+        in: query
+        name: text
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get text nsfw
+      tags:
+      - AI
   /posters:
     get:
       consumes:
@@ -787,7 +832,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.UserViewID'
+            $ref: '#/definitions/View.UserViewIDs'
       summary: Update a User by ID
       tags:
       - users

@@ -20,6 +20,64 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/ai/predict": {
+            "get": {
+                "description": "Get photo nsfw AI",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Get photo nsfw AI",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Image Url",
+                        "name": "image_url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/ai/predict_txt": {
+            "get": {
+                "description": "Get text nsfw",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Get text nsfw",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Text",
+                        "name": "text",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/posters": {
             "get": {
                 "description": "Retrieves a list of all posters, sorted and paginated according to the given parameters",
@@ -669,7 +727,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.UserViewID"
+                            "$ref": "#/definitions/View.UserViewIDs"
                         }
                     }
                 }
@@ -1269,6 +1327,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Model.Poster"
                     }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "View.UserViewIDs": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
                 },
                 "username": {
                     "type": "string"

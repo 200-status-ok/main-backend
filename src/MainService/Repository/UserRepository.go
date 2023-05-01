@@ -56,7 +56,7 @@ func (r *UserRepository) FindById(id uint) (*Model.User, error) {
 
 func (r *UserRepository) GetAllUsers() (*[]Model.User, error) {
 	var users []Model.User
-	err := r.db.Preload("Posters").Preload("MarkedPosters").Find(&users).Error
+	err := r.db.Find(&users).Error
 	if err != nil {
 		return nil, errors.New("error while getting all users")
 	}
@@ -65,13 +65,13 @@ func (r *UserRepository) GetAllUsers() (*[]Model.User, error) {
 
 func (r *UserRepository) DeleteUser(id uint) error {
 	var user Model.User
-	var posters []Model.Poster
-	err := r.db.Where("id = ?", id).Delete(&user).Error
-	//delete users posters
-	err = r.db.Where("user_id = ?", id).Find(&posters).Error
-	for _, poster := range posters {
-		r.db.Delete(&poster)
+	if err := r.db.Delete(&user.Posters, "user_id = ?", id).Error; err != nil {
+		return err
 	}
+	if err := r.db.Delete(&user.MarkedPosters, "user_id = ?", id).Error; err != nil {
+		return err
+	}
+	err := r.db.Where("id = ?", id).Delete(&user).Error
 	if err != nil {
 		return errors.New("error while deleting user")
 	}

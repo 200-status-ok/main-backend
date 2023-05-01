@@ -86,7 +86,7 @@ func GetUsers(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID"
 // @Param user body UseCase.UpdateUserRequest true "User"
-// @Success 200 {object} View.UserViewID
+// @Success 200 {object} View.UserViewIDs
 // @Router /users/{id} [patch]
 func UpdateUser(c *gin.Context) {
 	UseCase.UpdateUserByIdResponse(c)

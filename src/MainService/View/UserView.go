@@ -12,6 +12,10 @@ type UserViewID struct {
 	Posters      []Model2.Poster       `json:"posters"`
 	MarkedPoster []Model2.MarkedPoster `json:"marked_posters"`
 }
+type UserViewIDs struct {
+	Id       uint   `json:"id"`
+	Username string `json:"username"`
+}
 
 func GetUserByIdView(user Model2.User, c *gin.Context) {
 	result := UserViewID{
@@ -24,13 +28,11 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 }
 
 func GetUsersView(users []Model2.User, c *gin.Context) {
-	var result []UserViewID
+	var result []UserViewIDs
 	for _, user := range users {
-		result = append(result, UserViewID{
-			Id:           user.ID,
-			Username:     user.Username,
-			Posters:      user.Posters,
-			MarkedPoster: user.MarkedPosters,
+		result = append(result, UserViewIDs{
+			Id:       user.ID,
+			Username: user.Username,
 		})
 	}
 	c.JSON(http.StatusOK, result)

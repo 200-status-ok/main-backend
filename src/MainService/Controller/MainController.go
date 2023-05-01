@@ -43,6 +43,11 @@ func (s *Server) MainController() {
 			tags.POST("/", Api2.CreateTag)
 			tags.DELETE("/:id", Api2.DeleteTag)
 		}
+		ai := v1.Group("/ai")
+		{
+			ai.GET("/predict", Api2.GetPhotoNSFWAi)
+			ai.GET("/predict_txt/", Api2.GetTextNSFW)
+		}
 	}
 
 }
