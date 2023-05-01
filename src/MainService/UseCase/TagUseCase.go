@@ -1,7 +1,10 @@
 package UseCase
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
+	"github.com/403-access-denied/main-backend/src/MainService/DTO"
 	"github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
@@ -110,4 +113,109 @@ func GetTagsResponse(c *gin.Context) {
 	}
 	DBConfiguration.CloseDB()
 	View.GetAllTagView(tags, c)
+}
+
+type GeneratePosterInfoRequest struct {
+	ImageUrl string `form:"image_url"`
+}
+
+func GeneratePosterInfoResponse(c *gin.Context) {
+
+	var request GeneratePosterInfoRequest
+	if err := c.ShouldBindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c1 := make(chan DTO.GeneratedPosterTags)
+	c2 := make(chan DTO.GeneratedPosterColors)
+
+	apiKey := "acc_52760e43313cc5e"
+	apiSecret := "eab29250d009f3ae079998c5b3e6c83d"
+	imageUrl := "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Car_keys.jpg/300px-Car_keys.jpg"
+
+	fmt.Println("modar Generating info...")
+	fmt.Println("modar image url: " + request.ImageUrl)
+
+	go func() {
+
+		fmt.Println("modar Generating tags...")
+
+		client := &http.Client{}
+
+		reqUrl := "https://api.imagga.com/v2/tags?image_url=" +
+			imageUrl
+
+		req, _ := http.NewRequest("GET", reqUrl, nil)
+		req.SetBasicAuth(apiKey, apiSecret)
+		resp, err := client.Do(req)
+
+		if err != nil {
+			fmt.Println("Error: Error when sending request to the server:", err)
+			c1 <- DTO.GeneratedPosterTags{}
+			return
+		}
+
+		defer resp.Body.Close()
+
+		var generatedPosterTags DTO.GeneratedPosterTags
+		err = json.NewDecoder(resp.Body).Decode(&generatedPosterTags)
+		if err != nil {
+			fmt.Println("Error decoding JSON response:", err)
+			c1 <- DTO.GeneratedPosterTags{}
+			return
+		}
+
+		fmt.Println("modar Generating Tags response:", generatedPosterTags)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c1 <- DTO.GeneratedPosterTags{}
+			return
+		}
+
+		c1 <- generatedPosterTags
+	}()
+
+	go func() {
+
+		fmt.Println("modar Generating Colors...")
+
+		client := &http.Client{}
+
+		reqUrl := "https://api.imagga.com/v2/colors?image_url=" +
+			imageUrl
+
+		req, _ := http.NewRequest("GET", reqUrl, nil)
+		req.SetBasicAuth(apiKey, apiSecret)
+		resp, err := client.Do(req)
+
+		if err != nil {
+			fmt.Println("Error: Error when sending request to the server:", err)
+			c2 <- DTO.GeneratedPosterColors{}
+			return
+		}
+
+		defer resp.Body.Close()
+
+		var generatedPosterColors DTO.GeneratedPosterColors
+		err = json.NewDecoder(resp.Body).Decode(&generatedPosterColors)
+		if err != nil {
+			fmt.Println("Error decoding JSON response:", err)
+			c2 <- DTO.GeneratedPosterColors{}
+			return
+		}
+
+		fmt.Println("modar Generating Colors response:", generatedPosterColors)
+
+		c2 <- generatedPosterColors
+	}()
+
+	fmt.Println("modar Waiting for info...")
+	generatedTagsResult := <-c1
+	generatedColorsResult := <-c2
+
+	fmt.Println("modar Info generated successfully!")
+
+	View.GeneratePosterInfoView(generatedTagsResult, generatedColorsResult, c)
 }

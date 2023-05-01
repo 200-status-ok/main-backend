@@ -330,6 +330,21 @@ definitions:
       name:
         type: string
     type: object
+  View.GeneratedPosterInfoView:
+    properties:
+      colors:
+        items:
+          type: string
+        type: array
+      tags:
+        items:
+          type: string
+        type: array
+      titles:
+        items:
+          type: string
+        type: array
+    type: object
   View.MessageView:
     properties:
       message:
@@ -387,6 +402,27 @@ info:
   title: Swagger Documentation for Golang web API(Gin framework)
   version: "1.0"
 paths:
+  /api-call/generatePosterInfo:
+    get:
+      consumes:
+      - application/json
+      description: Generates info for a poster
+      parameters:
+      - description: Image Url
+        in: query
+        name: image_url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.GeneratedPosterInfoView'
+      summary: Generate poster info
+      tags:
+      - ApiCall
   /posters:
     get:
       consumes:

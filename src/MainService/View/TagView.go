@@ -1,8 +1,11 @@
 package View
 
 import (
+	"github.com/403-access-denied/main-backend/src/MainService/DTO"
 	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
+	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/gin-gonic/gin"
+	"math"
 	"net/http"
 )
 
@@ -28,4 +31,34 @@ func GetAllTagView(tags []Model2.Category, c *gin.Context) {
 		})
 	}
 	c.JSON(http.StatusOK, result)
+}
+
+type GeneratedPosterInfoView struct {
+	Titles []string `json:"titles"`
+	Tags   []string `json:"tags"`
+	Colors []string `json:"colors"`
+}
+
+func GeneratePosterInfoView(generatedTags DTO.GeneratedPosterTags, generatedColors DTO.GeneratedPosterColors, c *gin.Context) {
+
+	var titlesResult []string
+	for i := 0; i < int(math.Min(float64(len(generatedTags.Result.Tags)), 4)); i++ {
+		titlesResult = append(titlesResult, generatedTags.Result.Tags[i].Tag.Fa)
+	}
+
+	var tagsResult []string
+	for i := 0; i < int(math.Min(float64(len(generatedTags.Result.Tags)), 10)); i++ {
+		tagsResult = append(tagsResult, generatedTags.Result.Tags[i].Tag.Fa)
+	}
+
+	var colorsResult []string
+	for _, color := range generatedColors.Result.Colors.ForegroundColors {
+		colorsResult = append(colorsResult, Utils.ColorParentsToPersian[color.ClosestPaletteColorParent])
+	}
+
+	c.JSON(http.StatusOK, GeneratedPosterInfoView{
+		Titles: titlesResult,
+		Tags:   tagsResult,
+		Colors: colorsResult,
+	})
 }

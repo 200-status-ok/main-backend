@@ -38,6 +38,10 @@ func (s *Server) MainController() {
 			tags.POST("/", Api2.CreateTag)
 			tags.DELETE("/:id", Api2.DeleteTag)
 		}
+		api := v1.Group("/api-call")
+		{
+			api.GET("/generatePosterInfo", Api2.GeneratePosterInfo)
+		}
 	}
 
 }
