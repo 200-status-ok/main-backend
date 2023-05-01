@@ -4,7 +4,6 @@ import (
 	"fmt"
 	Utils2 "github.com/403-access-denied/main-backend/src/NotificationService/Utils"
 	"os"
-	"sync"
 )
 
 func SendToUser() {
@@ -22,22 +21,22 @@ func SendToUser() {
 		}
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+	channels := make(chan struct{}, 2)
 	go func() {
-		defer wg.Done()
 		err := messageBroker.SubscribeOnQueue("email_notification", "email_notification")
 		if err != nil {
 			fmt.Println("Error subscribing to email_notification queue:", err)
 		}
+		channels <- struct{}{}
 	}()
+
 	go func() {
-		defer wg.Done()
 		err := messageBroker.SubscribeOnQueue("sms_notification", "sms_notification")
 		if err != nil {
 			fmt.Println("Error subscribing to sms_notification queue:", err)
 		}
+		channels <- struct{}{}
 	}()
-	wg.Wait()
-	messageBroker.Close()
+
+	<-channels
 }

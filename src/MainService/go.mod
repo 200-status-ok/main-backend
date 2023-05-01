@@ -8,6 +8,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/uuid v1.3.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/pquerna/otp v1.4.0
 	github.com/rabbitmq/amqp091-go v1.8.0
 	github.com/spf13/viper v1.15.0
