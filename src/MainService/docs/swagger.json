@@ -71,7 +71,39 @@
                 }
             }
         },
-        "/chats/create-conversation": {
+        "/api-call/generatePosterInfo": {
+            "get": {
+                "description": "Generates info for a poster",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiCall"
+                ],
+                "summary": "Generate poster info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Image Url",
+                        "name": "image_url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.GeneratedPosterInfoView"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/conversation": {
             "post": {
                 "description": "Create a chat conversation",
                 "consumes": [
@@ -139,38 +171,6 @@
                         "description": "OK",
                         "schema": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api-call/generatePosterInfo": {
-            "get": {
-                "description": "Generates info for a poster",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ApiCall"
-                ],
-                "summary": "Generate poster info",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Image Url",
-                        "name": "image_url",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/View.GeneratedPosterInfoView"
                         }
                     }
                 }
@@ -1036,12 +1036,6 @@
                 },
                 "updatedAt": {
                     "type": "string"
-                },
-                "user_1_id": {
-                    "type": "integer"
-                },
-                "user_2_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -1247,15 +1241,11 @@
             "type": "object",
             "required": [
                 "client_id",
-                "id",
                 "name",
                 "poster_id"
             ],
             "properties": {
                 "client_id": {
-                    "type": "integer"
-                },
-                "id": {
                     "type": "integer"
                 },
                 "name": {
@@ -1494,8 +1484,14 @@
                         "$ref": "#/definitions/Model.Image"
                     }
                 },
+                "phone_user": {
+                    "type": "string"
+                },
                 "status": {
                     "$ref": "#/definitions/Model.PosterStatus"
+                },
+                "telegram_id": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"

@@ -20,79 +20,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/chats/create-conversation": {
-            "post": {
-                "description": "Create a chat conversation",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Chat"
-                ],
-                "summary": "Create a chat conversation for two users",
-                "parameters": [
-                    {
-                        "description": "ChatConversation",
-                        "name": "room",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UseCase.CreateConversation"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/chats/join": {
-            "get": {
-                "description": "JoinConversation a chat room",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Chat"
-                ],
-                "summary": "JoinConversation a chat room",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Chat ID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Client ID",
-                        "name": "client_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/ai/predict": {
             "post": {
                 "description": "Get photo nsfw AI",
@@ -180,6 +107,79 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/View.GeneratedPosterInfoView"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/conversation": {
+            "post": {
+                "description": "Create a chat conversation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Create a chat conversation for two users",
+                "parameters": [
+                    {
+                        "description": "ChatConversation",
+                        "name": "room",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.CreateConversation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/join": {
+            "get": {
+                "description": "JoinConversation a chat room",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "JoinConversation a chat room",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Chat ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Client ID",
+                        "name": "client_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -1045,12 +1045,6 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "string"
-                },
-                "user_1_id": {
-                    "type": "integer"
-                },
-                "user_2_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -1256,15 +1250,11 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "client_id",
-                "id",
                 "name",
                 "poster_id"
             ],
             "properties": {
                 "client_id": {
-                    "type": "integer"
-                },
-                "id": {
                     "type": "integer"
                 },
                 "name": {
@@ -1503,8 +1493,14 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Image"
                     }
                 },
+                "phone_user": {
+                    "type": "string"
+                },
                 "status": {
                     "$ref": "#/definitions/Model.PosterStatus"
+                },
+                "telegram_id": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"

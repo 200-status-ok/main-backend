@@ -1,4 +1,4 @@
-module github.com/403-access-denied/main-backend/src/NotificationService
+module github.com/403-access-denied/main-backend/src/WorkerService
 
 go 1.20
 

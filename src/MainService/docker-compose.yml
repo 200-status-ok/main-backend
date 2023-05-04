@@ -30,7 +30,7 @@ services:
       - database
     networks:
       - main-network
-      - notification-network
+      - worker-network
 
   redis:
     image: redis:alpine3.17
@@ -45,6 +45,6 @@ services:
 networks:
   main-network:
     driver: bridge
-  notification-network:
+  worker-network:
     name: rabbitmq_network
     external: true

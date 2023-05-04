@@ -57,7 +57,7 @@ func (s *Server) MainController() {
 		chats := v1.Group("/chats")
 		{
 			chats.GET("/join", s.ChatWS.JoinConversation)
-			chats.POST("/create-conversation", s.ChatWS.CreateChatConversation)
+			chats.POST("/conversation", s.ChatWS.CreateChatConversation)
 		}
 	}
 
