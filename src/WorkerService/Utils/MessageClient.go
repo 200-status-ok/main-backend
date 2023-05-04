@@ -114,7 +114,7 @@ func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName str
 	if err != nil {
 		return err
 	}
-	msgs, err := channel.Consume(
+	message, err := channel.Consume(
 		queue.Name,
 		consumerName,
 		true,
@@ -127,14 +127,12 @@ func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName str
 		return err
 	}
 	var forever = make(chan struct{})
-	go func() {
-		for d := range msgs {
-			fmt.Println("Received a message: ", string(d.Body))
-			arr := CustomArray{}
-			arr = strings.Split(string(d.Body), "/")
-			arr.SendingNotification()
-		}
-	}()
+	for d := range message {
+		fmt.Println("Received a message: ", string(d.Body))
+		arr := CustomArray{}
+		arr = strings.Split(string(d.Body), "/")
+		arr.SendingNotification()
+	}
 	<-forever
 	return nil
 }

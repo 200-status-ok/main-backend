@@ -142,10 +142,6 @@ definitions:
         type: integer
       updatedAt:
         type: string
-      user_1_id:
-        type: integer
-      user_2_id:
-        type: integer
     type: object
   Model.Image:
     properties:
@@ -282,15 +278,12 @@ definitions:
     properties:
       client_id:
         type: integer
-      id:
-        type: integer
       name:
         type: string
       poster_id:
         type: integer
     required:
     - client_id
-    - id
     - name
     - poster_id
     type: object
@@ -447,8 +440,12 @@ definitions:
         items:
           $ref: '#/definitions/Model.Image'
         type: array
+      phone_user:
+        type: string
       status:
         $ref: '#/definitions/Model.PosterStatus'
+      telegram_id:
+        type: string
       title:
         type: string
       updated_at:
@@ -501,54 +498,6 @@ info:
   title: Swagger Documentation for Golang web API(Gin framework)
   version: "1.0"
 paths:
-  /chats/create-conversation:
-    post:
-      consumes:
-      - application/json
-      description: Create a chat conversation
-      parameters:
-      - description: ChatConversation
-        in: body
-        name: room
-        required: true
-        schema:
-          $ref: '#/definitions/UseCase.CreateConversation'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: Create a chat conversation for two users
-      tags:
-      - Chat
-  /chats/join:
-    get:
-      consumes:
-      - application/json
-      description: JoinConversation a chat room
-      parameters:
-      - description: Chat ID
-        in: query
-        name: id
-        required: true
-        type: integer
-      - description: Client ID
-        in: query
-        name: client_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: JoinConversation a chat room
-      tags:
-      - Chat
   /ai/predict:
     post:
       consumes:
@@ -609,6 +558,54 @@ paths:
       summary: Generate poster info
       tags:
       - ApiCall
+  /chats/conversation:
+    post:
+      consumes:
+      - application/json
+      description: Create a chat conversation
+      parameters:
+      - description: ChatConversation
+        in: body
+        name: room
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.CreateConversation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Create a chat conversation for two users
+      tags:
+      - Chat
+  /chats/join:
+    get:
+      consumes:
+      - application/json
+      description: JoinConversation a chat room
+      parameters:
+      - description: Chat ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Client ID
+        in: query
+        name: client_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: JoinConversation a chat room
+      tags:
+      - Chat
   /posters:
     get:
       consumes:

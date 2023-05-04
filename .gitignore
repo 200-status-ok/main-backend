@@ -19,6 +19,5 @@
 .vscode
 .DS_Store
 
-src/MainService/docs
-
-tmp/
+/src/MainService/tmp
+/src/WorkerService/tmp2

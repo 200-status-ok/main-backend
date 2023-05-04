@@ -2,7 +2,7 @@ package UseCase
 
 import (
 	"fmt"
-	Utils2 "github.com/403-access-denied/main-backend/src/NotificationService/Utils"
+	Utils2 "github.com/403-access-denied/main-backend/src/WorkerService/Utils"
 	"os"
 )
 
@@ -21,13 +21,11 @@ func SendToUser() {
 		}
 	}
 
-	channels := make(chan struct{}, 2)
 	go func() {
 		err := messageBroker.SubscribeOnQueue("email_notification", "email_notification")
 		if err != nil {
 			fmt.Println("Error subscribing to email_notification queue:", err)
 		}
-		channels <- struct{}{}
 	}()
 
 	go func() {
@@ -35,8 +33,5 @@ func SendToUser() {
 		if err != nil {
 			fmt.Println("Error subscribing to sms_notification queue:", err)
 		}
-		channels <- struct{}{}
 	}()
-
-	<-channels
 }

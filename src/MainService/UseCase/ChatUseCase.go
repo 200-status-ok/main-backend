@@ -45,7 +45,7 @@ type CreateConversation struct {
 // @Produce json
 // @Param room body CreateConversation true "ChatConversation"
 // @Success 200 {object} string
-// @Router /chats/create-conversation [post]
+// @Router /chats/conversation [post]
 func (wsUseCase *ChatWS) CreateChatConversation(c *gin.Context) {
 	var request CreateConversation
 	if err := c.ShouldBindJSON(&request); err != nil {
