@@ -248,3 +248,87 @@ func (r *PosterRepository) UpdatePoster(id int, poster DTO2.PosterDTO, addresses
 
 	return posterModel, nil
 }
+
+func (r *PosterRepository) CreatePosterReport(posterID uint, issuerID uint, reportType string, description string) error {
+
+	var reportModel = Model2.PosterReport{
+		PosterID:    posterID,
+		IssuerID:    issuerID,
+		ReportType:  reportType,
+		Description: description,
+		Status:      "open",
+	}
+
+	result := r.db.Create(&reportModel)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (r *PosterRepository) GetAllPosterReports(limit, offset int, status string) ([]Model2.PosterReport, error) {
+	var posterReports []Model2.PosterReport
+
+	var result = r.db.Preload("Poster").Preload("Issuer").Preload("Poster.User").Where("deleted_at IS NULL").Limit(limit).Offset(offset).Order("created_at DESC")
+
+	if status != "both" {
+		result = result.Where("status = ?", status)
+	}
+
+	result.Find(&posterReports)
+
+	DBConfiguration.CloseDB()
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return posterReports, nil
+}
+
+func (r *PosterRepository) GetPosterReportById(id int) (Model2.PosterReport, error) {
+	var posterReport Model2.PosterReport
+
+	result := r.db.Preload("Poster").Preload("Issuer").First(&posterReport, "id = ?", id)
+	DBConfiguration.CloseDB()
+
+	if result.Error != nil {
+		return Model2.PosterReport{}, result.Error
+	}
+
+	return posterReport, nil
+}
+
+func (r *PosterRepository) UpdatePosterReport(id, posterID, issuerID uint, reportType, description, status string) error {
+
+	var updatedPosterReportModel Model2.PosterReport
+
+	if posterID != 0 {
+		updatedPosterReportModel.PosterID = posterID
+	}
+
+	if issuerID != 0 {
+		updatedPosterReportModel.IssuerID = issuerID
+	}
+
+	if reportType != "" {
+		updatedPosterReportModel.ReportType = reportType
+	}
+
+	if description != "" {
+		updatedPosterReportModel.Description = description
+	}
+
+	if status != "" {
+		updatedPosterReportModel.Status = status
+	}
+
+	result := r.db.Model(&Model2.PosterReport{}).Where("id = ?", id).Updates(updatedPosterReportModel)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	DBConfiguration.CloseDB()
+
+	return nil
+}

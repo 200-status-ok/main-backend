@@ -15,7 +15,7 @@ import (
 
 type getPostersRequest struct {
 	PageID       int     `form:"page_id" binding:"required,min=1"`
-	PageSize     int     `form:"page_size" binding:"required,min=5,max=10"`
+	PageSize     int     `form:"page_size" binding:"required,min=5,max=20"`
 	Sort         string  `form:"sort,omitempty" binding:"omitempty,oneof=asc desc"`
 	SortBy       string  `form:"sort_by,omitempty" binding:"omitempty,oneof=created_at updated_at id"`
 	Status       string  `form:"status,omitempty" binding:"oneof=lost found both"`
@@ -297,4 +297,117 @@ func GetTextNSFWResponse(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"message": "sfw"})
 	}
+}
+
+type CreatePosterReportRequest struct {
+	PosterId    uint   `form:"poster_id" binding:"required"`
+	IssuerId    uint   `form:"issuer_id" binding:"required"`
+	ReportType  string `form:"report_type" binding:"required,oneof=spam inappropriate other"` //TODO: add more report types
+	Description string `form:"description"`
+}
+
+func CreatePosterReportResponse(c *gin.Context) {
+	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	var request CreatePosterReportRequest
+	if err := c.ShouldBindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := posterRepository.CreatePosterReport(request.PosterId, request.IssuerId, request.ReportType, request.Description)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	DBConfiguration.CloseDB()
+	c.JSON(http.StatusOK, gin.H{"message": "Report created"})
+}
+
+type getPosterReportsRequest struct {
+	PageID   int    `form:"page_id" binding:"required,min=1"`
+	PageSize int    `form:"page_size" binding:"required,min=5,max=20"`
+	Status   string `form:"status,omitempty" binding:"oneof=open resolved both"`
+}
+
+func GetPosterReportsResponse(c *gin.Context) {
+	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+
+	var request getPosterReportsRequest
+	if err := c.ShouldBindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	offset := (request.PageID - 1) * request.PageSize
+	request.Status = c.DefaultQuery("status", "both")
+
+	posterReports, err := posterRepository.GetAllPosterReports(request.PageSize, offset, request.Status)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	DBConfiguration.CloseDB()
+	View.GetPosterReportsView(posterReports, c)
+}
+
+type GetPosterReportByIdRequest struct {
+	ID int `uri:"id" binding:"required,min=1"`
+}
+
+func GetPosterReportByIdResponse(c *gin.Context) {
+	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+
+	var request GetPosterReportByIdRequest
+	if err := c.ShouldBindUri(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	posterReport, err := posterRepository.GetPosterReportById(request.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	DBConfiguration.CloseDB()
+	View.GetPosterReportByIdView(posterReport, c)
+}
+
+type UpdatePosterReportRequest struct {
+	PosterID    uint   `json:"poster_id"`
+	IssuerID    uint   `json:"issuer_id"`
+	ReportType  string `json:"report_type"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+}
+
+type UpdatePosterReportByIdRequest struct {
+	ID uint `uri:"id" binding:"required,min=1"`
+}
+
+func UpdatePosterReportResponse(c *gin.Context) {
+	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+
+	var request UpdatePosterReportRequest
+	var id UpdatePosterReportByIdRequest
+
+	if err := c.ShouldBindUri(&id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := posterRepository.UpdatePosterReport(id.ID, request.PosterID, request.IssuerID, request.ReportType, request.Description, request.Status)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	DBConfiguration.CloseDB()
+
+	c.JSON(http.StatusOK, gin.H{"message": "Report resolved"})
 }

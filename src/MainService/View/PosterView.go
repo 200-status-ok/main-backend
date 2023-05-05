@@ -92,3 +92,39 @@ func UpdatePosterView(poster Model2.Poster, c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, result)
 }
+
+type PosterReportView struct {
+	ID          uint          `json:"id"`
+	Poster      Model2.Poster `json:"poster"`
+	Issuer      Model2.User   `json:"issuer"`
+	ReportType  string        `json:"report_type"`
+	Description string        `json:"description"`
+	Status      string        `json:"status"`
+}
+
+func GetPosterReportsView(posterReports []Model2.PosterReport, c *gin.Context) {
+	result := make([]PosterReportView, 0)
+	for _, posterReport := range posterReports {
+		result = append(result, PosterReportView{
+			ID:          posterReport.ID,
+			Poster:      posterReport.Poster,
+			Issuer:      posterReport.Issuer,
+			ReportType:  posterReport.ReportType,
+			Description: posterReport.Description,
+			Status:      posterReport.Status,
+		})
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+func GetPosterReportByIdView(posterReport Model2.PosterReport, c *gin.Context) {
+	result := PosterReportView{
+		ID:          posterReport.ID,
+		Poster:      posterReport.Poster,
+		Issuer:      posterReport.Issuer,
+		ReportType:  posterReport.ReportType,
+		Description: posterReport.Description,
+		Status:      posterReport.Status,
+	}
+	c.JSON(http.StatusOK, result)
+}

@@ -107,3 +107,61 @@ func GetPhotoNSFWAi(c *gin.Context) {
 func GetTextNSFW(c *gin.Context) {
 	UseCase.GetTextNSFWResponse(c)
 }
+
+// CreatePosterReport godoc
+// @Summary Report a poster
+// @Description Reports a poster
+// @Tags reports
+// @Accept  json
+// @Produce  json
+// @Param poster_id query int true "Poster ID"
+// @Param issuer_id query int true "Issuer ID"
+// @Param report_type query string true "Report Type" enum(spam, inappropriate, other) default(other)
+// @Param description query string false "Description"
+// @Success 200
+// @Router /reports/report-poster [post]
+func CreatePosterReport(c *gin.Context) {
+	UseCase.CreatePosterReportResponse(c)
+}
+
+// GetPosterReports godoc
+// @Summary Get a list of all poster reports
+// @Description Retrieves a list of all poster reports, sorted and paginated according to the given parameters
+// @Tags reports
+// @Accept  json
+// @Produce  json
+// @Param page_id query int true "Page ID" minimum(1) default(1)
+// @Param page_size query int true "Page size" minimum(1) default(10)
+// @Param status query string true "Status" enum(open, resolved, both) default(both)
+// @Success 200 {array} View.PosterReportView
+// @Router /reports [get]
+func GetPosterReports(c *gin.Context) {
+	UseCase.GetPosterReportsResponse(c)
+}
+
+// GetPosterReport godoc
+// @Summary Get a poster report by ID
+// @Description Retrieves a poster report by ID
+// @Tags reports
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Report ID"
+// @Success 200 {object} View.PosterReportView
+// @Router /reports/{id} [get]
+func GetPosterReport(c *gin.Context) {
+	UseCase.GetPosterReportByIdResponse(c)
+}
+
+// UpdatePosterReport godoc
+// @Summary Update a poster report by ID
+// @Description Updates a poster report by ID
+// @Tags reports
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Report ID"
+// @Param report body UseCase.UpdatePosterReportRequest true "Poster Report"
+// @Success 200 {object} View.PosterView
+// @Router /reports/{id} [patch]
+func UpdatePosterReport(c *gin.Context) {
+	UseCase.UpdatePosterReportResponse(c)
+}
