@@ -25,19 +25,36 @@ func (r *ChatRepository) CreateChatRoom(posterId, userId uint) error {
 	return nil
 }
 
-func (r *ChatRepository) GetChatRoomByPosterId(posterId uint) (Model.ChatRoom, error) {
-	var roomModel Model.ChatRoom
-	result := r.db.Where("poster_id = ?", posterId).First(&roomModel)
+func (r *ChatRepository) GetChatRoomByPosterId(convId uint) (Model.ChatRoom, Model.Conversation, error) {
+	// get the conversation then get the chat room
+	var convModel Model.Conversation
+	result := r.db.Where("id = ?", convId).First(&convModel)
 	if result.Error != nil {
-		return Model.ChatRoom{}, result.Error
+		return Model.ChatRoom{}, Model.Conversation{}, result.Error
 	}
 
-	return roomModel, nil
+	var roomModel Model.ChatRoom
+	result = r.db.Where("id = ?", convModel.RoomID).First(&roomModel)
+	if result.Error != nil {
+		return Model.ChatRoom{}, Model.Conversation{}, result.Error
+	}
+
+	return roomModel, convModel, nil
 }
 
 func (r *ChatRepository) GetConversationById(chatRoom uint) (Model.Conversation, error) {
 	var convModel Model.Conversation
 	result := r.db.Where("room_id = ?", chatRoom).First(&convModel)
+	if result.Error != nil {
+		return Model.Conversation{}, result.Error
+	}
+
+	return convModel, nil
+}
+
+func (r *ChatRepository) GetConversationByClient(chatRoom, clientId uint) (Model.Conversation, error) {
+	var convModel Model.Conversation
+	result := r.db.Where("room_id = ? AND member_id = ?", chatRoom, clientId).First(&convModel)
 	if result.Error != nil {
 		return Model.Conversation{}, result.Error
 	}

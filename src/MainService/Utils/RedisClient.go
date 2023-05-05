@@ -50,3 +50,30 @@ func (redisCli *RedisClient) Get(key string) (string, error) {
 	}
 	return val, nil
 }
+
+func (redisCli *RedisClient) LRange(key string, start int64, stop int64) ([]string, error) {
+	client := redisCli.Connect()
+	val, err := client.LRange(redisCli.Context, key, start, stop).Result()
+	if err != nil {
+		return nil, err
+	}
+	return val, nil
+}
+
+func (redisCli *RedisClient) RPush(key string, value string) error {
+	client := redisCli.Connect()
+	err := client.RPush(redisCli.Context, key, value).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (redisCli *RedisClient) Del(key string) error {
+	client := redisCli.Connect()
+	err := client.Del(redisCli.Context, key).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}

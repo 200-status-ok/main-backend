@@ -20,7 +20,7 @@ type Poster struct {
 	HasChat     bool         `gorm:"type:bool;not null;default:false" json:"has_chat"`
 	Award       float64      `gorm:"type:decimal" json:"award"`
 	UserID      uint         `gorm:"type:int;" json:"user_id"`
-	Categories  []Category   `gorm:"many2many:poster_categories;" json:"categories"`
+	Tags        []Tag        `gorm:"many2many:poster_tags;" json:"tags"`
 	Images      []Image      `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"image"`
 	Addresses   []Address    `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
 	User        User         `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"user"`
@@ -74,12 +74,12 @@ func (p *Poster) SetUserID(userID uint) {
 	p.UserID = userID
 }
 
-func (p *Poster) GetCategories() []Category {
-	return p.Categories
+func (p *Poster) GetCategories() []Tag {
+	return p.Tags
 }
 
-func (p *Poster) SetCategories(categories []Category) {
-	p.Categories = categories
+func (p *Poster) SetCategories(categories []Tag) {
+	p.Tags = categories
 }
 
 func (p *Poster) GetImages() []Image {

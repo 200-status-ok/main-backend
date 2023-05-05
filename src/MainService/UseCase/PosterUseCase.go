@@ -107,10 +107,10 @@ func DeletePosterByIdResponse(c *gin.Context) {
 }
 
 type CreatePosterRequest struct {
-	Poster     DTO2.PosterDTO
-	Addresses  []DTO2.AddressDTO
-	ImgUrls    []string `json:"img_urls" binding:"required"`
-	Categories []int    `json:"categories" binding:"required"`
+	Poster    DTO2.PosterDTO
+	Addresses []DTO2.AddressDTO
+	ImgUrls   []string `json:"img_urls" binding:"required"`
+	Tags      []int    `json:"tags" binding:"required"`
 }
 
 func CreatePosterResponse(c *gin.Context) {
@@ -120,7 +120,7 @@ func CreatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	poster, err := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Categories)
+	poster, err := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Tags)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

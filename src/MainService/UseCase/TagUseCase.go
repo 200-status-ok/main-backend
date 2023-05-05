@@ -23,7 +23,7 @@ func CreateTagResponse(c *gin.Context) {
 		return
 	}
 	tagRepository := Repository.NewCategoryRepository(DBConfiguration.GetDB())
-	tags, err := tagRepository.CreateCategory(Model.Category{
+	tags, err := tagRepository.CreateCategory(Model.Tag{
 		Name: tag.Name,
 	})
 	if err != nil {
@@ -53,7 +53,7 @@ func UpdateTagByIdResponse(c *gin.Context) {
 		return
 	}
 	tagRepository := Repository.NewCategoryRepository(DBConfiguration.GetDB())
-	tags, err := tagRepository.UpdateCategory(id.ID, Model.Category{
+	tags, err := tagRepository.UpdateCategory(id.ID, Model.Tag{
 		Name: tag.Name,
 	})
 	if err != nil {

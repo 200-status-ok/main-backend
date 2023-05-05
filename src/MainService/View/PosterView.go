@@ -16,7 +16,7 @@ type PosterView struct {
 	UserPhone   string              `json:"phone_user"`
 	Addresses   []Model2.Address    `json:"address"`
 	Images      []Model2.Image      `json:"images"`
-	Categories  []Model2.Category   `json:"categories"`
+	Tags        []Model2.Tag        `json:"categories"`
 	User        uint                `json:"user"`
 	CreatedAt   time.Time           `json:"created_at"`
 	UpdatedAt   time.Time           `json:"updated_at"`
@@ -32,7 +32,7 @@ func GetPostersView(posters []Model2.Poster, c *gin.Context) {
 			Addresses:   poster.Addresses,
 			Images:      poster.Images,
 			Status:      poster.Status,
-			Categories:  poster.Categories,
+			Tags:        poster.Tags,
 			User:        poster.UserID,
 			CreatedAt:   poster.CreatedAt,
 			UpdatedAt:   poster.UpdatedAt,
@@ -51,7 +51,7 @@ func GetPosterByIdView(poster Model2.Poster, c *gin.Context) {
 		TelegramId:  poster.TelegramID,
 		UserPhone:   poster.UserPhone,
 		Status:      poster.Status,
-		Categories:  poster.Categories,
+		Tags:        poster.Tags,
 		User:        poster.UserID,
 		CreatedAt:   poster.CreatedAt,
 		UpdatedAt:   poster.UpdatedAt,
@@ -67,7 +67,7 @@ func CreatePosterView(poster Model2.Poster, c *gin.Context) {
 		Addresses:   poster.Addresses,
 		Images:      poster.Images,
 		Status:      poster.Status,
-		Categories:  poster.Categories,
+		Tags:        poster.Tags,
 		User:        poster.UserID,
 		CreatedAt:   poster.CreatedAt,
 		UpdatedAt:   poster.UpdatedAt,
@@ -85,7 +85,7 @@ func UpdatePosterView(poster Model2.Poster, c *gin.Context) {
 		Status:      poster.Status,
 		TelegramId:  poster.TelegramID,
 		UserPhone:   poster.UserPhone,
-		Categories:  poster.Categories,
+		Tags:        poster.Tags,
 		User:        poster.UserID,
 		CreatedAt:   poster.CreatedAt,
 		UpdatedAt:   poster.UpdatedAt,

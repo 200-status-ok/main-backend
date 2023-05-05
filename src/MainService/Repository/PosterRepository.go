@@ -28,10 +28,10 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 
 	var result *gorm.DB
 	if filterObject.SearchPhrase != "" || filterObject.TagIds != nil {
-		result = r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
+		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
 			Order(sortBy + " " + sortType)
 	} else {
-		result = r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
+		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
 			Limit(limit).Offset(offset).Order(sortBy + " " + sortType)
 	}
 
@@ -73,7 +73,7 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 					searchScore += 1
 				}
 
-				for _, category := range poster.Categories {
+				for _, category := range poster.Tags {
 					if strings.Contains(category.Name, filterObject.SearchPhrase) || strings.Contains(filterObject.SearchPhrase, category.Name) {
 						searchScore += 1
 					}
@@ -82,7 +82,7 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 
 			if filterObject.TagIds != nil {
 				for _, tagId := range filterObject.TagIds {
-					for _, category := range poster.Categories {
+					for _, category := range poster.Tags {
 						if tagId == int(category.ID) {
 							searchScore += 1
 						}
@@ -122,7 +122,7 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 
 func (r *PosterRepository) GetPosterById(id int) (Model2.Poster, error) {
 	var poster Model2.Poster
-	result := r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
+	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
 		First(&poster, "id = ?", id)
 	DBConfiguration.CloseDB()
 	if result.Error != nil {
@@ -144,7 +144,7 @@ func (r *PosterRepository) DeletePosterById(id int) error {
 	if result.Error != nil {
 		return result.Error
 	}
-	_ = r.db.Model(&poster).Association("Categories").Clear()
+	_ = r.db.Model(&poster).Association("Tags").Clear()
 	if err := r.db.Delete(&poster, "id = ?", id).Error; err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (r *PosterRepository) DeletePosterById(id int) error {
 func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.AddressDTO, imageUrl []string, categories []int) (
 	Model2.Poster, error) {
 	var posterModel Model2.Poster
-	var categoriesModel []Model2.Category
+	var categoriesModel []Model2.Tag
 	posterModel.SetTitle(poster.Title)
 	posterModel.SetDescription(poster.Description)
 	posterModel.SetUserID(poster.UserID)
@@ -205,12 +205,12 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 func (r *PosterRepository) UpdatePoster(id int, poster DTO2.PosterDTO, addresses []DTO2.AddressDTO, imageUrl []string, categories []int) (
 	Model2.Poster, error) {
 	var posterModel Model2.Poster
-	result := r.db.Preload("Addresses").Preload("Images").Preload("Categories").Preload("User").
+	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
 		First(&posterModel, "id = ?", id)
 	if result.Error != nil {
 		return Model2.Poster{}, result.Error
 	}
-	var categoriesModel []Model2.Category
+	var categoriesModel []Model2.Tag
 	posterModel.SetTitle(poster.Title)
 	posterModel.SetDescription(poster.Description)
 	posterModel.SetUserID(poster.UserID)

@@ -1,6 +1,7 @@
 package WebSocket
 
 import (
+	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/gorilla/websocket"
 	"log"
 )
@@ -15,9 +16,11 @@ const (
 type Client struct {
 	Conn           *websocket.Conn
 	Message        chan *Message
-	ID             int      `json:"id"`
-	Role           ConvRole `json:"role"`
-	ConversationID int      `json:"conversation_id"`
+	ID             int                `json:"id"`
+	Role           ConvRole           `json:"role"`
+	ConversationID int                `json:"conversation_id"`
+	RedisClient    *Utils.RedisClient `json:"redis_client"`
+	IsConnected    bool               `json:"is_connected"`
 }
 
 type Message struct {
@@ -61,18 +64,21 @@ func (c *Client) Write() {
 		}
 	}()
 	for {
-		message, ok := <-c.Message
-		if !ok {
-			err := c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
-			if err != nil {
-				return
+		if c.IsConnected {
+			message, ok := <-c.Message
+			if !ok {
+				err := c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				if err != nil {
+					break
+				}
+				break
 			}
-			return
-		}
 
-		err := c.Conn.WriteJSON(message)
-		if err != nil {
-			return
+			err := c.Conn.WriteJSON(message)
+			if err != nil {
+				c.Message <- message
+				break
+			}
 		}
 	}
 }
