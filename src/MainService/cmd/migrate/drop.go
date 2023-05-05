@@ -16,6 +16,7 @@ func main() {
 	models = append(models, &Model2.Address{})
 	models = append(models, &Model2.MarkedPoster{})
 	models = append(models, &Model2.ChatRoom{})
+	models = append(models, &Model2.PosterReport{})
 	DBConfiguration.InitDB()
 	DBConfiguration.DropModel(models)
 	DBConfiguration.CloseDB()
