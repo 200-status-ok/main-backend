@@ -1,17 +1,10 @@
 package WebSocket
 
-import "fmt"
-
 type ConversationChat struct {
-	ID       int
-	Name     string
-	Members  map[int]*Client
-	ChatRoom *ChatRoom
-}
-
-type ChatRoom struct {
-	ID   int
-	Name string
+	ID     int
+	Name   string
+	Member *Client
+	Owner  *Client
 }
 
 type Hub struct {
@@ -37,10 +30,10 @@ func (h *Hub) Run() {
 		select {
 		case client := <-h.Register:
 			if conv, ok := h.ChatConversation[client.ConversationID]; ok {
-				if len(conv.Members) <= 2 {
-					conv.Members[client.ID] = client
+				if client.Role == Owner {
+					conv.Owner = client
 				} else {
-					fmt.Println("Conversation is full")
+					conv.Member = client
 				}
 			}
 		case client := <-h.Unregister:
@@ -50,15 +43,18 @@ func (h *Hub) Run() {
 					ConversationID: client.ConversationID,
 					SenderID:       client.ID,
 				}
-				delete(conv.Members, client.ID)
-				close(client.Message)
+				if client.Role == Owner {
+					conv.Owner.IsConnected = false
+				} else {
+					conv.Member.IsConnected = false
+				}
 			}
 		case message := <-h.Broadcast:
 			if conv, ok := h.ChatConversation[message.ConversationID]; ok {
-				for _, client := range conv.Members {
-					if client.ID != message.SenderID {
-						client.Message <- message
-					}
+				if message.SenderID == conv.Owner.ID {
+					conv.Member.Message <- message
+				} else {
+					conv.Owner.Message <- message
 				}
 			}
 		}

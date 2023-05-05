@@ -12,7 +12,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param tag body UseCase.CreateTagRequest true "Tag"
-// @Success 200 {object} View.CategoryView
+// @Success 200 {object} View.TagView
 // @Router /tags [post]
 func CreateTag(c *gin.Context) {
 	UseCase.CreateTagResponse(c)
@@ -26,7 +26,7 @@ func CreateTag(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "Tag ID"
 // @Param tag body UseCase.UpdateTagRequest true "Tag"
-// @Success 200 {object} View.CategoryView
+// @Success 200 {object} View.TagView
 // @Router /tags/{id} [patch]
 func UpdateTag(c *gin.Context) {
 	UseCase.UpdateTagByIdResponse(c)
@@ -52,7 +52,7 @@ func DeleteTag(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Tag ID"
-// @Success 200 {object} View.CategoryView
+// @Success 200 {object} View.TagView
 // @Router /tags/{id} [get]
 func GetTag(c *gin.Context) {
 	UseCase.GetTagByIdResponse(c)
@@ -64,7 +64,7 @@ func GetTag(c *gin.Context) {
 // @Tags Tags
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} View.CategoryView
+// @Success 200 {array} View.TagView
 // @Router /tags [get]
 func GetTags(c *gin.Context) {
 	UseCase.GetTagsResponse(c)

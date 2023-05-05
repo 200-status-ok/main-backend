@@ -9,7 +9,7 @@ func main() {
 	var models []interface{}
 	models = append(models, &Model2.User{})
 	models = append(models, &Model2.Poster{})
-	models = append(models, &Model2.Category{})
+	models = append(models, &Model2.Tag{})
 	models = append(models, &Model2.Conversation{})
 	models = append(models, &Model2.Message{})
 	models = append(models, &Model2.Image{})

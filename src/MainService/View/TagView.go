@@ -9,23 +9,23 @@ import (
 	"net/http"
 )
 
-type CategoryView struct {
+type TagView struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 
-func CreateTagView(tag Model2.Category, c *gin.Context) {
-	result := CategoryView{
+func CreateTagView(tag Model2.Tag, c *gin.Context) {
+	result := TagView{
 		ID:   tag.ID,
 		Name: tag.Name,
 	}
 	c.JSON(http.StatusOK, result)
 }
 
-func GetAllTagView(tags []Model2.Category, c *gin.Context) {
-	var result []CategoryView
+func GetAllTagView(tags []Model2.Tag, c *gin.Context) {
+	var result []TagView
 	for _, tag := range tags {
-		result = append(result, CategoryView{
+		result = append(result, TagView{
 			ID:   tag.ID,
 			Name: tag.Name,
 		})

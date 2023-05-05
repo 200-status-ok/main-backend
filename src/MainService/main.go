@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/403-access-denied/main-backend/src/MainService/Controller"
+	"github.com/403-access-denied/main-backend/src/MainService/Controller/Api"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
-	"github.com/403-access-denied/main-backend/src/MainService/UseCase"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/403-access-denied/main-backend/src/MainService/WebSocket"
 	"github.com/403-access-denied/main-backend/src/MainService/docs"
@@ -33,8 +33,8 @@ func main() {
 	secretKey := Utils.ReadFromEnvFile(".env", "JWT_SECRET")
 	token, _ := Token.NewJWTMaker(secretKey)
 	hub := WebSocket.NewHub()
-	wsUseCase := UseCase.NewChatWS(hub)
-	server := Controller.Server{Router: r, TokenMaker: token, ChatWS: wsUseCase}
+	wsUseCase := Api.NewChatWS(hub)
+	server := Controller.Server{Router: r, TokenMaker: token, ChatWs: wsUseCase}
 	server.MainController()
 
 	go wsUseCase.Hub.Run()

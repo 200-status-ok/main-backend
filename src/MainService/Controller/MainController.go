@@ -3,14 +3,13 @@ package Controller
 import (
 	Api2 "github.com/403-access-denied/main-backend/src/MainService/Controller/Api"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
-	"github.com/403-access-denied/main-backend/src/MainService/UseCase"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
 	Router     *gin.Engine
 	TokenMaker Token.Maker
-	ChatWS     *UseCase.ChatWS
+	ChatWs     *Api2.ChatWS
 }
 
 func (s *Server) MainController() {
@@ -52,19 +51,16 @@ func (s *Server) MainController() {
 			tags.POST("/", Api2.CreateTag)
 			tags.DELETE("/:id", Api2.DeleteTag)
 		}
-		ai := v1.Group("/ai")
-		{
-			ai.POST("/predict", Api2.GetPhotoNSFWAi)
-			ai.GET("/predict_txt/", Api2.GetTextNSFW)
-		}
 		api := v1.Group("/api-call")
 		{
 			api.GET("/generatePosterInfo", Api2.GeneratePosterInfo)
+			api.POST("/predict", Api2.GetPhotoNSFWAi)
+			api.GET("/predict-txt/", Api2.GetTextNSFW)
 		}
 		chats := v1.Group("/chats")
 		{
-			chats.GET("/join", s.ChatWS.JoinConversation)
-			chats.POST("/conversation", s.ChatWS.CreateChatConversation)
+			chats.GET("/join", s.ChatWs.JoinConversation)
+			chats.POST("/conversation", Api2.CreateChatConversation)
 		}
 	}
 
