@@ -13,38 +13,9 @@ func NewChatRepository(db *gorm.DB) *ChatRepository {
 	return &ChatRepository{db: db}
 }
 
-func (r *ChatRepository) CreateChatRoom(posterId, userId uint) error {
-	var roomModel Model.ChatRoom
-	roomModel.PosterID = posterId
-	roomModel.OwnerID = userId
-	result := r.db.Create(&roomModel)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
-func (r *ChatRepository) GetChatRoomByPosterId(convId uint) (Model.ChatRoom, Model.Conversation, error) {
-	// get the conversation then get the chat room
+func (r *ChatRepository) GetConversationById(convId uint) (Model.Conversation, error) {
 	var convModel Model.Conversation
 	result := r.db.Where("id = ?", convId).First(&convModel)
-	if result.Error != nil {
-		return Model.ChatRoom{}, Model.Conversation{}, result.Error
-	}
-
-	var roomModel Model.ChatRoom
-	result = r.db.Where("id = ?", convModel.RoomID).First(&roomModel)
-	if result.Error != nil {
-		return Model.ChatRoom{}, Model.Conversation{}, result.Error
-	}
-
-	return roomModel, convModel, nil
-}
-
-func (r *ChatRepository) GetConversationById(chatRoom uint) (Model.Conversation, error) {
-	var convModel Model.Conversation
-	result := r.db.Where("room_id = ?", chatRoom).First(&convModel)
 	if result.Error != nil {
 		return Model.Conversation{}, result.Error
 	}
@@ -62,12 +33,28 @@ func (r *ChatRepository) GetConversationByClient(chatRoom, clientId uint) (Model
 	return convModel, nil
 }
 
-func (r *ChatRepository) CreateConversation(roomId, memberId uint) (Model.Conversation, error) {
-	conversationModel := Model.Conversation{RoomID: roomId, MemberID: memberId}
-	result := r.db.Create(&conversationModel)
-	if result.Error != nil {
-		return Model.Conversation{}, result.Error
+func (r *ChatRepository) CreateConversation(name string, ownerId uint, memberId uint, posterId uint) error {
+	convModel := Model.Conversation{
+		Name:     name,
+		OwnerID:  ownerId,
+		MemberID: memberId,
+		PosterID: posterId,
 	}
 
-	return conversationModel, nil
+	result := r.db.Create(&convModel)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (r *ChatRepository) GetPosterOwner(posterId uint) (Model.Poster, error) {
+	var poster Model.Poster
+	result := r.db.First(&poster, posterId)
+	if result.Error != nil {
+		return Model.Poster{}, result.Error
+	}
+
+	return poster, nil
 }

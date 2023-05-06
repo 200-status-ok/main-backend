@@ -20,7 +20,6 @@ func Migration() {
 	models = append(models, &Model2.Image{})
 	models = append(models, &Model2.Address{})
 	models = append(models, &Model2.MarkedPoster{})
-	models = append(models, &Model2.ChatRoom{})
 	models = append(models, &Model2.PosterReport{})
 	DBConfiguration.InitDB()
 	DBConfiguration.MigrateModel(models)

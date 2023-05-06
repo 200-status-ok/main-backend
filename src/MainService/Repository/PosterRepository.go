@@ -181,13 +181,6 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 
 	posterID := posterModel.GetID()
 
-	if posterModel.HasChat {
-		err := NewChatRepository(r.db).CreateChatRoom(posterID, poster.UserID)
-		if err != nil {
-			return Model2.Poster{}, err
-		}
-	}
-
 	newAddress, err := NewAddressRepository(r.db).CreateAddress(addresses, posterID)
 	if err != nil {
 		return Model2.Poster{}, err

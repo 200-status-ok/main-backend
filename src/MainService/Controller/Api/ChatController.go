@@ -46,7 +46,7 @@ func NewChatWS(hub *WebSocket.Hub) *ChatWS {
 // @Param id query uint true "Chat ID"
 // @Param client_id query uint true "Client ID"
 // @Success 200 {object} string
-// @Router /chats/join [post]
+// @Router /chats/join [get]
 func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 	var request JoinConversationReq
 	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
@@ -56,7 +56,7 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 		return
 	}
 
-	chatRoom, conversation, err := chatRepo.GetChatRoomByPosterId(request.ConversationID)
+	conversation, err := chatRepo.GetConversationById(request.ConversationID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -80,7 +80,7 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 		ownerClient := &WebSocket.Client{
 			Conn:           &websocket.Conn{},
 			Message:        make(chan *WebSocket.Message, 15),
-			ID:             int(chatRoom.OwnerID),
+			ID:             int(conversation.OwnerID),
 			Role:           WebSocket.Owner,
 			ConversationID: int(conversation.ID),
 			IsConnected:    false,
@@ -94,7 +94,7 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 		return
 	}
 	var client *WebSocket.Client
-	if request.ClientID == chatRoom.OwnerID {
+	if request.ClientID == conversation.OwnerID {
 		client = wsUseCase.Hub.ChatConversation[int(conversation.ID)].Owner
 	} else {
 		client = wsUseCase.Hub.ChatConversation[int(conversation.ID)].Member
@@ -124,13 +124,12 @@ func CreateChatConversation(c *gin.Context) {
 		return
 	}
 	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
-	room, _, err := chatRepo.GetChatRoomByPosterId(uint(request.PosterID))
+	poster, err := chatRepo.GetPosterOwner(uint(request.PosterID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	_, err = chatRepo.CreateConversation(room.ID, uint(request.ClientID))
+	err = chatRepo.CreateConversation(request.Name, poster.UserID, uint(request.ClientID), uint(request.PosterID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
