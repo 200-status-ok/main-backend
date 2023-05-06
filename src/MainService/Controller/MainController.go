@@ -35,6 +35,7 @@ func (s *Server) MainController() {
 			poster.POST("/", Api2.CreatePoster)
 			poster.PATCH("/:id", Api2.UpdatePoster)
 			poster.DELETE("/:id", Api2.DeletePoster)
+			poster.POST("/image-upload", Api2.UploadPosterImage)
 		}
 		report := v1.Group("/reports")
 		{

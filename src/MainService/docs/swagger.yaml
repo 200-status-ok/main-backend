@@ -1,5 +1,18 @@
 basePath: /api/v1
 definitions:
+  Api.CreateConversation:
+    properties:
+      client_id:
+        type: integer
+      name:
+        type: string
+      poster_id:
+        type: integer
+    required:
+    - client_id
+    - name
+    - poster_id
+    type: object
   DTO.AddressDTO:
     properties:
       address_detail:
@@ -86,44 +99,6 @@ definitions:
       updatedAt:
         type: string
     type: object
-  Model.Category:
-    properties:
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      name:
-        type: string
-      posters:
-        items:
-          $ref: '#/definitions/Model.Poster'
-        type: array
-      updatedAt:
-        type: string
-    type: object
-  Model.ChatRoom:
-    properties:
-      conversations:
-        items:
-          $ref: '#/definitions/Model.Conversation'
-        type: array
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      name:
-        type: string
-      owner_id:
-        type: integer
-      poster_id:
-        type: integer
-      updatedAt:
-        type: string
-    type: object
   Model.Conversation:
     properties:
       createdAt:
@@ -138,7 +113,11 @@ definitions:
         items:
           $ref: '#/definitions/Model.Message'
         type: array
-      room_id:
+      name:
+        type: string
+      owner_id:
+        type: integer
+      poster_id:
         type: integer
       updatedAt:
         type: string
@@ -202,10 +181,6 @@ definitions:
         type: array
       award:
         type: number
-      categories:
-        items:
-          $ref: '#/definitions/Model.Category'
-        type: array
       createdAt:
         type: string
       deletedAt:
@@ -224,6 +199,10 @@ definitions:
         type: array
       status:
         $ref: '#/definitions/Model.PosterStatus'
+      tags:
+        items:
+          $ref: '#/definitions/Model.Tag'
+        type: array
       telegram_id:
         type: string
       title:
@@ -245,16 +224,25 @@ definitions:
     x-enum-varnames:
     - Lost
     - Found
+  Model.Tag:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      name:
+        type: string
+      posters:
+        items:
+          $ref: '#/definitions/Model.Poster'
+        type: array
+      updatedAt:
+        type: string
+    type: object
   Model.User:
     properties:
-      chat_rooms:
-        items:
-          $ref: '#/definitions/Model.ChatRoom'
-        type: array
-      conversations:
-        items:
-          $ref: '#/definitions/Model.Conversation'
-        type: array
       createdAt:
         type: string
       deletedAt:
@@ -265,6 +253,14 @@ definitions:
         items:
           $ref: '#/definitions/Model.MarkedPoster'
         type: array
+      member_conversations:
+        items:
+          $ref: '#/definitions/Model.Conversation'
+        type: array
+      own_conversations:
+        items:
+          $ref: '#/definitions/Model.Conversation'
+        type: array
       posters:
         items:
           $ref: '#/definitions/Model.Poster'
@@ -274,28 +270,11 @@ definitions:
       username:
         type: string
     type: object
-  UseCase.CreateConversation:
-    properties:
-      client_id:
-        type: integer
-      name:
-        type: string
-      poster_id:
-        type: integer
-    required:
-    - client_id
-    - name
-    - poster_id
-    type: object
   UseCase.CreatePosterRequest:
     properties:
       addresses:
         items:
           $ref: '#/definitions/DTO.AddressDTO'
-        type: array
-      categories:
-        items:
-          type: integer
         type: array
       img_urls:
         items:
@@ -303,9 +282,13 @@ definitions:
         type: array
       poster:
         $ref: '#/definitions/DTO.PosterDTO'
+      tags:
+        items:
+          type: integer
+        type: array
     required:
-    - categories
     - img_urls
+    - tags
     type: object
   UseCase.CreateTagRequest:
     properties:
@@ -340,6 +323,19 @@ definitions:
         type: string
     required:
     - username
+    type: object
+  UseCase.UpdatePosterReportRequest:
+    properties:
+      description:
+        type: string
+      issuer_id:
+        type: integer
+      poster_id:
+        type: integer
+      report_type:
+        type: string
+      status:
+        type: string
     type: object
   UseCase.UpdatePosterRequest:
     properties:
@@ -391,13 +387,6 @@ definitions:
     - otp
     - username
     type: object
-  View.CategoryView:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
   View.GeneratedPosterInfoView:
     properties:
       colors:
@@ -420,6 +409,21 @@ definitions:
       message:
         type: string
     type: object
+  View.PosterReportView:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      issuer:
+        $ref: '#/definitions/Model.User'
+      poster:
+        $ref: '#/definitions/Model.Poster'
+      report_type:
+        type: string
+      status:
+        type: string
+    type: object
   View.PosterView:
     properties:
       address:
@@ -428,7 +432,7 @@ definitions:
         type: array
       categories:
         items:
-          $ref: '#/definitions/Model.Category'
+          $ref: '#/definitions/Model.Tag'
         type: array
       created_at:
         type: string
@@ -452,6 +456,13 @@ definitions:
         type: string
       user:
         type: integer
+    type: object
+  View.TagView:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   View.UserView:
     properties:
@@ -498,45 +509,6 @@ info:
   title: Swagger Documentation for Golang web API(Gin framework)
   version: "1.0"
 paths:
-  /ai/predict:
-    post:
-      consumes:
-      - application/json
-      description: Get photo nsfw AI
-      parameters:
-      - description: Image Url
-        in: body
-        name: image_url
-        required: true
-        schema:
-          $ref: '#/definitions/UseCase.GetPhotoAiNSFWRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Get photo nsfw AI
-      tags:
-      - AI
-  /ai/predict_txt:
-    get:
-      consumes:
-      - application/json
-      description: Get text nsfw
-      parameters:
-      - description: Text
-        in: query
-        name: text
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Get text nsfw
-      tags:
-      - AI
   /api-call/generatePosterInfo:
     get:
       consumes:
@@ -558,6 +530,45 @@ paths:
       summary: Generate poster info
       tags:
       - ApiCall
+  /api-call/predict:
+    post:
+      consumes:
+      - application/json
+      description: Get photo nsfw AI
+      parameters:
+      - description: Image Url
+        in: body
+        name: image_url
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.GetPhotoAiNSFWRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get photo nsfw AI
+      tags:
+      - ApiCall
+  /api-call/predict-txt:
+    get:
+      consumes:
+      - application/json
+      description: Get text nsfw
+      parameters:
+      - description: Text
+        in: query
+        name: text
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get text nsfw
+      tags:
+      - ApiCall
   /chats/conversation:
     post:
       consumes:
@@ -569,7 +580,7 @@ paths:
         name: room
         required: true
         schema:
-          $ref: '#/definitions/UseCase.CreateConversation'
+          $ref: '#/definitions/Api.CreateConversation'
       produces:
       - application/json
       responses:
@@ -771,6 +782,145 @@ paths:
       summary: Update a poster by ID
       tags:
       - posters
+  /posters/upload-image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload poster image
+      parameters:
+      - description: Multiple files
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Upload poster image
+      tags:
+      - posters
+  /reports:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all poster reports, sorted and paginated according
+        to the given parameters
+      parameters:
+      - default: 1
+        description: Page ID
+        in: query
+        minimum: 1
+        name: page_id
+        required: true
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        minimum: 1
+        name: page_size
+        required: true
+        type: integer
+      - default: both
+        description: Status
+        in: query
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/View.PosterReportView'
+            type: array
+      summary: Get a list of all poster reports
+      tags:
+      - reports
+  /reports/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a poster report by ID
+      parameters:
+      - description: Report ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.PosterReportView'
+      summary: Get a poster report by ID
+      tags:
+      - reports
+    patch:
+      consumes:
+      - application/json
+      description: Updates a poster report by ID
+      parameters:
+      - description: Report ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Poster Report
+        in: body
+        name: report
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.UpdatePosterReportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.PosterView'
+      summary: Update a poster report by ID
+      tags:
+      - reports
+  /reports/report-poster:
+    post:
+      consumes:
+      - application/json
+      description: Reports a poster
+      parameters:
+      - description: Poster ID
+        in: query
+        name: poster_id
+        required: true
+        type: integer
+      - description: Issuer ID
+        in: query
+        name: issuer_id
+        required: true
+        type: integer
+      - default: other
+        description: Report Type
+        in: query
+        name: report_type
+        required: true
+        type: string
+      - description: Description
+        in: query
+        name: description
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Report a poster
+      tags:
+      - reports
   /tags:
     get:
       consumes:
@@ -783,7 +933,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/View.CategoryView'
+              $ref: '#/definitions/View.TagView'
             type: array
       summary: Get a Tags
       tags:
@@ -805,7 +955,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.CategoryView'
+            $ref: '#/definitions/View.TagView'
       summary: Create a Tag by ID
       tags:
       - Tags
@@ -844,7 +994,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.CategoryView'
+            $ref: '#/definitions/View.TagView'
       summary: Get a Tag by ID
       tags:
       - Tags
@@ -870,7 +1020,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.CategoryView'
+            $ref: '#/definitions/View.TagView'
       summary: Update a Tag by ID
       tags:
       - Tags

@@ -2,6 +2,7 @@ package UseCase
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	"github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
@@ -187,7 +188,19 @@ func VerifyOtpResponse(c *gin.Context) {
 	View.LoginUserView(token, c)
 }
 
+type GoogleLoginRequest struct {
+	RedirectURI string `form:"redirect_uri" binding:"required"`
+}
+
+var RedirectURI string
+
 func OAuth2LoginResponse(c *gin.Context) {
+	var googleLoginReq GoogleLoginRequest
+	if err := c.ShouldBindQuery(&googleLoginReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	RedirectURI = googleLoginReq.RedirectURI
 	url := Utils2.GetGoogleAuthURL("random-state")
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
@@ -202,6 +215,7 @@ type GoogleCallbackRes struct {
 func GoogleCallbackResponse(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
+	fmt.Println(RedirectURI)
 	response, err := Utils2.GetGoogleUserInfo(code, state)
 
 	if err != nil {
@@ -251,7 +265,7 @@ func GoogleCallbackResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	View.LoginUserView(token, c)
+	c.Redirect(http.StatusTemporaryRedirect, RedirectURI+"?token="+token)
 }
 
 type GetUserByIdRequest struct {
