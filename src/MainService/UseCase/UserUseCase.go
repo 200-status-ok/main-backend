@@ -161,11 +161,11 @@ func VerifyOtpResponse(c *gin.Context) {
 
 	if userExist == nil {
 		newUser := &Model.User{
-			Username:      verifyReq.Username,
-			Posters:       nil,
-			MarkedPosters: nil,
-			ChatRooms:     nil,
-			Conversations: nil,
+			Username:            verifyReq.Username,
+			Posters:             nil,
+			MarkedPosters:       nil,
+			OwnConversations:    nil,
+			MemberConversations: nil,
 		}
 		_, err = userRepository.UserCreate(newUser)
 		if err != nil {
@@ -202,7 +202,7 @@ type GoogleCallbackRes struct {
 func GoogleCallbackResponse(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
-	response, err := Utils2.GetGoogleUserInfo(code, state, c)
+	response, err := Utils2.GetGoogleUserInfo(code, state)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -214,7 +214,44 @@ func GoogleCallbackResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"response": googleRes})
+	if !googleRes.VerifiedEmail {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "email not verified"})
+		return
+	}
+
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userExist, err := userRepository.FindByUsername(googleRes.Email)
+	if err != nil && err.Error() != "user not found" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if userExist == nil {
+		newUser := &Model.User{
+			Username:            googleRes.Email,
+			Posters:             nil,
+			MarkedPosters:       nil,
+			OwnConversations:    nil,
+			MemberConversations: nil,
+		}
+		_, err = userRepository.UserCreate(newUser)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	jwtMaker, err := Token.NewJWTMaker(Utils2.ReadFromEnvFile(".env", "JWT_SECRET"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	token, _, err := jwtMaker.MakeToken(googleRes.Email, time.Now().Add(time.Hour*24).Unix())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	View.LoginUserView(token, c)
 }
 
 type GetUserByIdRequest struct {

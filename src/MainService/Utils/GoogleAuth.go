@@ -3,7 +3,6 @@ package Utils
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"io/ioutil"
@@ -25,7 +24,7 @@ func GetGoogleAuthURL(state string) string {
 	return googleOauthConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
 }
 
-func GetGoogleUserInfo(code string, state string, c *gin.Context) ([]byte, error) {
+func GetGoogleUserInfo(code string, state string) ([]byte, error) {
 	if state != "random-state" {
 		return nil, errors.New("invalid oauth state")
 	}
