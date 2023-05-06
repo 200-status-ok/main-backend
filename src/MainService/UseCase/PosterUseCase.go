@@ -5,6 +5,7 @@ import (
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
+	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
@@ -410,4 +411,28 @@ func UpdatePosterReportResponse(c *gin.Context) {
 	DBConfiguration.CloseDB()
 
 	c.JSON(http.StatusOK, gin.H{"message": "Report resolved"})
+}
+
+func UploadPosterImageResponse(c *gin.Context) {
+	formHeader, err := c.FormFile("poster_image")
+	fileName := formHeader.Filename
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	file, err := formHeader.Open()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	defer file.Close()
+
+	uploadUrl, err := Utils.UploadInArvanCloud(file, fileName)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"url": uploadUrl})
 }

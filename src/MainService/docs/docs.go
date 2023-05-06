@@ -20,66 +20,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/ai/predict": {
-            "post": {
-                "description": "Get photo nsfw AI",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AI"
-                ],
-                "summary": "Get photo nsfw AI",
-                "parameters": [
-                    {
-                        "description": "Image Url",
-                        "name": "image_url",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UseCase.GetPhotoAiNSFWRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/ai/predict_txt": {
-            "get": {
-                "description": "Get text nsfw",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "AI"
-                ],
-                "summary": "Get text nsfw",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Text",
-                        "name": "text",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/api-call/generatePosterInfo": {
             "get": {
                 "description": "Generates info for a poster",
@@ -112,6 +52,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/api-call/predict": {
+            "post": {
+                "description": "Get photo nsfw AI",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiCall"
+                ],
+                "summary": "Get photo nsfw AI",
+                "parameters": [
+                    {
+                        "description": "Image Url",
+                        "name": "image_url",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.GetPhotoAiNSFWRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api-call/predict-txt": {
+            "get": {
+                "description": "Get text nsfw",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiCall"
+                ],
+                "summary": "Get text nsfw",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Text",
+                        "name": "text",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/chats/conversation": {
             "post": {
                 "description": "Create a chat conversation",
@@ -132,7 +132,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/UseCase.CreateConversation"
+                            "$ref": "#/definitions/Api.CreateConversation"
                         }
                     }
                 ],
@@ -330,6 +330,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/posters/upload-image": {
+            "post": {
+                "description": "Upload poster image",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posters"
+                ],
+                "summary": "Upload poster image",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Multiple files",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/posters/{id}": {
             "get": {
                 "description": "Retrieves a poster by ID",
@@ -428,6 +457,181 @@ const docTemplate = `{
                 }
             }
         },
+        "/reports": {
+            "get": {
+                "description": "Retrieves a list of all poster reports, sorted and paginated according to the given parameters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get a list of all poster reports",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page ID",
+                        "name": "page_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "both",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/View.PosterReportView"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/report-poster": {
+            "post": {
+                "description": "Reports a poster",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Report a poster",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Poster ID",
+                        "name": "poster_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Issuer ID",
+                        "name": "issuer_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "other",
+                        "description": "Report Type",
+                        "name": "report_type",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Description",
+                        "name": "description",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/reports/{id}": {
+            "get": {
+                "description": "Retrieves a poster report by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get a poster report by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Report ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.PosterReportView"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates a poster report by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Update a poster report by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Report ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Poster Report",
+                        "name": "report",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.UpdatePosterReportRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.PosterView"
+                        }
+                    }
+                }
+            }
+        },
         "/tags": {
             "get": {
                 "description": "Retrieves Tags",
@@ -447,7 +651,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/View.CategoryView"
+                                "$ref": "#/definitions/View.TagView"
                             }
                         }
                     }
@@ -480,7 +684,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.CategoryView"
+                            "$ref": "#/definitions/View.TagView"
                         }
                     }
                 }
@@ -512,7 +716,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.CategoryView"
+                            "$ref": "#/definitions/View.TagView"
                         }
                     }
                 }
@@ -578,7 +782,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.CategoryView"
+                            "$ref": "#/definitions/View.TagView"
                         }
                     }
                 }
@@ -842,6 +1046,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "Api.CreateConversation": {
+            "type": "object",
+            "required": [
+                "client_id",
+                "name",
+                "poster_id"
+            ],
+            "properties": {
+                "client_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "poster_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "DTO.AddressDTO": {
             "type": "object",
             "required": [
@@ -961,64 +1184,6 @@ const docTemplate = `{
                 }
             }
         },
-        "Model.Category": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "posters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Poster"
-                    }
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "Model.ChatRoom": {
-            "type": "object",
-            "properties": {
-                "conversations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Conversation"
-                    }
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "type": "integer"
-                },
-                "poster_id": {
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
         "Model.Conversation": {
             "type": "object",
             "properties": {
@@ -1040,7 +1205,13 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Message"
                     }
                 },
-                "room_id": {
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "integer"
+                },
+                "poster_id": {
                     "type": "integer"
                 },
                 "updatedAt": {
@@ -1138,12 +1309,6 @@ const docTemplate = `{
                 "award": {
                     "type": "number"
                 },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Category"
-                    }
-                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -1170,6 +1335,12 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/Model.PosterStatus"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Tag"
+                    }
                 },
                 "telegram_id": {
                     "type": "string"
@@ -1202,21 +1373,35 @@ const docTemplate = `{
                 "Found"
             ]
         },
+        "Model.Tag": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "posters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Poster"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "Model.User": {
             "type": "object",
             "properties": {
-                "chat_rooms": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.ChatRoom"
-                    }
-                },
-                "conversations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Conversation"
-                    }
-                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -1230,6 +1415,18 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Model.MarkedPoster"
+                    }
+                },
+                "member_conversations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Conversation"
+                    }
+                },
+                "own_conversations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Conversation"
                     }
                 },
                 "posters": {
@@ -1246,42 +1443,17 @@ const docTemplate = `{
                 }
             }
         },
-        "UseCase.CreateConversation": {
-            "type": "object",
-            "required": [
-                "client_id",
-                "name",
-                "poster_id"
-            ],
-            "properties": {
-                "client_id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "poster_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "UseCase.CreatePosterRequest": {
             "type": "object",
             "required": [
-                "categories",
-                "img_urls"
+                "img_urls",
+                "tags"
             ],
             "properties": {
                 "addresses": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/DTO.AddressDTO"
-                    }
-                },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
                     }
                 },
                 "img_urls": {
@@ -1292,6 +1464,12 @@ const docTemplate = `{
                 },
                 "poster": {
                     "$ref": "#/definitions/DTO.PosterDTO"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -1342,6 +1520,26 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 30,
                     "minLength": 11
+                }
+            }
+        },
+        "UseCase.UpdatePosterReportRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "issuer_id": {
+                    "type": "integer"
+                },
+                "poster_id": {
+                    "type": "integer"
+                },
+                "report_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
@@ -1418,17 +1616,6 @@ const docTemplate = `{
                 }
             }
         },
-        "View.CategoryView": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "View.GeneratedPosterInfoView": {
             "type": "object",
             "properties": {
@@ -1463,6 +1650,29 @@ const docTemplate = `{
                 }
             }
         },
+        "View.PosterReportView": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "issuer": {
+                    "$ref": "#/definitions/Model.User"
+                },
+                "poster": {
+                    "$ref": "#/definitions/Model.Poster"
+                },
+                "report_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "View.PosterView": {
             "type": "object",
             "properties": {
@@ -1475,7 +1685,7 @@ const docTemplate = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Model.Category"
+                        "$ref": "#/definitions/Model.Tag"
                     }
                 },
                 "created_at": {
@@ -1510,6 +1720,17 @@ const docTemplate = `{
                 },
                 "user": {
                     "type": "integer"
+                }
+            }
+        },
+        "View.TagView": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
