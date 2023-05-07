@@ -9,9 +9,12 @@ import (
 	"github.com/403-access-denied/main-backend/src/MainService/View"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type getPostersRequest struct {
@@ -362,6 +365,11 @@ func UpdatePosterReportResponse(c *gin.Context) {
 func UploadPosterImageResponse(c *gin.Context) {
 	formHeader, err := c.FormFile("poster_image")
 	fileName := formHeader.Filename
+	extension := path.Ext(fileName)
+
+	currentTime := time.Now().Format("20060102_150405")
+	randomString := strconv.FormatInt(rand.Int63(), 16)
+	newName := currentTime + "_" + randomString + extension
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -374,7 +382,7 @@ func UploadPosterImageResponse(c *gin.Context) {
 	}
 	defer file.Close()
 
-	uploadUrl, err := Utils.UploadInArvanCloud(file, fileName)
+	uploadUrl, err := Utils.UploadInArvanCloud(file, newName)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
