@@ -117,3 +117,30 @@ func CreateUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 	UseCase.DeleteUserByIdResponse(c)
 }
+
+// Payment godoc
+// @Summary Payment
+// @Description Payment
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id query int true "User ID"
+// @Param amount query float64 true "Amount"
+// @Success 200
+// @Router /users/payment/user_wallet [get]
+func Payment(c *gin.Context) {
+	UseCase.PaymentResponse(c)
+}
+
+// PaymentVerify godoc
+// @Summary Payment Verify
+// @Description Payment Verify
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Payment ID"
+// @Success 200
+// @Router /users/payment/user_wallet/{id} [get]
+func PaymentVerify(c *gin.Context) {
+	UseCase.PaymentVerifyResponse(c)
+}

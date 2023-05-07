@@ -210,60 +210,6 @@ func GetPhotoAiNSFWResponse(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"message": "sfw"})
 	}
-
-	//body := []byte(fmt.Sprintf(`{"version": "9a34a6339872a03f45236f114321fb51fc7aa8269d38ae0ce5334969981e4cd8", "input": {"image": "%s"}}`, PhotoUrl))
-	//url := "https://api.replicate.com/v1/predictions"
-	//req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	//	return
-	//}
-	//req.Header.Set("Content-Type", "application/json")
-	//req.Header.Set("Authorization", "Token r8_bGcNjdhhzNRBctXTTfmhbipfPGQGPhj1zO2Xc")
-	//client := &http.Client{}
-	//resp, err := client.Do(req)
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	//	return
-	//}
-	//defer resp.Body.Close()
-	//responseBody, err := ioutil.ReadAll(resp.Body)
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	//	return
-	//}
-	//splitStr := strings.Split(string(responseBody), ",")
-	//splitStrForID := strings.Split(splitStr[3], ":")
-	//
-	//time.Sleep(2 * time.Second)
-	//
-	//url1 := "https://api.replicate.com/v1/predictions/" + removeQuoteFromString(splitStrForID[1])
-	//req1, err := http.NewRequest("GET", url1, nil)
-	//
-	//// Add headers to the request
-	//req1.Header.Set("Content-Type", "application/json")
-	//req1.Header.Set("Authorization", "Token r8_bGcNjdhhzNRBctXTTfmhbipfPGQGPhj1zO2Xc")
-	//
-	//// Send the request
-	//client1 := &http.Client{}
-	//resp1, err := client1.Do(req1)
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	//	return
-	//}
-	//defer resp1.Body.Close()
-	//
-	//body1, err := ioutil.ReadAll(resp1.Body)
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	//	return
-	//}
-	//splitStr22 := strings.Split(string(body1), ",")
-	//splitStrForID = strings.Split(splitStr22[7], ":")
-	//fmt.Println(splitStrForID)
-	//
-	//c.JSON(http.StatusOK, gin.H{"message": removeQuoteFromString(splitStrForID[1])})
-
 }
 
 type GetTextNSFWRequest struct {

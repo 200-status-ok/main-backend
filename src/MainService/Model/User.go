@@ -9,9 +9,11 @@ type User struct {
 	gorm.Model
 	Username            string         `gorm:"type:varchar(50);not null;unique" json:"username"`
 	Posters             []Poster       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"posters"`
+	Wallet              float64        `gorm:"type:decimal(10,2);default:0" json:"wallet"`
 	OwnConversations    []Conversation `gorm:"foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"own_conversations"`
 	MemberConversations []Conversation `gorm:"foreignKey:MemberID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"member_conversations"`
 	MarkedPosters       []MarkedPoster `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"marked_posters"`
+	Payments            []Payment      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"Payments"`
 }
 
 func (u *User) GetUsername() string {
@@ -44,4 +46,12 @@ func (u *User) GetUpdatedAt() string {
 
 func (u *User) SetUpdatedAt(updatedAt time.Time) {
 	u.UpdatedAt = updatedAt
+}
+
+func (u *User) SetWallet(wallet float64) {
+	u.Wallet = wallet
+}
+
+func (u *User) GetWallet() float64 {
+	return u.Wallet
 }

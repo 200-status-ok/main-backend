@@ -26,6 +26,8 @@ func (s *Server) MainController() {
 			user.PATCH("/:id", Api2.UpdateUser)
 			user.POST("/", Api2.CreateUser)
 			user.DELETE("/:id", Api2.DeleteUser)
+			user.GET("/payment/user_wallet", Api2.Payment)
+			user.GET("/payment/user_wallet/:id", Api2.PaymentVerify)
 		}
 		// TODO add auth middleware
 		poster := v1.Group("/posters")
