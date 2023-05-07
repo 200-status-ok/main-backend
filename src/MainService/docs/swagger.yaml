@@ -173,6 +173,25 @@ definitions:
       updatedAt:
         type: string
     type: object
+  Model.Payment:
+    properties:
+      amount:
+        type: number
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      status:
+        type: string
+      track_id:
+        type: string
+      updatedAt:
+        type: string
+      user_id:
+        type: integer
+    type: object
   Model.Poster:
     properties:
       address:
@@ -243,6 +262,10 @@ definitions:
     type: object
   Model.User:
     properties:
+      Payments:
+        items:
+          $ref: '#/definitions/Model.Payment'
+        type: array
       createdAt:
         type: string
       deletedAt:
@@ -269,6 +292,8 @@ definitions:
         type: string
       username:
         type: string
+      wallet:
+        type: number
     type: object
   UseCase.CreatePosterRequest:
     properties:
@@ -485,6 +510,8 @@ definitions:
         type: array
       username:
         type: string
+      wallet:
+        type: number
     type: object
   View.UserViewIDs:
     properties:
@@ -492,6 +519,8 @@ definitions:
         type: integer
       username:
         type: string
+      wallet:
+        type: number
     type: object
   gorm.DeletedAt:
     properties:
@@ -1191,6 +1220,49 @@ paths:
           schema:
             $ref: '#/definitions/View.MessageView'
       summary: send otp to user
+      tags:
+      - users
+  /users/payment/user_wallet:
+    get:
+      consumes:
+      - application/json
+      description: Payment
+      parameters:
+      - description: User ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Amount
+        in: query
+        name: amount
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Payment
+      tags:
+      - users
+  /users/payment/user_wallet/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Payment Verify
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Payment Verify
       tags:
       - users
 swagger: "2.0"

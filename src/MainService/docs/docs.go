@@ -946,6 +946,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/payment/user_wallet": {
+            "get": {
+                "description": "Payment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Payment",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Amount",
+                        "name": "amount",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/users/payment/user_wallet/{id}": {
+            "get": {
+                "description": "Payment Verify",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Payment Verify",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Payment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "description": "Retrieves a User by ID",
@@ -1297,6 +1362,35 @@ const docTemplate = `{
                 }
             }
         },
+        "Model.Payment": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "track_id": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "Model.Poster": {
             "type": "object",
             "properties": {
@@ -1402,6 +1496,12 @@ const docTemplate = `{
         "Model.User": {
             "type": "object",
             "properties": {
+                "Payments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Payment"
+                    }
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -1440,6 +1540,9 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                },
+                "wallet": {
+                    "type": "number"
                 }
             }
         },
@@ -1765,6 +1868,9 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                },
+                "wallet": {
+                    "type": "number"
                 }
             }
         },
@@ -1776,6 +1882,9 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                },
+                "wallet": {
+                    "type": "number"
                 }
             }
         },
