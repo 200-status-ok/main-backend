@@ -173,11 +173,11 @@ func VerifyOtpResponse(c *gin.Context) {
 			Payments:            nil,
 		}
 		user, err := userRepository.UserCreate(newUser)
-		userId = user.ID
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		userId = user.ID
 	} else {
 		userId = userExist.ID
 	}
@@ -259,11 +259,11 @@ func GoogleCallbackResponse(c *gin.Context) {
 			Payments:            nil,
 		}
 		createdUser, err := userRepository.UserCreate(newUser)
-		userID = uint64(createdUser.ID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		userID = uint64(createdUser.ID)
 	} else {
 		userID = uint64(userExist.ID)
 	}
