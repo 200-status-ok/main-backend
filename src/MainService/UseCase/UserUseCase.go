@@ -1,6 +1,7 @@
 package UseCase
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
@@ -12,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -167,6 +169,8 @@ func VerifyOtpResponse(c *gin.Context) {
 			MarkedPosters:       nil,
 			OwnConversations:    nil,
 			MemberConversations: nil,
+			Wallet:              0,
+			Payments:            nil,
 		}
 		_, err = userRepository.UserCreate(newUser)
 		if err != nil {
@@ -247,6 +251,8 @@ func GoogleCallbackResponse(c *gin.Context) {
 			MarkedPosters:       nil,
 			OwnConversations:    nil,
 			MemberConversations: nil,
+			Wallet:              0,
+			Payments:            nil,
 		}
 		_, err = userRepository.UserCreate(newUser)
 		if err != nil {
@@ -372,4 +378,185 @@ func DeleteUserByIdResponse(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"response": "user deleted"})
+}
+
+type PaymentRequest struct {
+	Amount float64 `form:"amount" binding:"required,min=1"`
+	Id     int     `form:"id" binding:"required,min=1"`
+}
+type data struct {
+	Merchant    string  `json:"merchant"`
+	CallbackURL string  `json:"callbackUrl"`
+	Description string  `json:"description"`
+	Amount      float64 `json:"amount"`
+	OrderID     string  `json:"orderId"`
+}
+
+func PaymentResponse(c *gin.Context) {
+	var paymentReq PaymentRequest
+	if err := c.ShouldBindQuery(&paymentReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var merchant = "zibal"
+	d := data{
+		Merchant:    merchant,
+		CallbackURL: "https://example.com/callback",
+		Description: "golang package",
+		Amount:      paymentReq.Amount,
+	}
+	fmt.Println(d.OrderID)
+	jsonData, err := json.Marshal(d)
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+	var url = "https://gateway.zibal.ir/v1/request"
+	// post request to zibal with gin
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+	// Map result to a struct to easily access parameters
+	var structResult map[string]interface{}
+	br := bytes.NewReader([]byte(string(body)))
+	decodedJson := json.NewDecoder(br)
+	decodedJson.UseNumber()
+	err = decodedJson.Decode(&structResult)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Access response parameters
+	var resultNumber = structResult["result"]
+	var trackId = structResult["trackId"]
+	// Change response parameters types to string
+	trackIdStringValue := fmt.Sprint(trackId)
+	resultStringValue := fmt.Sprint(resultNumber)
+	fmt.Println(trackIdStringValue)
+	fmt.Println(resultStringValue)
+	// check if result is 100
+	if resultStringValue == "100" {
+		// redirect to zibal
+		PaymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
+		_, err := PaymentRepository.CreatePayment(Model.Payment{
+			Amount:  paymentReq.Amount,
+			UserID:  uint(paymentReq.Id),
+			TrackID: trackIdStringValue,
+			Status:  "pending",
+		})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		c.Redirect(http.StatusFound, "https://gateway.zibal.ir/start/"+trackIdStringValue)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error"})
+		return
+	}
+}
+
+type VerifyRequest struct {
+	ID uint `uri:"id" binding:"required,min=1"`
+}
+type dataVerify struct {
+	Merchant string `json:"merchant"`
+	TrackId  string `json:"trackId"`
+}
+
+func PaymentVerifyResponse(c *gin.Context) {
+	var verifyReq VerifyRequest
+	paymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
+	if err := c.ShouldBindUri(&verifyReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var merchant = "zibal"
+	payment, err := paymentRepository.GetPaymentById(int(verifyReq.ID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	d := dataVerify{
+		Merchant: merchant,
+		TrackId:  payment.TrackID,
+	}
+	var url = "https://gateway.zibal.ir/v1/verify"
+	jsonData, err := json.Marshal(d)
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+	// Map result to a struct to easily access parameters
+	var structResult map[string]interface{}
+	br := bytes.NewReader([]byte(string(body)))
+	decodedJson := json.NewDecoder(br)
+	decodedJson.UseNumber()
+	err = decodedJson.Decode(&structResult)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Access response parameters
+	var resultNumber = structResult["result"]
+	var paidAt = structResult["paidAt"]
+	var status = structResult["status"]
+	// Change response parameters types to string
+	resultStringValue := fmt.Sprint(resultNumber)
+	paidAtStringValue := fmt.Sprint(paidAt)
+	statusStringValue := fmt.Sprint(status)
+	fmt.Println(resultStringValue)
+	fmt.Println(paidAtStringValue)
+	fmt.Println(statusStringValue)
+	if resultStringValue == "100" {
+		if statusStringValue == "1" {
+			payment.Status = "paid"
+			userRep := Repository.NewUserRepository(DBConfiguration.GetDB())
+			user, err := userRep.UpdateWallet(payment.UserID, payment.Amount)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			fmt.Println(user)
+			updatePayment, err := paymentRepository.UpdatePayment(payment.ID, payment)
+			if err != nil {
+				return
+			}
+			fmt.Println(updatePayment)
+			c.JSON(http.StatusOK, gin.H{"message": "payment is successful"})
+			return
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "payment is not successful"})
+			return
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "payment is not successful"})
+		return
+	}
 }

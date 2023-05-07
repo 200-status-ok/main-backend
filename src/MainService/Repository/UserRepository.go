@@ -77,3 +77,17 @@ func (r *UserRepository) DeleteUser(id uint) error {
 	}
 	return nil
 }
+
+func (r *UserRepository) UpdateWallet(id uint, amount float64) (*Model.User, error) {
+	var user Model.User
+	result := r.db.First(&user, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	user.SetWallet(user.GetWallet() + amount)
+	result = r.db.Save(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
