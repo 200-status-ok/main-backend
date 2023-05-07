@@ -61,7 +61,7 @@ func GoogleCallback(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID"
 // @Success 200 {object} View.UserViewID
-// @Router /users/{id} [get]
+// @Router /users/authorize [get]
 func GetUser(c *gin.Context) {
 	UseCase.GetUserByIdResponse(c)
 }

@@ -133,7 +133,7 @@ func VerifyOtpResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username"})
 		return
 	}
-
+	var userId uint
 	userExist, err := userRepository.FindByUsername(verifyReq.Username)
 	if err != nil && err.Error() != "user not found" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -169,14 +169,17 @@ func VerifyOtpResponse(c *gin.Context) {
 			MarkedPosters:       nil,
 			OwnConversations:    nil,
 			MemberConversations: nil,
-			Wallet:              0,
+			Wallet:              0.0,
 			Payments:            nil,
 		}
-		_, err = userRepository.UserCreate(newUser)
+		user, err := userRepository.UserCreate(newUser)
+		userId = user.ID
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+	} else {
+		userId = userExist.ID
 	}
 
 	jwtMaker, err := Token.NewJWTMaker(Utils2.ReadFromEnvFile(".env", "JWT_SECRET"))
@@ -184,7 +187,7 @@ func VerifyOtpResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	token, _, err := jwtMaker.MakeToken(verifyReq.Username, time.Now().Add(time.Hour*24).Unix())
+	token, _, err := jwtMaker.MakeToken(verifyReq.Username, uint64(userId), time.Hour*24*7)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -238,6 +241,7 @@ func GoogleCallbackResponse(c *gin.Context) {
 	}
 
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	var userID uint64
 	userExist, err := userRepository.FindByUsername(googleRes.Email)
 	if err != nil && err.Error() != "user not found" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -251,14 +255,17 @@ func GoogleCallbackResponse(c *gin.Context) {
 			MarkedPosters:       nil,
 			OwnConversations:    nil,
 			MemberConversations: nil,
-			Wallet:              0,
+			Wallet:              0.0,
 			Payments:            nil,
 		}
-		_, err = userRepository.UserCreate(newUser)
+		createdUser, err := userRepository.UserCreate(newUser)
+		userID = uint64(createdUser.ID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+	} else {
+		userID = uint64(userExist.ID)
 	}
 
 	jwtMaker, err := Token.NewJWTMaker(Utils2.ReadFromEnvFile(".env", "JWT_SECRET"))
@@ -266,7 +273,7 @@ func GoogleCallbackResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	token, _, err := jwtMaker.MakeToken(googleRes.Email, time.Now().Add(time.Hour*24).Unix())
+	token, _, err := jwtMaker.MakeToken(googleRes.Email, userID, time.Hour*24*7)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -274,18 +281,10 @@ func GoogleCallbackResponse(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, RedirectURI+"?token="+token)
 }
 
-type GetUserByIdRequest struct {
-	ID uint `uri:"id" binding:"required,min=1"`
-}
-
 func GetUserByIdResponse(c *gin.Context) {
-	var getUserReq GetUserByIdRequest
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
-	if err := c.ShouldBindUri(&getUserReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	user, err := userRepository.FindById(getUserReq.ID)
+	user, err := userRepository.FindById(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -455,6 +455,8 @@ definitions:
         items:
           $ref: '#/definitions/Model.Address'
         type: array
+      award:
+        type: number
       categories:
         items:
           $ref: '#/definitions/Model.Tag'
@@ -1110,26 +1112,6 @@ paths:
       summary: Delete a User by ID
       tags:
       - users
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a User by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/View.UserViewID'
-      summary: Get a User by ID
-      tags:
-      - users
     patch:
       consumes:
       - application/json
@@ -1220,6 +1202,27 @@ paths:
           schema:
             $ref: '#/definitions/View.MessageView'
       summary: send otp to user
+      tags:
+      - users
+  /users/authorize:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewID'
+      summary: Get a User by ID
       tags:
       - users
   /users/payment/user_wallet:

@@ -18,6 +18,7 @@ type PosterView struct {
 	Images      []Model2.Image      `json:"images"`
 	Tags        []Model2.Tag        `json:"categories"`
 	User        uint                `json:"user"`
+	Award       float64             `json:"award"`
 	CreatedAt   time.Time           `json:"created_at"`
 	UpdatedAt   time.Time           `json:"updated_at"`
 }
@@ -34,6 +35,7 @@ func GetPostersView(posters []Model2.Poster, c *gin.Context) {
 			Status:      poster.Status,
 			Tags:        poster.Tags,
 			User:        poster.UserID,
+			Award:       poster.Award,
 			CreatedAt:   poster.CreatedAt,
 			UpdatedAt:   poster.UpdatedAt,
 		})
@@ -53,6 +55,7 @@ func GetPosterByIdView(poster Model2.Poster, c *gin.Context) {
 		Status:      poster.Status,
 		Tags:        poster.Tags,
 		User:        poster.UserID,
+		Award:       poster.Award,
 		CreatedAt:   poster.CreatedAt,
 		UpdatedAt:   poster.UpdatedAt,
 	}

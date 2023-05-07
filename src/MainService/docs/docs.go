@@ -946,6 +946,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/authorize": {
+            "get": {
+                "description": "Retrieves a User by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a User by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.UserViewID"
+                        }
+                    }
+                }
+            }
+        },
         "/users/payment/user_wallet": {
             "get": {
                 "description": "Payment",
@@ -1012,36 +1044,6 @@ const docTemplate = `{
             }
         },
         "/users/{id}": {
-            "get": {
-                "description": "Retrieves a User by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get a User by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/View.UserViewID"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Deletes a User by ID",
                 "consumes": [
@@ -1784,6 +1786,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Model.Address"
                     }
+                },
+                "award": {
+                    "type": "number"
                 },
                 "categories": {
                     "type": "array",

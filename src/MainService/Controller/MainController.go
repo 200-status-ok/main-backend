@@ -2,6 +2,7 @@ package Controller
 
 import (
 	Api2 "github.com/403-access-denied/main-backend/src/MainService/Controller/Api"
+	"github.com/403-access-denied/main-backend/src/MainService/Middleware"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	"github.com/gin-gonic/gin"
 )
@@ -17,11 +18,14 @@ func (s *Server) MainController() {
 	{
 		user := v1.Group("/users")
 		{
+			userAuthRoutes := user.Group("/authorize").Use(Middleware.AuthMiddleware(s.TokenMaker))
+			{
+				userAuthRoutes.GET("/", Api2.GetUser)
+			}
 			user.POST("/auth/otp/send", Api2.SendOTP)
 			user.POST("/auth/otp/login", Api2.LoginUser)
 			user.GET("/auth/google/login", Api2.OAuth2Login)
 			user.GET("/auth/google/callback", Api2.GoogleCallback)
-			user.GET("/:id", Api2.GetUser)
 			user.GET("/", Api2.GetUsers)
 			user.PATCH("/:id", Api2.UpdateUser)
 			user.POST("/", Api2.CreateUser)

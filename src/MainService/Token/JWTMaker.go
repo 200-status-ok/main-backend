@@ -2,8 +2,10 @@ package Token
 
 import (
 	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"strconv"
 	"time"
 )
 
@@ -20,14 +22,15 @@ func NewJWTMaker(secretKey string) (Maker, error) {
 	return &JWTMaker{secretKey: secretKey}, nil
 }
 
-func (j *JWTMaker) MakeToken(username string, duration int64) (string, *Payload, error) {
-	payload, err := NewPayload(username, duration)
+func (j *JWTMaker) MakeToken(username string, userID uint64, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(username, userID, duration)
 	if err != nil {
 		return "", nil, err
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": payload.Username,
 		"id":       payload.ID,
+		"userId":   payload.UserID,
 		"issuedAt": payload.IssuedAt,
 		"expired":  payload.Expired,
 	})
@@ -52,11 +55,19 @@ func (j *JWTMaker) VerifyToken(token string) (*Payload, error) {
 	if !ok {
 		return nil, errors.New("invalid token")
 	}
+	id, _ := uuid.Parse(claims["id"].(string))
+	issuedAtStr := claims["issuedAt"].(string)
+	issuedAt, err := time.Parse(time.RFC3339, issuedAtStr)
+	expiredStr := claims["expired"].(string)
+	expired, err := time.Parse(time.RFC3339, expiredStr)
+	userID, _ := strconv.ParseUint(fmt.Sprintf("%v", claims["userId"].(float64)), 10, 64)
+
 	payload := &Payload{
 		Username: claims["username"].(string),
-		ID:       claims["id"].(uuid.UUID),
-		IssuedAt: claims["issuedAt"].(time.Time),
-		Expired:  claims["expired"].(time.Time),
+		ID:       id,
+		UserID:   userID,
+		IssuedAt: issuedAt,
+		Expired:  expired,
 	}
 	if err := payload.Valid(); err != nil {
 		return nil, err
