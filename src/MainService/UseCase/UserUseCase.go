@@ -305,18 +305,18 @@ func GetUsersResponse(c *gin.Context) {
 type UpdateUserRequest struct {
 	Username string `json:"username" binding:"required,min=11,max=30"`
 }
-type UpdateUserByIdRequest struct {
-	ID uint `uri:"id" binding:"required,min=1"`
-}
 
 func UpdateUserByIdResponse(c *gin.Context) {
 	var updateUserReq UpdateUserRequest
-	var updateUserByIdReq UpdateUserByIdRequest
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
-	if err := c.ShouldBindUri(&updateUserByIdReq); err != nil {
+
+	_, err := userRepository.FindById(uint(payload.UserID))
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	if err := c.ShouldBindJSON(&updateUserReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -325,14 +325,14 @@ func UpdateUserByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username"})
 		return
 	}
-	user, err := userRepository.UserUpdate(&Model.User{
+	updateUser, err := userRepository.UserUpdate(&Model.User{
 		Username: updateUserReq.Username,
-	}, updateUserByIdReq.ID)
+	}, uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	View.GetUserByIdView(*user, c)
+	View.GetUserByIdView(*updateUser, c)
 }
 
 type CreateUserRequest struct {
@@ -360,18 +360,10 @@ func CreateUserResponse(c *gin.Context) {
 	View.GetUserByIdView(*user, c)
 }
 
-type DeleteUserByIdRequest struct {
-	ID uint `uri:"id" binding:"required,min=1"`
-}
-
 func DeleteUserByIdResponse(c *gin.Context) {
-	var deleteUserByIdReq DeleteUserByIdRequest
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
-	if err := c.ShouldBindUri(&deleteUserByIdReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err := userRepository.DeleteUser(deleteUserByIdReq.ID)
+	err := userRepository.DeleteUser(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -381,7 +373,6 @@ func DeleteUserByIdResponse(c *gin.Context) {
 
 type PaymentRequest struct {
 	Amount float64 `form:"amount" binding:"required,min=1"`
-	Id     int     `form:"id" binding:"required,min=1"`
 }
 type data struct {
 	Merchant    string  `json:"merchant"`
@@ -393,6 +384,7 @@ type data struct {
 
 func PaymentResponse(c *gin.Context) {
 	var paymentReq PaymentRequest
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	if err := c.ShouldBindQuery(&paymentReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -452,7 +444,7 @@ func PaymentResponse(c *gin.Context) {
 		PaymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
 		_, err := PaymentRepository.CreatePayment(Model.Payment{
 			Amount:  paymentReq.Amount,
-			UserID:  uint(paymentReq.Id),
+			UserID:  uint(payload.UserID),
 			TrackID: trackIdStringValue,
 			Status:  "pending",
 		})

@@ -131,9 +131,10 @@ func (r *PosterRepository) GetPosterById(id int) (Model2.Poster, error) {
 	return poster, nil
 }
 
-func (r *PosterRepository) DeletePosterById(id int) error {
+func (r *PosterRepository) DeletePosterById(id int, userId uint) error {
 	var poster Model2.Poster
-	result := r.db.Find(&poster, "id = ?", id)
+	// check the userId and posterId
+	result := r.db.First(&poster, "id = ? and user_id = ?", id, userId)
 	if result.Error != nil {
 		return result.Error
 	}

@@ -2,6 +2,7 @@ package Controller
 
 import (
 	Api2 "github.com/403-access-denied/main-backend/src/MainService/Controller/Api"
+	"github.com/403-access-denied/main-backend/src/MainService/Controller/Api/Admin"
 	"github.com/403-access-denied/main-backend/src/MainService/Middleware"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	"github.com/gin-gonic/gin"
@@ -16,31 +17,44 @@ type Server struct {
 func (s *Server) MainController() {
 	v1 := s.Router.Group("/api/v1")
 	{
+		// todo replace the auth middleware with the admin middleware
+		admin := v1.Group("/admin").Use(Middleware.AuthMiddleware(s.TokenMaker))
+		{
+			admin.GET("/user", Admin.GetUser)
+			admin.GET("/users", Admin.GetUsers)
+			admin.PATCH("/user/:id", Admin.UpdateUser)
+			admin.POST("/user", Admin.CreateUser)
+			admin.DELETE("/user/:id", Admin.DeleteUser)
+
+			admin.POST("/poster", Admin.CreatePoster)
+			admin.PATCH("/poster/:id", Admin.UpdatePoster)
+			admin.DELETE("/poster/:id", Admin.DeletePoster)
+		}
 		user := v1.Group("/users")
 		{
 			userAuthRoutes := user.Group("/authorize").Use(Middleware.AuthMiddleware(s.TokenMaker))
 			{
 				userAuthRoutes.GET("/", Api2.GetUser)
+				userAuthRoutes.PATCH("/", Api2.UpdateUser)
+				userAuthRoutes.DELETE("/", Api2.DeleteUser)
+				userAuthRoutes.GET("/payment/user_wallet", Api2.Payment)
+				userAuthRoutes.GET("/payment/user_wallet/:id", Api2.PaymentVerify)
 			}
 			user.POST("/auth/otp/send", Api2.SendOTP)
 			user.POST("/auth/otp/login", Api2.LoginUser)
 			user.GET("/auth/google/login", Api2.OAuth2Login)
 			user.GET("/auth/google/callback", Api2.GoogleCallback)
-			user.GET("/", Api2.GetUsers)
-			user.PATCH("/:id", Api2.UpdateUser)
-			user.POST("/", Api2.CreateUser)
-			user.DELETE("/:id", Api2.DeleteUser)
-			user.GET("/payment/user_wallet", Api2.Payment)
-			user.GET("/payment/user_wallet/:id", Api2.PaymentVerify)
 		}
-		// TODO add auth middleware
 		poster := v1.Group("/posters")
 		{
 			poster.GET("/", Api2.GetPosters)
 			poster.GET("/:id", Api2.GetPoster)
-			poster.POST("/", Api2.CreatePoster)
-			poster.PATCH("/:id", Api2.UpdatePoster)
-			poster.DELETE("/:id", Api2.DeletePoster)
+			authPosters := poster.Group("/authorize").Use(Middleware.AuthMiddleware(s.TokenMaker))
+			{
+				authPosters.POST("/", Api2.CreatePoster)
+				authPosters.PATCH("/:id", Api2.UpdatePoster)
+				authPosters.DELETE("/:id", Api2.DeletePoster)
+			}
 			poster.POST("/upload-image", Api2.UploadPosterImage)
 		}
 		report := v1.Group("/reports")

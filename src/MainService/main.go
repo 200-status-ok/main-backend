@@ -15,17 +15,17 @@ import (
 
 // @title Swagger Documentation for Golang web API(Gin framework)
 // @version 1.0
-
 // @contact.name API Support
 // @contact.url http://www.swagger.io/support
 // @contact.email support@swagger.io
-
 // @BasePath /api/v1
 func main() {
 	r := gin.Default()
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
+	config.AllowCredentials = true
+	config.AllowHeaders = []string{"Authorization", "Content-Type"}
 	r.Use(cors.New(config))
 
 	docs.SwaggerInfo.BasePath = "/api/v1"
