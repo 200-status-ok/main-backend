@@ -1,6 +1,7 @@
 package Repository
 
 import (
+	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
 	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
@@ -27,12 +28,17 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 	var posters []Model2.Poster
 
 	var result *gorm.DB
+
 	if filterObject.SearchPhrase != "" || filterObject.TagIds != nil {
 		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
 			Order(sortBy + " " + sortType)
 	} else {
 		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
 			Limit(limit).Offset(offset).Order(sortBy + " " + sortType)
+	}
+
+	if filterObject.State != "" && filterObject.State != "all" {
+		result = result.Where("state = ?", filterObject.State)
 	}
 
 	if filterObject.Status != "" && filterObject.Status != "both" {
@@ -213,6 +219,7 @@ func (r *PosterRepository) UpdatePoster(id int, poster DTO2.PosterDTO, addresses
 	posterModel.SetTelegramID(poster.TelID)
 	posterModel.SetHasAlert(poster.Alert)
 	posterModel.SetAward(poster.Award)
+	posterModel.SetState(poster.State)
 
 	for _, category := range categories {
 		categoryModel, err := NewCategoryRepository(r.db).GetCategoryById(category)
@@ -317,6 +324,26 @@ func (r *PosterRepository) UpdatePosterReport(id, posterID, issuerID uint, repor
 	}
 
 	result := r.db.Model(&Model2.PosterReport{}).Where("id = ?", id).Updates(updatedPosterReportModel)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	DBConfiguration.CloseDB()
+
+	return nil
+}
+
+func (r *PosterRepository) UpdatePosterState(id uint, state string) error {
+
+	var updatedPosterReportModel Model2.Poster
+
+	updatedPosterReportModel.State = state
+
+	fmt.Println("modar id is: ", id)
+	fmt.Println("modar updatedPosterReportModel is: ", updatedPosterReportModel)
+
+	result := r.db.Model(&Model2.Poster{}).Where("id = ?", id).Updates(updatedPosterReportModel)
 
 	if result.Error != nil {
 		return result.Error

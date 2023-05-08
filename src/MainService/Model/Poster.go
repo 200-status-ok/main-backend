@@ -24,6 +24,7 @@ type Poster struct {
 	Images      []Image      `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"image"`
 	Addresses   []Address    `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
 	User        User         `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"user"`
+	State       string       `gorm:"type:state;default:'pending';not null;" json:"state"`
 }
 
 func (p *Poster) GetTitle() string {
@@ -124,4 +125,12 @@ func (p *Poster) GetCreatedAt() string {
 
 func (p *Poster) GetUpdatedAt() string {
 	return p.UpdatedAt.String()
+}
+
+func (p *Poster) GetState() string {
+	return p.State
+}
+
+func (p *Poster) SetState(state string) {
+	p.State = state
 }

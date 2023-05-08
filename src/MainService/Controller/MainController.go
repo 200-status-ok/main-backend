@@ -56,6 +56,7 @@ func (s *Server) MainController() {
 				authPosters.DELETE("/:id", Api2.DeletePoster)
 			}
 			poster.POST("/upload-image", Api2.UploadPosterImage)
+			poster.PATCH("/update-state", Api2.UpdatePosterState)
 		}
 		report := v1.Group("/reports")
 		{

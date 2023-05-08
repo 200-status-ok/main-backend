@@ -31,6 +31,7 @@ type getPostersRequest struct {
 	Lat          float64 `form:"lat,omitempty"`
 	Lon          float64 `form:"lon,omitempty"`
 	TagIds       []int   `form:"tag_ids,omitempty" swaggertype:"array,int"`
+	State        string  `form:"state,omitempty" binding:"omitempty,oneof=all pending accepted rejected"`
 }
 
 func GetPostersResponse(c *gin.Context) {
@@ -58,6 +59,7 @@ func GetPostersResponse(c *gin.Context) {
 		Lat:          request.Lat,
 		Lon:          request.Lon,
 		TagIds:       request.TagIds,
+		State:        request.State,
 	}
 
 	posters, err := posterRepository.GetAllPosters(request.PageSize, offset, request.Sort, request.SortBy, filterObject)
@@ -396,4 +398,30 @@ func UploadPosterImageResponse(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"url": uploadUrl})
+}
+
+type UpdatePosterStateRequest struct {
+	ID    uint   `form:"id" binding:"required,min=1"`
+	State string `form:"state" binding:"required,oneof=accepted rejected pending"`
+}
+
+func UpdatePosterStateResponse(c *gin.Context) {
+	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+
+	var request UpdatePosterStateRequest
+
+	if err := c.ShouldBindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := posterRepository.UpdatePosterState(request.ID, request.State)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	DBConfiguration.CloseDB()
+
+	c.JSON(http.StatusOK, gin.H{"message": "Poster state updated!"})
 }
