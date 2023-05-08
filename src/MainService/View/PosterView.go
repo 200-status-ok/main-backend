@@ -21,6 +21,7 @@ type PosterView struct {
 	Award       float64             `json:"award"`
 	CreatedAt   time.Time           `json:"created_at"`
 	UpdatedAt   time.Time           `json:"updated_at"`
+	State       string              `json:"state"`
 }
 
 func GetPostersView(posters []Model2.Poster, c *gin.Context) {
@@ -38,6 +39,7 @@ func GetPostersView(posters []Model2.Poster, c *gin.Context) {
 			Award:       poster.Award,
 			CreatedAt:   poster.CreatedAt,
 			UpdatedAt:   poster.UpdatedAt,
+			State:       poster.State,
 		})
 	}
 	c.JSON(http.StatusOK, result)
@@ -58,6 +60,7 @@ func GetPosterByIdView(poster Model2.Poster, c *gin.Context) {
 		Award:       poster.Award,
 		CreatedAt:   poster.CreatedAt,
 		UpdatedAt:   poster.UpdatedAt,
+		State:       poster.State,
 	}
 	c.JSON(http.StatusOK, result)
 }
@@ -74,6 +77,7 @@ func CreatePosterView(poster Model2.Poster, c *gin.Context) {
 		User:        poster.UserID,
 		CreatedAt:   poster.CreatedAt,
 		UpdatedAt:   poster.UpdatedAt,
+		State:       poster.State,
 	}
 	c.JSON(http.StatusOK, result)
 }
@@ -92,6 +96,7 @@ func UpdatePosterView(poster Model2.Poster, c *gin.Context) {
 		User:        poster.UserID,
 		CreatedAt:   poster.CreatedAt,
 		UpdatedAt:   poster.UpdatedAt,
+		State:       poster.State,
 	}
 	c.JSON(http.StatusOK, result)
 }
