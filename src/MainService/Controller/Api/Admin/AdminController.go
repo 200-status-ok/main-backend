@@ -5,6 +5,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SignupAdmin godoc
+// @Summary signup admin
+// @Description signup admin
+// @Tags admin
+// @Accept  json
+// @Produce  json
+// @Param admin body UseCase.SignupAdminRequest true "Signup Admin"
+// @Success 200 {object} View.AdminView
+// @Router /admin/signup [post]
+func SignupAdmin(c *gin.Context) {
+	UseCase.SignupAdminResponse(c)
+}
+
+// LoginAdmin godoc
+// @Summary login admin
+// @Description login admin
+// @Tags admin
+// @Accept  json
+// @Produce  json
+// @Param admin body UseCase.LoginAdminRequest true "Login Admin"
+// @Success 200 {object} View.AdminLoginView
+// @Router /admin/login [post]
+func LoginAdmin(c *gin.Context) {
+	UseCase.LoginAdminResponse(c)
+}
+
 // GetUser godoc
 // @Summary Get a User by ID
 // @Description Retrieves a User by ID

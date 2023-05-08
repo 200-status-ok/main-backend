@@ -18,17 +18,17 @@ func (s *Server) MainController() {
 	v1 := s.Router.Group("/api/v1")
 	{
 		// todo replace the auth middleware with the admin middleware
-		admin := v1.Group("/admin").Use(Middleware.AuthMiddleware(s.TokenMaker))
+		authorizeAdmin := v1.Group("/admin").Use(Middleware.AuthMiddleware(s.TokenMaker))
 		{
-			admin.GET("/user", Admin.GetUser)
-			admin.GET("/users", Admin.GetUsers)
-			admin.PATCH("/user/:id", Admin.UpdateUser)
-			admin.POST("/user", Admin.CreateUser)
-			admin.DELETE("/user/:id", Admin.DeleteUser)
+			authorizeAdmin.GET("/user", Admin.GetUser)
+			authorizeAdmin.GET("/users", Admin.GetUsers)
+			authorizeAdmin.PATCH("/user/:id", Admin.UpdateUser)
+			authorizeAdmin.POST("/user", Admin.CreateUser)
+			authorizeAdmin.DELETE("/user/:id", Admin.DeleteUser)
 
-			admin.POST("/poster", Admin.CreatePoster)
-			admin.PATCH("/poster/:id", Admin.UpdatePoster)
-			admin.DELETE("/poster/:id", Admin.DeletePoster)
+			authorizeAdmin.POST("/poster", Admin.CreatePoster)
+			authorizeAdmin.PATCH("/poster/:id", Admin.UpdatePoster)
+			authorizeAdmin.DELETE("/poster/:id", Admin.DeletePoster)
 		}
 		user := v1.Group("/users")
 		{
@@ -85,8 +85,8 @@ func (s *Server) MainController() {
 		}
 		admin := v1.Group("/admin")
 		{
-			admin.POST("/signup", Api2.SignupAdmin)
-			admin.POST("/login", Api2.LoginAdmin)
+			admin.POST("/signup", Admin.SignupAdmin)
+			admin.POST("/login", Admin.LoginAdmin)
 		}
 	}
 
