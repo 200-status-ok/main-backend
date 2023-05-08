@@ -69,6 +69,11 @@ func (s *Server) MainController() {
 			chats.GET("/join", s.ChatWs.JoinConversation)
 			chats.POST("/conversation", Api2.CreateChatConversation)
 		}
+		admin := v1.Group("/admin")
+		{
+			admin.POST("/signup", Api2.SignupAdmin)
+			admin.POST("/login", Api2.LoginAdmin)
+		}
 	}
 
 }
