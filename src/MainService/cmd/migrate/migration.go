@@ -22,6 +22,7 @@ func Migration() {
 	models = append(models, &Model2.MarkedPoster{})
 	models = append(models, &Model2.PosterReport{})
 	models = append(models, &Model2.Payment{})
+	models = append(models, &Model2.Admin{})
 	DBConfiguration.InitDB()
 	DBConfiguration.MigrateModel(models)
 	DBConfiguration.CloseDB()
