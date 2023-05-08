@@ -23,6 +23,7 @@ import (
 // @Param lat query float64 false "Latitude"
 // @Param lon query float64 false "Longitude"
 // @Param tag_ids query []int false "TagIds" collectionFormat(multi) example(1,2,3)
+// @Param state query string false "State" enum(all, accepted, rejected, pending) default(all)
 // @Success 200 {array} View.PosterView
 // @Router /posters [get]
 func GetPosters(c *gin.Context) {
@@ -177,4 +178,18 @@ func UpdatePosterReport(c *gin.Context) {
 // @Router /posters/upload-image [post]
 func UploadPosterImage(c *gin.Context) {
 	UseCase.UploadPosterImageResponse(c)
+}
+
+// UpdatePosterState godoc
+// @Summary Update a poster state by ID
+// @Description Updates a poster report by ID
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param id query int true "ID"
+// @Param state query string false "State" enum(pending, accepted, rejected) default(accepted)
+// @Success 200
+// @Router /posters/update-state [patch]
+func UpdatePosterState(c *gin.Context) {
+	UseCase.UpdatePosterStateResponse(c)
 }

@@ -10,6 +10,7 @@ type PosterDTO struct {
 	Chat        bool    `json:"chat" binding:"required"`
 	Award       float64 `json:"award"`
 	UserID      uint    `json:"user_id" binding:"required,min=1"`
+	State       string  `json:"state" binding:"required,oneof=accepted rejected pending"`
 }
 
 type FilterObject struct { //todo move this to another file
@@ -21,6 +22,7 @@ type FilterObject struct { //todo move this to another file
 	Lat          float64
 	Lon          float64
 	TagIds       []int
+	State        string
 }
 
 type GeneratedPosterTags struct { //todo modar move maybe, reGenerate
