@@ -171,6 +171,7 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 	posterModel.SetHasAlert(poster.Alert)
 	posterModel.SetAward(poster.Award)
 	posterModel.HasChat = poster.Chat
+	posterModel.State = "pending"
 
 	for _, category := range categories {
 		categoryModel, err := NewCategoryRepository(r.db).GetCategoryById(category)
