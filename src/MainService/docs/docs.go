@@ -20,6 +20,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/login": {
+            "post": {
+                "description": "login admin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "login admin",
+                "parameters": [
+                    {
+                        "description": "Login Admin",
+                        "name": "admin",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.LoginAdminRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.AdminLoginView"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/poster": {
             "post": {
                 "description": "Creates a poster",
@@ -117,6 +151,40 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/View.PosterView"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/signup": {
+            "post": {
+                "description": "signup admin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "signup admin",
+                "parameters": [
+                    {
+                        "description": "Signup Admin",
+                        "name": "admin",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.SignupAdminRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.AdminView"
                         }
                     }
                 }
@@ -543,6 +611,13 @@ const docTemplate = `{
                         "description": "TagIds",
                         "name": "tag_ids",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "all",
+                        "description": "State",
+                        "name": "state",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -586,6 +661,42 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/View.PosterView"
                         }
+                    }
+                }
+            }
+        },
+        "/posters/update-state": {
+            "patch": {
+                "description": "Updates a poster report by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posters"
+                ],
+                "summary": "Update a poster state by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "accepted",
+                        "description": "State",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -1429,6 +1540,7 @@ const docTemplate = `{
             "required": [
                 "alert",
                 "chat",
+                "state",
                 "status",
                 "title",
                 "user_id"
@@ -1447,6 +1559,14 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 1000,
                     "minLength": 5
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "accepted",
+                        "rejected",
+                        "pending"
+                    ]
                 },
                 "status": {
                     "type": "string",
@@ -1689,6 +1809,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Image"
                     }
                 },
+                "state": {
+                    "type": "string"
+                },
                 "status": {
                     "$ref": "#/definitions/Model.PosterStatus"
                 },
@@ -1875,6 +1998,17 @@ const docTemplate = `{
                 }
             }
         },
+        "UseCase.LoginAdminRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "UseCase.SendOTPRequest": {
             "type": "object",
             "required": [
@@ -1885,6 +2019,47 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 30,
                     "minLength": 11
+                }
+            }
+        },
+        "UseCase.SignupAdminRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "f_name",
+                "l_name",
+                "password",
+                "phone",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 8
+                },
+                "f_name": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 4
+                },
+                "l_name": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 4
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 11
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 5
                 }
             }
         },
@@ -1978,6 +2153,37 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 30,
                     "minLength": 11
+                }
+            }
+        },
+        "View.AdminLoginView": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "View.AdminView": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "f_name": {
+                    "type": "string"
+                },
+                "l_name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

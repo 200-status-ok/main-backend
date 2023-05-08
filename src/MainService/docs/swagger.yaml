@@ -49,6 +49,12 @@ definitions:
         maxLength: 1000
         minLength: 5
         type: string
+      state:
+        enum:
+        - accepted
+        - rejected
+        - pending
+        type: string
       status:
         enum:
         - lost
@@ -72,6 +78,7 @@ definitions:
     required:
     - alert
     - chat
+    - state
     - status
     - title
     - user_id
@@ -216,6 +223,8 @@ definitions:
         items:
           $ref: '#/definitions/Model.Image'
         type: array
+      state:
+        type: string
       status:
         $ref: '#/definitions/Model.PosterStatus'
       tags:
@@ -340,6 +349,13 @@ definitions:
     required:
     - image_url
     type: object
+  UseCase.LoginAdminRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   UseCase.SendOTPRequest:
     properties:
       username:
@@ -347,6 +363,38 @@ definitions:
         minLength: 11
         type: string
     required:
+    - username
+    type: object
+  UseCase.SignupAdminRequest:
+    properties:
+      email:
+        maxLength: 30
+        minLength: 8
+        type: string
+      f_name:
+        maxLength: 30
+        minLength: 4
+        type: string
+      l_name:
+        maxLength: 30
+        minLength: 4
+        type: string
+      password:
+        type: string
+      phone:
+        maxLength: 30
+        minLength: 11
+        type: string
+      username:
+        maxLength: 30
+        minLength: 5
+        type: string
+    required:
+    - email
+    - f_name
+    - l_name
+    - password
+    - phone
     - username
     type: object
   UseCase.UpdatePosterReportRequest:
@@ -411,6 +459,26 @@ definitions:
     required:
     - otp
     - username
+    type: object
+  View.AdminLoginView:
+    properties:
+      message:
+        type: string
+      token:
+        type: string
+    type: object
+  View.AdminView:
+    properties:
+      email:
+        type: string
+      f_name:
+        type: string
+      l_name:
+        type: string
+      phone:
+        type: string
+      username:
+        type: string
     type: object
   View.GeneratedPosterInfoView:
     properties:
@@ -540,6 +608,28 @@ info:
   title: Swagger Documentation for Golang web API(Gin framework)
   version: "1.0"
 paths:
+  /admin/login:
+    post:
+      consumes:
+      - application/json
+      description: login admin
+      parameters:
+      - description: Login Admin
+        in: body
+        name: admin
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.LoginAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.AdminLoginView'
+      summary: login admin
+      tags:
+      - admin
   /admin/poster:
     post:
       consumes:
@@ -605,6 +695,28 @@ paths:
           schema:
             $ref: '#/definitions/View.PosterView'
       summary: Update a poster by ID
+      tags:
+      - admin
+  /admin/signup:
+    post:
+      consumes:
+      - application/json
+      description: signup admin
+      parameters:
+      - description: Signup Admin
+        in: body
+        name: admin
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.SignupAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.AdminView'
+      summary: signup admin
       tags:
       - admin
   /admin/user:
@@ -886,6 +998,11 @@ paths:
           type: integer
         name: tag_ids
         type: array
+      - default: all
+        description: State
+        in: query
+        name: state
+        type: string
       produces:
       - application/json
       responses:
@@ -982,6 +1099,30 @@ paths:
           schema:
             $ref: '#/definitions/View.PosterView'
       summary: Update a poster by ID
+      tags:
+      - posters
+  /posters/update-state:
+    patch:
+      consumes:
+      - application/json
+      description: Updates a poster report by ID
+      parameters:
+      - description: ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - default: accepted
+        description: State
+        in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update a poster state by ID
       tags:
       - posters
   /posters/upload-image:
