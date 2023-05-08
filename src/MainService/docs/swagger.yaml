@@ -540,6 +540,177 @@ info:
   title: Swagger Documentation for Golang web API(Gin framework)
   version: "1.0"
 paths:
+  /admin/poster:
+    post:
+      consumes:
+      - application/json
+      description: Creates a poster
+      parameters:
+      - description: Poster
+        in: body
+        name: poster
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.CreatePosterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.PosterView'
+      summary: Create a poster
+      tags:
+      - admin
+  /admin/poster/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a poster by ID
+      parameters:
+      - description: Poster ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete a poster by ID
+      tags:
+      - admin
+    patch:
+      consumes:
+      - application/json
+      description: Updates a poster by ID
+      parameters:
+      - description: Poster ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Poster
+        in: body
+        name: poster
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.UpdatePosterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.PosterView'
+      summary: Update a poster by ID
+      tags:
+      - admin
+  /admin/user:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewID'
+      summary: Get a User by ID
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      description: Create a User
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewID'
+      summary: Create a User
+      tags:
+      - admin
+  /admin/user/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete a User by ID
+      tags:
+      - admin
+    patch:
+      consumes:
+      - application/json
+      description: Updates a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewIDs'
+      summary: Update a User by ID
+      tags:
+      - admin
+  /admin/users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves Users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/View.UserViewID'
+            type: array
+      summary: Get a Users
+      tags:
+      - admin
   /api-call/generatePosterInfo:
     get:
       consumes:

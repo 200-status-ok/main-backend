@@ -5,6 +5,7 @@ import (
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
+	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
 	"github.com/gin-gonic/gin"
@@ -96,16 +97,18 @@ type DeletePosterByIdRequest struct {
 
 func DeletePosterByIdResponse(c *gin.Context) {
 	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request DeletePosterByIdRequest
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := posterRepository.DeletePosterById(request.ID)
+	err := posterRepository.DeletePosterById(request.ID, uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	DBConfiguration.CloseDB()
 	c.JSON(http.StatusOK, gin.H{"message": "Poster deleted"})
 }
@@ -119,11 +122,13 @@ type CreatePosterRequest struct {
 
 func CreatePosterResponse(c *gin.Context) {
 	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request CreatePosterRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	request.Poster.UserID = uint(payload.UserID)
 	poster, err := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Tags)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -146,6 +151,7 @@ type UpdatePosterByIdRequest struct {
 
 func UpdatePosterResponse(c *gin.Context) {
 	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request UpdatePosterRequest
 	var id UpdatePosterByIdRequest
 	if err := c.ShouldBindUri(&id); err != nil {
@@ -156,6 +162,7 @@ func UpdatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	request.Poster.UserID = uint(payload.UserID)
 	poster, err := posterRepository.UpdatePoster(id.ID, request.Poster, request.Addresses, request.ImgUrls,
 		request.Categories)
 	if err != nil {
