@@ -24,7 +24,7 @@ type Poster struct {
 	Images      []Image      `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"image"`
 	Addresses   []Address    `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
 	User        User         `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"user"`
-	State       string       `gorm:"type:state;default:'pending';not null;" json:"state"`
+	State       string       `gorm:"type:string;default:'pending';not null;" json:"state"`
 }
 
 func (p *Poster) GetTitle() string {
