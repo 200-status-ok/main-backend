@@ -631,7 +631,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/posters/authorize": {
             "post": {
                 "description": "Creates a poster",
                 "consumes": [
@@ -652,6 +654,74 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/UseCase.CreatePosterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.PosterView"
+                        }
+                    }
+                }
+            }
+        },
+        "/posters/authorize/{id}": {
+            "delete": {
+                "description": "Deletes a poster by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posters"
+                ],
+                "summary": "Delete a poster by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Poster ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates a poster by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posters"
+                ],
+                "summary": "Update a poster by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Poster ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Poster",
+                        "name": "poster",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.UpdatePosterRequest"
                         }
                     }
                 ],
@@ -750,72 +820,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/View.PosterView"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Deletes a poster by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posters"
-                ],
-                "summary": "Delete a poster by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Poster ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            },
-            "patch": {
-                "description": "Updates a poster by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posters"
-                ],
-                "summary": "Update a poster by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Poster ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Poster",
-                        "name": "poster",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UseCase.UpdatePosterRequest"
-                        }
                     }
                 ],
                 "responses": {
@@ -1349,7 +1353,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/payment/user_wallet": {
+        "/users/authorize/payment/user_wallet": {
             "get": {
                 "description": "Payment",
                 "consumes": [
@@ -1385,7 +1389,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/payment/user_wallet/{id}": {
+        "/users/authorize/payment/user_wallet/{id}": {
             "get": {
                 "description": "Payment Verify",
                 "consumes": [
@@ -1414,7 +1418,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/users/authorize/{id}": {
             "delete": {
                 "description": "Deletes a User by ID",
                 "consumes": [
@@ -2384,6 +2388,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

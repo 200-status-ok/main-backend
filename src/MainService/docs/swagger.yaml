@@ -1015,6 +1015,28 @@ paths:
       summary: Get a list of all posters
       tags:
       - posters
+  /posters/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a poster by ID
+      parameters:
+      - description: Poster ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.PosterView'
+      summary: Get a poster by ID
+      tags:
+      - posters
+  /posters/authorize:
     post:
       consumes:
       - application/json
@@ -1036,7 +1058,7 @@ paths:
       summary: Create a poster
       tags:
       - posters
-  /posters/{id}:
+  /posters/authorize/{id}:
     delete:
       consumes:
       - application/json
@@ -1053,26 +1075,6 @@ paths:
         "200":
           description: OK
       summary: Delete a poster by ID
-      tags:
-      - posters
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a poster by ID
-      parameters:
-      - description: Poster ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/View.PosterView'
-      summary: Get a poster by ID
       tags:
       - posters
     patch:
@@ -1405,51 +1407,6 @@ paths:
       summary: Create a User
       tags:
       - users
-  /users/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Deletes a User by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Delete a User by ID
-      tags:
-      - users
-    patch:
-      consumes:
-      - application/json
-      description: Updates a User by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: User
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/UseCase.UpdateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/View.UserViewIDs'
-      summary: Update a User by ID
-      tags:
-      - users
   /users/auth/google/callback:
     get:
       consumes:
@@ -1537,7 +1494,52 @@ paths:
       summary: Get a User by ID
       tags:
       - users
-  /users/payment/user_wallet:
+  /users/authorize/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete a User by ID
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Updates a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewIDs'
+      summary: Update a User by ID
+      tags:
+      - users
+  /users/authorize/payment/user_wallet:
     get:
       consumes:
       - application/json
@@ -1561,7 +1563,7 @@ paths:
       summary: Payment
       tags:
       - users
-  /users/payment/user_wallet/{id}:
+  /users/authorize/payment/user_wallet/{id}:
     get:
       consumes:
       - application/json

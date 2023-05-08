@@ -87,7 +87,7 @@ func GetUsers(c *gin.Context) {
 // @Param id path int true "User ID"
 // @Param user body UseCase.UpdateUserRequest true "User"
 // @Success 200 {object} View.UserViewIDs
-// @Router /users/{id} [patch]
+// @Router /users/authorize/{id} [patch]
 func UpdateUser(c *gin.Context) {
 	UseCase.UpdateUserByIdResponse(c)
 }
@@ -113,7 +113,7 @@ func CreateUser(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID"
 // @Success 200
-// @Router /users/{id} [delete]
+// @Router /users/authorize/{id} [delete]
 func DeleteUser(c *gin.Context) {
 	UseCase.DeleteUserByIdResponse(c)
 }
@@ -127,7 +127,7 @@ func DeleteUser(c *gin.Context) {
 // @Param id query int true "User ID"
 // @Param amount query float64 true "Amount"
 // @Success 200
-// @Router /users/payment/user_wallet [get]
+// @Router /users/authorize/payment/user_wallet [get]
 func Payment(c *gin.Context) {
 	UseCase.PaymentResponse(c)
 }
@@ -140,7 +140,7 @@ func Payment(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "Payment ID"
 // @Success 200
-// @Router /users/payment/user_wallet/{id} [get]
+// @Router /users/authorize/payment/user_wallet/{id} [get]
 func PaymentVerify(c *gin.Context) {
 	UseCase.PaymentVerifyResponse(c)
 }

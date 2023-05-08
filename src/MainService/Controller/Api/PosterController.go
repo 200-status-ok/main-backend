@@ -51,7 +51,7 @@ func GetPoster(c *gin.Context) {
 // @Produce  json
 // @Param poster body UseCase.CreatePosterRequest true "Poster"
 // @Success 200 {object} View.PosterView
-// @Router /posters [post]
+// @Router /posters/authorize [post]
 func CreatePoster(c *gin.Context) {
 	UseCase.CreatePosterResponse(c)
 }
@@ -65,7 +65,7 @@ func CreatePoster(c *gin.Context) {
 // @Param id path int true "Poster ID"
 // @Param poster body UseCase.UpdatePosterRequest true "Poster"
 // @Success 200 {object} View.PosterView
-// @Router /posters/{id} [patch]
+// @Router /posters/authorize/{id} [patch]
 func UpdatePoster(c *gin.Context) {
 	UseCase.UpdatePosterResponse(c)
 }
@@ -78,7 +78,7 @@ func UpdatePoster(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "Poster ID"
 // @Success 200
-// @Router /posters/{id} [delete]
+// @Router /posters/authorize/{id} [delete]
 func DeletePoster(c *gin.Context) {
 	UseCase.DeletePosterByIdResponse(c)
 }
