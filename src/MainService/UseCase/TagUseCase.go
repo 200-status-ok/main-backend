@@ -30,7 +30,7 @@ func CreateTagResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.CreateTagView(tags, c)
 }
 
@@ -60,7 +60,7 @@ func UpdateTagByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.CreateTagView(tags, c)
 }
 
@@ -80,7 +80,7 @@ func DeleteTagByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	c.JSON(http.StatusOK, gin.H{})
 }
 
@@ -100,7 +100,7 @@ func GetTagByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.CreateTagView(tags, c)
 }
 
@@ -111,7 +111,7 @@ func GetTagsResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.GetAllTagView(tags, c)
 }
 

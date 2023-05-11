@@ -2,7 +2,6 @@ package Repository
 
 import (
 	"fmt"
-	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
 	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
@@ -119,7 +118,7 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 		}
 	}
 
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -130,7 +129,7 @@ func (r *PosterRepository) GetPosterById(id int) (Model2.Poster, error) {
 	var poster Model2.Poster
 	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
 		First(&poster, "id = ?", id)
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	if result.Error != nil {
 		return Model2.Poster{}, result.Error
 	}
@@ -280,7 +279,7 @@ func (r *PosterRepository) GetAllPosterReports(limit, offset int, status string)
 
 	result.Find(&posterReports)
 
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -291,7 +290,7 @@ func (r *PosterRepository) GetPosterReportById(id int) (Model2.PosterReport, err
 	var posterReport Model2.PosterReport
 
 	result := r.db.Preload("Poster").Preload("Issuer").First(&posterReport, "id = ?", id)
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 
 	if result.Error != nil {
 		return Model2.PosterReport{}, result.Error
@@ -330,7 +329,7 @@ func (r *PosterRepository) UpdatePosterReport(id, posterID, issuerID uint, repor
 		return result.Error
 	}
 
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 
 	return nil
 }
@@ -350,7 +349,7 @@ func (r *PosterRepository) UpdatePosterState(id uint, state string) error {
 		return result.Error
 	}
 
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 
 	return nil
 }

@@ -47,7 +47,7 @@ func (r *UserRepository) UserCreate(user *Model.User) (*Model.User, error) {
 
 func (r *UserRepository) FindById(id uint) (*Model.User, error) {
 	var user Model.User
-	err := r.db.Where("id = ?", id).First(&user).Error
+	err := r.db.Preload("Posters").Preload("MarkedPosters").Where("id = ?", id).First(&user).Error
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
