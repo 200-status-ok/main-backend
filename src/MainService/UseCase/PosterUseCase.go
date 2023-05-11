@@ -69,7 +69,7 @@ func GetPostersResponse(c *gin.Context) {
 		return
 	}
 
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.GetPostersView(posters, c)
 }
 
@@ -89,7 +89,7 @@ func GetPosterByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.GetPosterByIdView(poster, c)
 }
 
@@ -111,7 +111,7 @@ func DeletePosterByIdResponse(c *gin.Context) {
 		return
 	}
 
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	c.JSON(http.StatusOK, gin.H{"message": "Poster deleted"})
 }
 
@@ -136,7 +136,7 @@ func CreatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.CreatePosterView(poster, c)
 }
 
@@ -171,7 +171,7 @@ func UpdatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.UpdatePosterView(poster, c)
 }
 
@@ -277,7 +277,7 @@ func CreatePosterReportResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	c.JSON(http.StatusOK, gin.H{"message": "Report created"})
 }
 
@@ -306,7 +306,7 @@ func GetPosterReportsResponse(c *gin.Context) {
 		return
 	}
 
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.GetPosterReportsView(posterReports, c)
 }
 
@@ -329,7 +329,7 @@ func GetPosterReportByIdResponse(c *gin.Context) {
 		return
 	}
 
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 	View.GetPosterReportByIdView(posterReport, c)
 }
 
@@ -366,7 +366,7 @@ func UpdatePosterReportResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 
 	c.JSON(http.StatusOK, gin.H{"message": "Report resolved"})
 }
@@ -421,7 +421,7 @@ func UpdatePosterStateResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 
 	c.JSON(http.StatusOK, gin.H{"message": "Poster state updated!"})
 }

@@ -6,10 +6,6 @@ import (
 )
 
 func main() {
-	Migration()
-}
-
-func Migration() {
 	var models []interface{}
 	// add the model to migrate the database
 	models = append(models, &Model2.User{})
@@ -23,7 +19,7 @@ func Migration() {
 	models = append(models, &Model2.PosterReport{})
 	models = append(models, &Model2.Payment{})
 	models = append(models, &Model2.Admin{})
-	DBConfiguration.InitDB()
+	//DBConfiguration.init()
 	DBConfiguration.MigrateModel(models)
-	DBConfiguration.CloseDB()
+	//DBConfiguration.CloseDB()
 }
