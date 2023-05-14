@@ -2,6 +2,7 @@ package Api
 
 import (
 	"github.com/403-access-denied/main-backend/src/MainService/UseCase"
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,6 +28,9 @@ import (
 // @Success 200 {array} View.PosterView
 // @Router /posters [get]
 func GetPosters(c *gin.Context) {
+	span := sentry.StartSpan(c.Request.Context(), "GetPosters",
+		sentry.WithTransactionName("GetPosters"))
+	defer span.Finish()
 	UseCase.GetPostersResponse(c)
 }
 

@@ -1164,30 +1164,6 @@ const docTemplate = `{
             }
         },
         "/users": {
-            "get": {
-                "description": "Retrieves Users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get a Users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/View.UserViewID"
-                            }
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create a User",
                 "consumes": [
@@ -1544,7 +1520,6 @@ const docTemplate = `{
             "required": [
                 "alert",
                 "chat",
-                "state",
                 "status",
                 "title",
                 "user_id"
@@ -1565,12 +1540,7 @@ const docTemplate = `{
                     "minLength": 5
                 },
                 "state": {
-                    "type": "string",
-                    "enum": [
-                        "accepted",
-                        "rejected",
-                        "pending"
-                    ]
+                    "type": "string"
                 },
                 "status": {
                     "type": "string",
@@ -2284,6 +2254,9 @@ const docTemplate = `{
                 "phone_user": {
                     "type": "string"
                 },
+                "state": {
+                    "type": "string"
+                },
                 "status": {
                     "$ref": "#/definitions/Model.PosterStatus"
                 },
@@ -2388,8 +2361,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {

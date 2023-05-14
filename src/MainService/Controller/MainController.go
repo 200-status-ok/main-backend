@@ -17,6 +17,7 @@ type Server struct {
 func (s *Server) MainController() {
 	v1 := s.Router.Group("/api/v1")
 	{
+		v1.Use(Middleware.SentryMiddleware())
 		// todo replace the auth middleware with the admin middleware
 		authorizeAdmin := v1.Group("/admin").Use(Middleware.AuthMiddleware(s.TokenMaker))
 		{

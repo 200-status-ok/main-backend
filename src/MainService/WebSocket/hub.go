@@ -1,5 +1,7 @@
 package WebSocket
 
+import "github.com/getsentry/sentry-go"
+
 type ConversationChat struct {
 	ID     int
 	Name   string
@@ -26,6 +28,10 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
+	localHub := sentry.CurrentHub().Clone()
+	localHub.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetTag("component", "realtime-chat")
+	})
 	for {
 		select {
 		case client := <-h.Register:
