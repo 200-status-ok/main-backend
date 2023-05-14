@@ -1155,30 +1155,6 @@
             }
         },
         "/users": {
-            "get": {
-                "description": "Retrieves Users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get a Users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/View.UserViewID"
-                            }
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create a User",
                 "consumes": [
@@ -1535,7 +1511,6 @@
             "required": [
                 "alert",
                 "chat",
-                "state",
                 "status",
                 "title",
                 "user_id"
@@ -1556,12 +1531,7 @@
                     "minLength": 5
                 },
                 "state": {
-                    "type": "string",
-                    "enum": [
-                        "accepted",
-                        "rejected",
-                        "pending"
-                    ]
+                    "type": "string"
                 },
                 "status": {
                     "type": "string",
@@ -2273,6 +2243,9 @@
                     }
                 },
                 "phone_user": {
+                    "type": "string"
+                },
+                "state": {
                     "type": "string"
                 },
                 "status": {

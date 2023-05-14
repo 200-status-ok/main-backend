@@ -66,18 +66,6 @@ func GetUser(c *gin.Context) {
 	UseCase.GetUserByIdResponse(c)
 }
 
-// GetUsers godoc
-// @Summary Get a Users
-// @Description Retrieves Users
-// @Tags users
-// @Accept  json
-// @Produce  json
-// @Success 200 {array} View.UserViewID
-// @Router /users [get]
-func GetUsers(c *gin.Context) {
-	UseCase.GetUsersResponse(c)
-}
-
 // UpdateUser godoc
 // @Summary Update a User by ID
 // @Description Updates a User by ID
