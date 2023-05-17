@@ -67,6 +67,7 @@ func (j *JWTMaker) VerifyToken(token string) (*Payload, error) {
 		Username: claims["username"].(string),
 		ID:       id,
 		UserID:   userID,
+		Role:     claims["role"].(string),
 		IssuedAt: issuedAt,
 		Expired:  expired,
 	}

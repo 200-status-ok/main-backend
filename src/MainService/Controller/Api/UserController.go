@@ -75,22 +75,9 @@ func GetUser(c *gin.Context) {
 // @Param id path int true "User ID"
 // @Param user body UseCase.UpdateUserRequest true "User"
 // @Success 200 {object} View.UserViewIDs
-// @Router /users/authorize/{id} [patch]
+// @Router /users/authorize/ [patch]
 func UpdateUser(c *gin.Context) {
 	UseCase.UpdateUserByIdResponse(c)
-}
-
-// CreateUser godoc
-// @Summary Create a User
-// @Description Create a User
-// @Tags users
-// @Accept  json
-// @Produce  json
-// @Param user body UseCase.CreateUserRequest true "User"
-// @Success 200 {object} View.UserViewID
-// @Router /users [post]
-func CreateUser(c *gin.Context) {
-	UseCase.CreateUserResponse(c)
 }
 
 // DeleteUser godoc
@@ -101,7 +88,7 @@ func CreateUser(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID"
 // @Success 200
-// @Router /users/authorize/{id} [delete]
+// @Router /users/authorize/ [delete]
 func DeleteUser(c *gin.Context) {
 	UseCase.DeleteUserByIdResponse(c)
 }

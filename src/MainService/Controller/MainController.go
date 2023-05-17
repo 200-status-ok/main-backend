@@ -21,15 +21,20 @@ func (s *Server) MainController() {
 		// todo replace the auth middleware with the admin middleware
 		authorizeAdmin := v1.Group("/admin").Use(Middleware.AdminAuthMiddleware(s.TokenMaker))
 		{
-			authorizeAdmin.GET("/user", Admin.GetUser)
+			authorizeAdmin.GET("/user/:userid", Admin.GetUser)
 			authorizeAdmin.GET("/users", Admin.GetUsers)
-			authorizeAdmin.PATCH("/user/:id", Admin.UpdateUser)
+			authorizeAdmin.PATCH("/user/:userid", Admin.UpdateUser)
 			authorizeAdmin.POST("/user", Admin.CreateUser)
-			authorizeAdmin.DELETE("/user/:id", Admin.DeleteUser)
+			authorizeAdmin.DELETE("/user/:userid", Admin.DeleteUser)
 
 			authorizeAdmin.POST("/poster", Admin.CreatePoster)
 			authorizeAdmin.PATCH("/poster/:id", Admin.UpdatePoster)
 			authorizeAdmin.DELETE("/poster/:id", Admin.DeletePoster)
+		}
+		admin := v1.Group("/admin")
+		{
+			admin.POST("/signup", Admin.SignupAdmin)
+			admin.POST("/login", Admin.LoginAdmin)
 		}
 		user := v1.Group("/users")
 		{
@@ -84,11 +89,6 @@ func (s *Server) MainController() {
 		{
 			chats.GET("/join", s.ChatWs.JoinConversation)
 			chats.POST("/conversation", Api2.CreateChatConversation)
-		}
-		admin := v1.Group("/admin")
-		{
-			admin.POST("/signup", Admin.SignupAdmin)
-			admin.POST("/login", Admin.LoginAdmin)
 		}
 	}
 

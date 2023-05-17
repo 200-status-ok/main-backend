@@ -443,6 +443,15 @@ definitions:
     required:
     - username
     type: object
+  UseCase.UserInfo:
+    properties:
+      username:
+        maxLength: 30
+        minLength: 5
+        type: string
+    required:
+    - username
+    type: object
   UseCase.VerifyOTPRequest:
     properties:
       otp:
@@ -725,26 +734,6 @@ paths:
       tags:
       - admin
   /admin/user:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a User by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/View.UserViewID'
-      summary: Get a User by ID
-      tags:
-      - admin
     post:
       consumes:
       - application/json
@@ -766,7 +755,7 @@ paths:
       summary: Create a User
       tags:
       - admin
-  /admin/user/{id}:
+  /admin/user/{userid}:
     delete:
       consumes:
       - application/json
@@ -774,7 +763,7 @@ paths:
       parameters:
       - description: User ID
         in: path
-        name: id
+        name: userid
         required: true
         type: integer
       produces:
@@ -785,6 +774,26 @@ paths:
       summary: Delete a User by ID
       tags:
       - admin
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a User by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewID'
+      summary: Get a User by ID
+      tags:
+      - admin
     patch:
       consumes:
       - application/json
@@ -792,7 +801,7 @@ paths:
       parameters:
       - description: User ID
         in: path
-        name: id
+        name: userid
         required: true
         type: integer
       - description: User
@@ -800,7 +809,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/UseCase.UpdateUserRequest'
+          $ref: '#/definitions/UseCase.UserInfo'
       produces:
       - application/json
       responses:
@@ -825,7 +834,7 @@ paths:
             items:
               $ref: '#/definitions/View.UserViewIDs'
             type: array
-      summary: Get a Users
+      summary: Get all Users
       tags:
       - admin
   /api-call/generatePosterInfo:
@@ -1374,28 +1383,6 @@ paths:
       summary: Update a Tag by ID
       tags:
       - Tags
-  /users:
-    post:
-      consumes:
-      - application/json
-      description: Create a User
-      parameters:
-      - description: User
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/UseCase.CreateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/View.UserViewID'
-      summary: Create a User
-      tags:
-      - users
   /users/auth/google/callback:
     get:
       consumes:
@@ -1483,7 +1470,7 @@ paths:
       summary: Get a User by ID
       tags:
       - users
-  /users/authorize/{id}:
+  /users/authorize/:
     delete:
       consumes:
       - application/json

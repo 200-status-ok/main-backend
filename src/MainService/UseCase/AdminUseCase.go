@@ -15,11 +15,11 @@ import (
 
 type SignupAdminRequest struct {
 	Username string `json:"username" binding:"required,min=5,max=30"`
-	Password string `json:"password"binding:"required"`
-	FName    string `json:"f_name" binding:"required,min=4,max=30"`
-	LName    string `json:"l_name"binding:"required,min=4,max=30"`
-	Email    string `json:"email"binding:"required,min=8,max=30"`
-	Phone    string `json:"phone"binding:"required,min=11,max=30"`
+	Password string `json:"password" binding:"required"`
+	FName    string `json:"f_name"   binding:"required,min=4,max=30"`
+	LName    string `json:"l_name"   binding:"required,min=4,max=30"`
+	Email    string `json:"email"    binding:"required,min=8,max=30"`
+	Phone    string `json:"phone"    binding:"required,min=11,max=30"`
 }
 
 func SignupAdminResponse(c *gin.Context) {
@@ -83,4 +83,84 @@ func LoginAdminResponse(c *gin.Context) {
 		return
 	}
 	View.LoginAdminView(token, c)
+}
+
+type GetUserByAdminRequest struct {
+	UserID uint `uri:"userid" binding:"required,min=1"`
+}
+
+func GetUserByIdAdminResponse(c *gin.Context) {
+	var request GetUserByAdminRequest
+	if err := c.ShouldBindUri(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	user, err := userRepository.FindById(request.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	View.GetUserByIdView(*user, c)
+}
+
+func GetUsersResponse(c *gin.Context) {
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	users, err := userRepository.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	View.GetUsersView(*users, c)
+}
+
+type UpdateUserByAdminRequest struct {
+	UserID uint `uri:"userid" binding:"required,min=1"`
+}
+
+type UserInfo struct {
+	Username string `json:"username" binding:"required,min=5,max=30"`
+}
+
+func UpdateUserByIdAdminResponse(c *gin.Context) {
+	var request UpdateUserByAdminRequest
+	var userInfo UserInfo
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	if err := c.ShouldBindUri(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := c.ShouldBindJSON(&userInfo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	updateUser, err := userRepository.UserUpdate(&Model.User{
+		Username: userInfo.Username,
+	}, request.UserID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	View.GetUserByIdView(*updateUser, c)
+}
+
+type DeleteUserRequest struct {
+	UserID uint `uri:"userid" binding:"required,min=1"`
+}
+
+func DeleteUserByIdAdminResponse(c *gin.Context) {
+	var request DeleteUserRequest
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	if err := c.ShouldBindUri(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := userRepository.DeleteUser(request.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
 }

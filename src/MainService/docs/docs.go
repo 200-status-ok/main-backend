@@ -191,36 +191,6 @@ const docTemplate = `{
             }
         },
         "/admin/user": {
-            "get": {
-                "description": "Retrieves a User by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Get a User by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/View.UserViewID"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create a User",
                 "consumes": [
@@ -254,7 +224,37 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/user/{id}": {
+        "/admin/user/{userid}": {
+            "get": {
+                "description": "Retrieves a User by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get a User by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.UserViewID"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Deletes a User by ID",
                 "consumes": [
@@ -271,7 +271,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "User ID",
-                        "name": "id",
+                        "name": "userid",
                         "in": "path",
                         "required": true
                     }
@@ -298,7 +298,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "User ID",
-                        "name": "id",
+                        "name": "userid",
                         "in": "path",
                         "required": true
                     },
@@ -308,7 +308,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/UseCase.UpdateUserRequest"
+                            "$ref": "#/definitions/UseCase.UserInfo"
                         }
                     }
                 ],
@@ -334,7 +334,7 @@ const docTemplate = `{
                 "tags": [
                     "admin"
                 ],
-                "summary": "Get a Users",
+                "summary": "Get all Users",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1163,40 +1163,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/users": {
-            "post": {
-                "description": "Create a User",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Create a User",
-                "parameters": [
-                    {
-                        "description": "User",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UseCase.CreateUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/View.UserViewID"
-                        }
-                    }
-                }
-            }
-        },
         "/users/auth/google/callback": {
             "get": {
                 "description": "google callback",
@@ -1329,72 +1295,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/authorize/payment/user_wallet": {
-            "get": {
-                "description": "Payment",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Payment",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "description": "Amount",
-                        "name": "amount",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/users/authorize/payment/user_wallet/{id}": {
-            "get": {
-                "description": "Payment Verify",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Payment Verify",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Payment ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/users/authorize/{id}": {
+        "/users/authorize/": {
             "delete": {
                 "description": "Deletes a User by ID",
                 "consumes": [
@@ -1458,6 +1359,71 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/View.UserViewIDs"
                         }
+                    }
+                }
+            }
+        },
+        "/users/authorize/payment/user_wallet": {
+            "get": {
+                "description": "Payment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Payment",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Amount",
+                        "name": "amount",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/users/authorize/payment/user_wallet/{id}": {
+            "get": {
+                "description": "Payment Verify",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Payment Verify",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Payment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -2110,6 +2076,19 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 30,
                     "minLength": 11
+                }
+            }
+        },
+        "UseCase.UserInfo": {
+            "type": "object",
+            "required": [
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 5
                 }
             }
         },
