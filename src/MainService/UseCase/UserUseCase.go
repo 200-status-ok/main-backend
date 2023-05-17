@@ -187,7 +187,7 @@ func VerifyOtpResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	token, _, err := jwtMaker.MakeToken(verifyReq.Username, uint64(userId), time.Hour*24*7)
+	token, _, err := jwtMaker.MakeToken(verifyReq.Username, uint64(userId), "User", time.Hour*24*7)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -273,7 +273,7 @@ func GoogleCallbackResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	token, _, err := jwtMaker.MakeToken(googleRes.Email, userID, time.Hour*24*7)
+	token, _, err := jwtMaker.MakeToken(googleRes.Email, userID, "User", time.Hour*24*7)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
