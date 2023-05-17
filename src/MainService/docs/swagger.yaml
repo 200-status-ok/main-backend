@@ -584,6 +584,14 @@ definitions:
     properties:
       id:
         type: integer
+      marked_posters:
+        items:
+          $ref: '#/definitions/Model.MarkedPoster'
+        type: array
+      posters:
+        items:
+          $ref: '#/definitions/Model.Poster'
+        type: array
       username:
         type: string
       wallet:
@@ -815,7 +823,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/View.UserViewID'
+              $ref: '#/definitions/View.UserViewIDs'
             type: array
       summary: Get a Users
       tags:

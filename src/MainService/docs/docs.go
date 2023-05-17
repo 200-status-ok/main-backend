@@ -341,7 +341,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/View.UserViewID"
+                                "$ref": "#/definitions/View.UserViewIDs"
                             }
                         }
                     }
@@ -2327,6 +2327,18 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "integer"
+                },
+                "marked_posters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.MarkedPoster"
+                    }
+                },
+                "posters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Poster"
+                    }
                 },
                 "username": {
                     "type": "string"
