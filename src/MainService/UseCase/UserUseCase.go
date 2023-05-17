@@ -360,10 +360,20 @@ func CreateUserResponse(c *gin.Context) {
 	View.GetUserByIdView(*user, c)
 }
 
+type DeleteUserRequest struct {
+	ID uint `uri:"id" binding:"required,min=1"`
+}
+
 func DeleteUserByIdResponse(c *gin.Context) {
-	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	_ = c.MustGet("authorization_payload").(*Token.Payload)
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
-	err := userRepository.DeleteUser(uint(payload.UserID))
+	var deleteUserReq DeleteUserRequest
+	err := c.ShouldBindUri(&deleteUserReq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err = userRepository.DeleteUser(deleteUserReq.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

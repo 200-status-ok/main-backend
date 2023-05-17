@@ -50,7 +50,7 @@ func GetUser(c *gin.Context) {
 // @Tags admin
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} View.UserViewID
+// @Success 200 {array} View.UserViewIDs
 // @Router /admin/users [get]
 func GetUsers(c *gin.Context) {
 	UseCase.GetUsersResponse(c)

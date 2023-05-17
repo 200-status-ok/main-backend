@@ -6,7 +6,7 @@ import (
 
 type Image struct {
 	gorm.Model
-	Url      string `gorm:"type:varchar(255);not null" json:"url"`
+	Url      string `gorm:"type:varchar(255)" json:"url"`
 	PosterID uint   `gorm:"not null" json:"image_id"`
 }
 

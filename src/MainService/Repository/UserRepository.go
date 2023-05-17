@@ -56,7 +56,7 @@ func (r *UserRepository) FindById(id uint) (*Model.User, error) {
 
 func (r *UserRepository) GetAllUsers() (*[]Model.User, error) {
 	var users []Model.User
-	err := r.db.Find(&users).Error
+	err := r.db.Preload("Posters").Preload("MarkedPosters").Find(&users).Error
 	if err != nil {
 		return nil, errors.New("error while getting all users")
 	}
