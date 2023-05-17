@@ -77,7 +77,7 @@ func LoginAdminResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	token, _, err := jwtMaker.MakeToken(request.Username, uint64(admin.ID), time.Hour*24*7)
+	token, _, err := jwtMaker.MakeToken(request.Username, uint64(admin.ID), "Admin", time.Hour*24*7)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

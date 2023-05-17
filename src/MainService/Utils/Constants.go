@@ -1,3 +1,8 @@
 package Utils
 
-const BaseLocationRadarRadius = 0.002
+const (
+	BaseLocationRadarRadius = 0.002
+	AuthorizationHeaderKey  = "authorization"
+	AuthorizationTypeBearer = "bearer"
+	AuthorizationPayloadKey = "authorization_payload"
+)

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func AuthMiddleware(tokenMaker Token.Maker) gin.HandlerFunc {
+func AdminAuthMiddleware(tokenMaker Token.Maker) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authorizationHeader := c.GetHeader(Utils.AuthorizationHeaderKey)
 		if len(authorizationHeader) == 0 {
@@ -28,6 +28,11 @@ func AuthMiddleware(tokenMaker Token.Maker) gin.HandlerFunc {
 		payload, err := tokenMaker.VerifyToken(accessToken)
 		if err != nil {
 			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
+			return
+		}
+		userRole := payload.Role
+		if userRole != "Admin" {
+			c.AbortWithStatusJSON(401, gin.H{"error": "invalid authorization role"})
 			return
 		}
 		c.Set(Utils.AuthorizationPayloadKey, payload)

@@ -19,7 +19,7 @@ func (s *Server) MainController() {
 	{
 		v1.Use(Middleware.SentryMiddleware())
 		// todo replace the auth middleware with the admin middleware
-		authorizeAdmin := v1.Group("/admin").Use(Middleware.AuthMiddleware(s.TokenMaker))
+		authorizeAdmin := v1.Group("/admin").Use(Middleware.AdminAuthMiddleware(s.TokenMaker))
 		{
 			authorizeAdmin.GET("/user", Admin.GetUser)
 			authorizeAdmin.GET("/users", Admin.GetUsers)
