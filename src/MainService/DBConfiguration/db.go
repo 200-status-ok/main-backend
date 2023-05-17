@@ -55,11 +55,6 @@ func DropModel(model []interface{}) error {
 	return nil
 }
 
-func CloseDB() {
-	dbSQL, _ := DB.DB()
-	dbSQL.Close()
-}
-
 func GetDB() *gorm.DB {
 	return DB
 }

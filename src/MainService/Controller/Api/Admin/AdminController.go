@@ -37,15 +37,15 @@ func LoginAdmin(c *gin.Context) {
 // @Tags admin
 // @Accept  json
 // @Produce  json
-// @Param id path int true "User ID"
+// @Param userid path int true "User ID"
 // @Success 200 {object} View.UserViewID
-// @Router /admin/user [get]
+// @Router /admin/user/{userid} [get]
 func GetUser(c *gin.Context) {
-	UseCase.GetUserByIdResponse(c)
+	UseCase.GetUserByIdAdminResponse(c)
 }
 
 // GetUsers godoc
-// @Summary Get a Users
+// @Summary Get all Users
 // @Description Retrieves Users
 // @Tags admin
 // @Accept  json
@@ -62,12 +62,12 @@ func GetUsers(c *gin.Context) {
 // @Tags admin
 // @Accept  json
 // @Produce  json
-// @Param id path int true "User ID"
-// @Param user body UseCase.UpdateUserRequest true "User"
+// @Param userid path int true "User ID"
+// @Param user body UseCase.UserInfo true "User"
 // @Success 200 {object} View.UserViewIDs
-// @Router /admin/user/{id} [patch]
+// @Router /admin/user/{userid} [patch]
 func UpdateUser(c *gin.Context) {
-	UseCase.UpdateUserByIdResponse(c)
+	UseCase.UpdateUserByIdAdminResponse(c)
 }
 
 // CreateUser godoc
@@ -89,11 +89,11 @@ func CreateUser(c *gin.Context) {
 // @Tags admin
 // @Accept  json
 // @Produce  json
-// @Param id path int true "User ID"
+// @Param userid path int true "User ID"
 // @Success 200
-// @Router /admin/user/{id} [delete]
+// @Router /admin/user/{userid} [delete]
 func DeleteUser(c *gin.Context) {
-	UseCase.DeleteUserByIdResponse(c)
+	UseCase.DeleteUserByIdAdminResponse(c)
 }
 
 // CreatePoster godoc
