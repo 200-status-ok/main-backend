@@ -735,6 +735,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/posters/create-mock-data": {
+            "post": {
+                "description": "Create mock data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posters"
+                ],
+                "summary": "Create mock data",
+                "parameters": [
+                    {
+                        "description": "Mock Data",
+                        "name": "mock",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UseCase.CreateMockDataRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/posters/update-state": {
             "patch": {
                 "description": "Updates a poster report by ID",
@@ -1871,6 +1902,28 @@ const docTemplate = `{
                 }
             }
         },
+        "UseCase.CreateMockDataRequest": {
+            "type": "object",
+            "required": [
+                "categories",
+                "count",
+                "user_id"
+            ],
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "UseCase.CreatePosterRequest": {
             "type": "object",
             "required": [
@@ -2352,6 +2405,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

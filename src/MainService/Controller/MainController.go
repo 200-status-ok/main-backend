@@ -63,6 +63,7 @@ func (s *Server) MainController() {
 			}
 			poster.POST("/upload-image", Api2.UploadPosterImage)
 			poster.PATCH("/update-state", Api2.UpdatePosterState)
+			poster.POST("/create-mock-data", Api2.CreateMockData)
 		}
 		report := v1.Group("/reports")
 		{

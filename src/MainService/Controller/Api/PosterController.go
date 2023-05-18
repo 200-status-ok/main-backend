@@ -197,3 +197,16 @@ func UploadPosterImage(c *gin.Context) {
 func UpdatePosterState(c *gin.Context) {
 	UseCase.UpdatePosterStateResponse(c)
 }
+
+// CreateMockData godoc
+// @Summary Create mock data
+// @Description Create mock data
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param mock body UseCase.CreateMockDataRequest true "Mock Data"
+// @Success 200
+// @Router /posters/create-mock-data [post]
+func CreateMockData(c *gin.Context) {
+	UseCase.CreateMockDataResponse(c)
+}

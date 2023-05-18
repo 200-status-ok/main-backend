@@ -193,12 +193,15 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 		return Model2.Poster{}, err
 	}
 	posterModel.SetAddress(newAddress)
-	newImages, err := NewImageRepository(r.db).CreateImage(imageUrl, posterID)
-	if err != nil {
-		return Model2.Poster{}, err
+	if imageUrl == nil {
+		return posterModel, nil
+	} else {
+		newImages, err := NewImageRepository(r.db).CreateImage(imageUrl, posterID)
+		if err != nil {
+			return Model2.Poster{}, err
+		}
+		posterModel.SetImages(newImages)
 	}
-	posterModel.SetImages(newImages)
-
 	return posterModel, nil
 }
 
