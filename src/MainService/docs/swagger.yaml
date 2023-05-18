@@ -299,6 +299,21 @@ definitions:
       wallet:
         type: number
     type: object
+  UseCase.CreateMockDataRequest:
+    properties:
+      categories:
+        items:
+          type: integer
+        type: array
+      count:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - categories
+    - count
+    - user_id
+    type: object
   UseCase.CreatePosterRequest:
     properties:
       addresses:
@@ -1115,6 +1130,26 @@ paths:
           schema:
             $ref: '#/definitions/View.PosterView'
       summary: Update a poster by ID
+      tags:
+      - posters
+  /posters/create-mock-data:
+    post:
+      consumes:
+      - application/json
+      description: Create mock data
+      parameters:
+      - description: Mock Data
+        in: body
+        name: mock
+        required: true
+        schema:
+          $ref: '#/definitions/UseCase.CreateMockDataRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create mock data
       tags:
       - posters
   /posters/update-state:
