@@ -22,7 +22,7 @@ import (
 
 type getPostersRequest struct {
 	PageID       int     `form:"page_id" binding:"required,min=1"`
-	PageSize     int     `form:"page_size" binding:"required,min=5,max=20"`
+	PageSize     int     `form:"page_size" binding:"required,min=5"`
 	Sort         string  `form:"sort,omitempty" binding:"omitempty,oneof=asc desc"`
 	SortBy       string  `form:"sort_by,omitempty" binding:"omitempty,oneof=created_at updated_at id"`
 	Status       string  `form:"status,omitempty" binding:"oneof=lost found both"`

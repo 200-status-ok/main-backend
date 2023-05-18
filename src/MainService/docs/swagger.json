@@ -433,7 +433,7 @@
         },
         "/chats/conversation": {
             "post": {
-                "description": "Create a chat conversation",
+                "description": "Create or check to exist a chat conversation",
                 "consumes": [
                     "application/json"
                 ],
@@ -443,15 +443,15 @@
                 "tags": [
                     "Chat"
                 ],
-                "summary": "Create a chat conversation for two users",
+                "summary": "Create or check to exist a chat conversation for two users",
                 "parameters": [
                     {
-                        "description": "ChatConversation",
-                        "name": "room",
+                        "description": "CreateConversation",
+                        "name": "conversation",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Api.CreateConversation"
+                            "$ref": "#/definitions/Api.ConversationInfo"
                         }
                     }
                 ],
@@ -465,8 +465,124 @@
                 }
             }
         },
+        "/chats/conversation/{conversation_id}": {
+            "get": {
+                "description": "Get conversation by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Get conversation by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Conversation ID",
+                        "name": "conversation_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/conversations": {
+            "get": {
+                "description": "Get all user conversations",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Get all user conversations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/View.ConversationView"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/history/{conversation_id}/": {
+            "get": {
+                "description": "Get conversation history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Get conversation history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "CreateConversation ID",
+                        "name": "conversation_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page ID",
+                        "name": "page_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Model.Conversation"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/chats/join": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "JoinConversation a chat room",
                 "consumes": [
                     "application/json"
@@ -479,6 +595,15 @@
                 ],
                 "summary": "JoinConversation a chat room",
                 "parameters": [
+                    {
+                        "description": "Message",
+                        "name": "Message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/WebSocket.MessageWithType"
+                        }
+                    },
                     {
                         "type": "integer",
                         "description": "Chat ID",
@@ -1452,17 +1577,13 @@
         }
     },
     "definitions": {
-        "Api.CreateConversation": {
+        "Api.ConversationInfo": {
             "type": "object",
             "required": [
-                "client_id",
                 "name",
                 "poster_id"
             ],
             "properties": {
-                "client_id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -1605,6 +1726,9 @@
                 "id": {
                     "type": "integer"
                 },
+                "image_url": {
+                    "type": "string"
+                },
                 "member_id": {
                     "type": "integer"
                 },
@@ -1700,6 +1824,9 @@
                 },
                 "sender_id": {
                     "type": "integer"
+                },
+                "type": {
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -2184,6 +2311,26 @@
                 }
             }
         },
+        "View.ConversationView": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "is_owner": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "poster_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "View.GeneratedPosterInfoView": {
             "type": "object",
             "properties": {
@@ -2368,6 +2515,15 @@
                 },
                 "wallet": {
                     "type": "number"
+                }
+            }
+        },
+        "WebSocket.MessageWithType": {
+            "type": "object",
+            "properties": {
+                "content": {},
+                "type": {
+                    "type": "string"
                 }
             }
         },

@@ -7,7 +7,8 @@ type Message struct {
 	ConversationId uint   `gorm:"not null" json:"conversation_id"`
 	SenderId       uint   `gorm:"not null" json:"sender_id"`
 	ReceiverId     uint   `gorm:"not null" json:"receiver_id"`
-	Content        string `gorm:"text;not null" json:"content"`
+	Content        string `gorm:"type:text;not null" json:"content"`
+	Type           string `gorm:"type:varchar(50);not null" json:"type"`
 }
 
 func (m *Message) GetID() uint {

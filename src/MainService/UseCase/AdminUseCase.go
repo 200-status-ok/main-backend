@@ -98,7 +98,7 @@ func GetUserByIdAdminResponse(c *gin.Context) {
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
 	user, err := userRepository.FindById(request.UserID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	View.GetUserByIdView(*user, c)
@@ -134,6 +134,11 @@ func UpdateUserByIdAdminResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if Utils2.UsernameValidation(userInfo.Username) == -1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username"})
+		return
+	}
+
 	updateUser, err := userRepository.UserUpdate(&Model.User{
 		Username: userInfo.Username,
 	}, request.UserID)
