@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
+	"github.com/403-access-denied/main-backend/src/MainService/Token"
+	"github.com/403-access-denied/main-backend/src/MainService/View"
 	"github.com/403-access-denied/main-backend/src/MainService/WebSocket"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -18,17 +20,6 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-type JoinConversationReq struct {
-	ConversationID uint `form:"conv_id" binding:"required"`
-	ClientID       uint `form:"client_id" binding:"required"`
-}
-
-type CreateConversation struct {
-	Name     string `json:"name" binding:"required"`
-	ClientID int    `json:"client_id" binding:"required"`
-	PosterID int    `json:"poster_id" binding:"required"`
-}
-
 type ChatWS struct {
 	Hub *WebSocket.Hub
 }
@@ -37,18 +28,25 @@ func NewChatWS(hub *WebSocket.Hub) *ChatWS {
 	return &ChatWS{Hub: hub}
 }
 
+type JoinConversationReq struct {
+	ConversationID uint `form:"conv_id" binding:"required"`
+}
+
 // JoinConversation JoinChat godoc
 // @Summary JoinConversation a chat room
 // @Description JoinConversation a chat room
 // @Tags Chat
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
+// @Param Message body WebSocket.MessageWithType true "Message"
 // @Param id query uint true "Chat ID"
 // @Param client_id query uint true "Client ID"
 // @Success 200 {object} string
 // @Router /chats/join [get]
 func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 	var request JoinConversationReq
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
 
 	if err := c.ShouldBindQuery(&request); err != nil {
@@ -94,7 +92,7 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 		return
 	}
 	var client *WebSocket.Client
-	if request.ClientID == conversation.OwnerID {
+	if uint(payload.UserID) == conversation.OwnerID {
 		client = wsUseCase.Hub.ChatConversation[int(conversation.ID)].Owner
 	} else {
 		client = wsUseCase.Hub.ChatConversation[int(conversation.ID)].Member
@@ -108,17 +106,23 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 	go client.Read(wsUseCase.Hub)
 }
 
-// CreateChatConversation CreateConversation godoc
-// @Summary Create a chat conversation for two users
-// @Description Create a chat conversation
+type ConversationInfo struct {
+	Name     string `json:"name" binding:"required"`
+	PosterID int    `json:"poster_id" binding:"required"`
+}
+
+// CreateConversation CreateOrCheckExistConversation godoc
+// @Summary Create or check to exist a chat conversation for two users
+// @Description Create or check to exist a chat conversation
 // @Tags Chat
 // @Accept json
 // @Produce json
-// @Param room body CreateConversation true "ChatConversation"
+// @Param conversation body ConversationInfo true "CreateConversation"
 // @Success 200 {object} string
 // @Router /chats/conversation [post]
-func CreateChatConversation(c *gin.Context) {
-	var request CreateConversation
+func CreateConversation(c *gin.Context) {
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	var request ConversationInfo
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -129,11 +133,126 @@ func CreateChatConversation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err = chatRepo.CreateConversation(request.Name, poster.UserID, uint(request.ClientID), uint(request.PosterID))
+	if poster.UserID == uint(payload.UserID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You can't create conversation with yourself"})
+		return
+	}
+	existConversation, err := chatRepo.ExistConversation(poster.UserID, uint(payload.UserID), poster.ID)
+	if err != nil && err.Error() != "record not found" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if existConversation.ID != 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "CreateConversation already exist", "conversation": existConversation})
+		return
+	}
+	var conversationImage = ""
+	if len(poster.Images) != 0 {
+		conversationImage = poster.Images[0].Url
+	}
+	conversation, err := chatRepo.CreateConversation(request.Name, conversationImage, poster.UserID, uint(payload.UserID),
+		uint(request.PosterID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Conversation created successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "CreateConversation created successfully", "conversation": conversation})
+}
+
+// AllUserConversations godoc
+// @Summary Get all user conversations
+// @Description Get all user conversations
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Success 200 {array} View.ConversationView
+// @Router /chats/conversations [get]
+func AllUserConversations(c *gin.Context) {
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
+
+	user, err := chatRepo.GetAllUserConversations(uint(payload.UserID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	View.GetAllUserConversation(c, user)
+}
+
+type GetConversationByIdPathRequest struct {
+	ConversationID uint `uri:"conversation_id" binding:"required"`
+}
+
+// GetConversationById godoc
+// @Summary Get conversation by id
+// @Description Get conversation by id
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversation_id path int true "Conversation ID"
+// @Success 200 {object} string
+// @Router /chats/conversation/{conversation_id} [get]
+func GetConversationById(c *gin.Context) {
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	var pathRequest GetConversationByIdPathRequest
+	if err := c.ShouldBindUri(&pathRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
+	conversation, err := chatRepo.GetUserConversationById(pathRequest.ConversationID, uint(payload.UserID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Get conversation successfully", "conversation": conversation})
+}
+
+type ConversationHistoryPathRequest struct {
+	ConversationID uint `uri:"conversation_id" binding:"required"`
+}
+
+type ConversationHistoryQueryRequest struct {
+	PageID   int `form:"page_id" binding:"required"`
+	PageSize int `form:"page_size" binding:"required,min=5"`
+}
+
+// ConversationHistory godoc
+// @Summary Get conversation history
+// @Description Get conversation history
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversation_id path uint true "CreateConversation ID"
+// @Param page_id query int true "Page ID" minimum(1) default(1)
+// @Param page_size query int true "Page size" minimum(1) default(10)
+// @Success 200 {array} Model.Conversation
+// @Router /chats/history/{conversation_id}/ [get]
+func ConversationHistory(c *gin.Context) {
+	chatRepository := Repository.NewChatRepository(DBConfiguration.GetDB())
+
+	var pathRequest ConversationHistoryPathRequest
+	if err := c.ShouldBindUri(&pathRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var queryRequest ConversationHistoryQueryRequest
+	if err := c.ShouldBindQuery(&queryRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	offset := (queryRequest.PageID - 1) * queryRequest.PageSize
+	messages, err := chatRepository.GetConversationHistory(pathRequest.ConversationID, queryRequest.PageSize, offset)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	View.GetConversationHistory(c, messages)
 }

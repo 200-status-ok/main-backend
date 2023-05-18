@@ -86,10 +86,14 @@ func (s *Server) MainController() {
 			api.POST("/predict", Api2.GetPhotoNSFWAi)
 			api.GET("/predict-txt/", Api2.GetTextNSFW)
 		}
-		chats := v1.Group("/chats")
+		chats := v1.Group("/chats").Use(Middleware.AuthMiddleware(s.TokenMaker))
 		{
 			chats.GET("/join", s.ChatWs.JoinConversation)
-			chats.POST("/conversation", Api2.CreateChatConversation)
+			chats.POST("/conversation", Api2.CreateConversation)
+			chats.GET("/conversations", Api2.AllUserConversations)
+			chats.GET("/conversation/:conversation_id", Api2.GetConversationById)
+			chats.GET("/history/:conversation_id", Api2.ConversationHistory)
+
 		}
 	}
 

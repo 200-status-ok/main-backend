@@ -301,12 +301,6 @@ func UpdateUserByIdResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
 
-	_, err := userRepository.FindById(uint(payload.UserID))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	if err := c.ShouldBindJSON(&updateUserReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

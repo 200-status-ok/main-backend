@@ -1,15 +1,12 @@
 basePath: /api/v1
 definitions:
-  Api.CreateConversation:
+  Api.ConversationInfo:
     properties:
-      client_id:
-        type: integer
       name:
         type: string
       poster_id:
         type: integer
     required:
-    - client_id
     - name
     - poster_id
     type: object
@@ -109,6 +106,8 @@ definitions:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
+      image_url:
+        type: string
       member_id:
         type: integer
       messages:
@@ -172,6 +171,8 @@ definitions:
         type: integer
       sender_id:
         type: integer
+      type:
+        type: string
       updatedAt:
         type: string
     type: object
@@ -499,6 +500,19 @@ definitions:
       username:
         type: string
     type: object
+  View.ConversationView:
+    properties:
+      id:
+        type: integer
+      image_url:
+        type: string
+      is_owner:
+        type: boolean
+      name:
+        type: string
+      poster_id:
+        type: integer
+    type: object
   View.GeneratedPosterInfoView:
     properties:
       colors:
@@ -620,6 +634,12 @@ definitions:
         type: string
       wallet:
         type: number
+    type: object
+  WebSocket.MessageWithType:
+    properties:
+      content: {}
+      type:
+        type: string
     type: object
   gorm.DeletedAt:
     properties:
@@ -916,14 +936,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a chat conversation
+      description: Create or check to exist a chat conversation
       parameters:
-      - description: ChatConversation
+      - description: CreateConversation
         in: body
-        name: room
+        name: conversation
         required: true
         schema:
-          $ref: '#/definitions/Api.CreateConversation'
+          $ref: '#/definitions/Api.ConversationInfo'
       produces:
       - application/json
       responses:
@@ -931,7 +951,82 @@ paths:
           description: OK
           schema:
             type: string
-      summary: Create a chat conversation for two users
+      summary: Create or check to exist a chat conversation for two users
+      tags:
+      - Chat
+  /chats/conversation/{conversation_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get conversation by id
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: conversation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get conversation by id
+      tags:
+      - Chat
+  /chats/conversations:
+    get:
+      consumes:
+      - application/json
+      description: Get all user conversations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/View.ConversationView'
+            type: array
+      summary: Get all user conversations
+      tags:
+      - Chat
+  /chats/history/{conversation_id}/:
+    get:
+      consumes:
+      - application/json
+      description: Get conversation history
+      parameters:
+      - description: CreateConversation ID
+        in: path
+        name: conversation_id
+        required: true
+        type: integer
+      - default: 1
+        description: Page ID
+        in: query
+        minimum: 1
+        name: page_id
+        required: true
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        minimum: 1
+        name: page_size
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Model.Conversation'
+            type: array
+      summary: Get conversation history
       tags:
       - Chat
   /chats/join:
@@ -940,6 +1035,12 @@ paths:
       - application/json
       description: JoinConversation a chat room
       parameters:
+      - description: Message
+        in: body
+        name: Message
+        required: true
+        schema:
+          $ref: '#/definitions/WebSocket.MessageWithType'
       - description: Chat ID
         in: query
         name: id
@@ -957,6 +1058,8 @@ paths:
           description: OK
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: JoinConversation a chat room
       tags:
       - Chat
