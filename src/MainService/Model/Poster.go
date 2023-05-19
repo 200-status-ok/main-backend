@@ -119,6 +119,10 @@ func (p *Poster) GetID() uint {
 	return p.ID
 }
 
+func (p *Poster) SetID(id uint) {
+	p.ID = id
+}
+
 func (p *Poster) GetCreatedAt() string {
 	return p.CreatedAt.String()
 }
@@ -133,4 +137,12 @@ func (p *Poster) GetState() string {
 
 func (p *Poster) SetState(state string) {
 	p.State = state
+}
+
+func (p *Poster) GetHasChat() bool {
+	return p.HasChat
+}
+
+func (p *Poster) SetHasChat(hasChat bool) {
+	p.HasChat = hasChat
 }

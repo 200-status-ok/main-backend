@@ -102,24 +102,25 @@ type DeletePosterByIdRequest struct {
 func DeletePosterByIdResponse(c *gin.Context) {
 	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
+
 	var request DeletePosterByIdRequest
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := posterRepository.DeletePosterById(request.ID, uint(payload.UserID))
+
+	err := posterRepository.DeletePosterById(uint(request.ID), uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	//DBConfiguration.CloseDB()
 	c.JSON(http.StatusOK, gin.H{"message": "Poster deleted"})
 }
 
 type CreatePosterRequest struct {
-	Poster    DTO2.PosterDTO
-	Addresses []DTO2.AddressDTO
+	Poster    DTO2.CreatePosterDTO
+	Addresses []DTO2.CreateAddressDTO
 	ImgUrls   []string `json:"img_urls" binding:"required"`
 	Tags      []int    `json:"tags" binding:"required"`
 }
@@ -143,10 +144,8 @@ func CreatePosterResponse(c *gin.Context) {
 }
 
 type UpdatePosterRequest struct {
-	Poster     DTO2.PosterDTO
-	Addresses  []DTO2.AddressDTO
-	ImgUrls    []string `json:"img_urls" binding:"required"`
-	Categories []int    `json:"categories" binding:"required"`
+	Poster    DTO2.UpdatePosterDTO    `json:"poster"`
+	Addresses []DTO2.UpdateAddressDTO `json:"addresses"`
 }
 
 type UpdatePosterByIdRequest struct {
@@ -156,6 +155,7 @@ type UpdatePosterByIdRequest struct {
 func UpdatePosterResponse(c *gin.Context) {
 	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
+
 	var request UpdatePosterRequest
 	var id UpdatePosterByIdRequest
 	if err := c.ShouldBindUri(&id); err != nil {
@@ -166,15 +166,15 @@ func UpdatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	request.Poster.UserID = uint(payload.UserID)
-	poster, err := posterRepository.UpdatePoster(id.ID, request.Poster, request.Addresses, request.ImgUrls,
-		request.Categories)
+	err := posterRepository.UpdatePoster(id.ID, request.Poster, request.Addresses)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
-	View.UpdatePosterView(poster, c)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Poster updated successfully"})
 }
 
 type GetPhotoAiNSFWRequest struct {
@@ -494,7 +494,7 @@ func MockPoster(count int, userID int, categories []int) error {
 		randomNumber4 := rand.Intn(len(categories))
 		if randomNumber3 == 0 {
 			request := CreatePosterRequest{
-				Poster: DTO2.PosterDTO{
+				Poster: DTO2.CreatePosterDTO{
 					Title:       splitStr[randomNumber2],
 					Description: "من یک " + splitStr[randomNumber2] + " گم کردم",
 					Status:      "lost",
@@ -503,7 +503,7 @@ func MockPoster(count int, userID int, categories []int) error {
 					UserID:      uint(userID),
 					State:       "pending",
 				},
-				Addresses: []DTO2.AddressDTO{
+				Addresses: []DTO2.CreateAddressDTO{
 					{
 						Province:      "تهران",
 						City:          "تهران",
@@ -526,7 +526,7 @@ func MockPoster(count int, userID int, categories []int) error {
 			fmt.Println(model)
 		} else {
 			request := CreatePosterRequest{
-				Poster: DTO2.PosterDTO{
+				Poster: DTO2.CreatePosterDTO{
 					Title:       splitStr[randomNumber2],
 					Description: "من یک " + splitStr[randomNumber2] + " پیدا کردم",
 					Status:      "found",
@@ -535,7 +535,7 @@ func MockPoster(count int, userID int, categories []int) error {
 					UserID:      uint(userID),
 					State:       "pending",
 				},
-				Addresses: []DTO2.AddressDTO{
+				Addresses: []DTO2.CreateAddressDTO{
 					{
 						Province:      "تهران",
 						City:          "تهران",

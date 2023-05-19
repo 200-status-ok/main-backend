@@ -82,25 +82,6 @@ func CreatePosterView(poster Model2.Poster, c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-func UpdatePosterView(poster Model2.Poster, c *gin.Context) {
-	result := PosterView{
-		ID:          poster.ID,
-		Title:       poster.Title,
-		Description: poster.Description,
-		Addresses:   poster.Addresses,
-		Images:      poster.Images,
-		Status:      poster.Status,
-		TelegramId:  poster.TelegramID,
-		UserPhone:   poster.UserPhone,
-		Tags:        poster.Tags,
-		User:        poster.UserID,
-		CreatedAt:   poster.CreatedAt,
-		UpdatedAt:   poster.UpdatedAt,
-		State:       poster.State,
-	}
-	c.JSON(http.StatusOK, result)
-}
-
 type PosterReportView struct {
 	ID          uint          `json:"id"`
 	Poster      Model2.Poster `json:"poster"`
