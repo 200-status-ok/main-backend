@@ -10,7 +10,7 @@ definitions:
     - name
     - poster_id
     type: object
-  DTO.AddressDTO:
+  DTO.CreateAddressDTO:
     properties:
       address_detail:
         maxLength: 1000
@@ -34,7 +34,7 @@ definitions:
     - longitude
     - province
     type: object
-  DTO.PosterDTO:
+  DTO.CreatePosterDTO:
     properties:
       alert:
         type: boolean
@@ -75,6 +75,75 @@ definitions:
     - title
     - user_id
     type: object
+  DTO.UpdateAddressDTO:
+    properties:
+      address_detail:
+        maxLength: 1000
+        type: string
+      city:
+        maxLength: 255
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      province:
+        maxLength: 255
+        type: string
+    type: object
+  DTO.UpdatePosterDTO:
+    properties:
+      alert:
+        enum:
+        - "true"
+        - "false"
+        - ""
+        type: string
+      award:
+        description: todo if you want to update reward to 0, set it to -1
+        type: number
+      chat:
+        enum:
+        - "true"
+        - "false"
+        - ""
+        type: string
+      description:
+        maxLength: 1000
+        type: string
+      img_urls:
+        items:
+          type: string
+        type: array
+      state:
+        enum:
+        - pending
+        - accepted
+        - rejected
+        - ""
+        type: string
+      status:
+        enum:
+        - lost
+        - found
+        - ""
+        type: string
+      tag_ids:
+        items:
+          type: integer
+        type: array
+      tel_id:
+        maxLength: 255
+        type: string
+      title:
+        maxLength: 255
+        type: string
+      user_id:
+        type: integer
+      user_phone:
+        maxLength: 13
+        type: string
+    type: object
   Model.Address:
     properties:
       address_detail:
@@ -83,9 +152,9 @@ definitions:
         type: integer
       city:
         type: string
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
@@ -95,14 +164,14 @@ definitions:
         type: number
       province:
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   Model.Conversation:
     properties:
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
@@ -120,29 +189,29 @@ definitions:
         type: integer
       poster_id:
         type: integer
-      updatedAt:
+      updated_at:
         type: string
     type: object
   Model.Image:
     properties:
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
       image_id:
         type: integer
-      updatedAt:
+      updated_at:
         type: string
       url:
         type: string
     type: object
   Model.MarkedPoster:
     properties:
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
@@ -150,7 +219,7 @@ definitions:
         $ref: '#/definitions/Model.Poster'
       poster_id:
         type: integer
-      updatedAt:
+      updated_at:
         type: string
       user_id:
         type: integer
@@ -161,9 +230,9 @@ definitions:
         type: string
       conversation_id:
         type: integer
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
@@ -173,16 +242,16 @@ definitions:
         type: integer
       type:
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   Model.Payment:
     properties:
       amount:
         type: number
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
@@ -190,7 +259,7 @@ definitions:
         type: string
       track_id:
         type: string
-      updatedAt:
+      updated_at:
         type: string
       user_id:
         type: integer
@@ -203,9 +272,9 @@ definitions:
         type: array
       award:
         type: number
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       description;:
         type: string
@@ -231,10 +300,8 @@ definitions:
         type: string
       title:
         type: string
-      updatedAt:
+      updated_at:
         type: string
-      user:
-        $ref: '#/definitions/Model.User'
       user_id:
         type: integer
       user_phone:
@@ -250,9 +317,9 @@ definitions:
     - Found
   Model.Tag:
     properties:
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
@@ -262,7 +329,7 @@ definitions:
         items:
           $ref: '#/definitions/Model.Poster'
         type: array
-      updatedAt:
+      updated_at:
         type: string
     type: object
   Model.User:
@@ -271,9 +338,9 @@ definitions:
         items:
           $ref: '#/definitions/Model.Payment'
         type: array
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
@@ -293,7 +360,7 @@ definitions:
         items:
           $ref: '#/definitions/Model.Poster'
         type: array
-      updatedAt:
+      updated_at:
         type: string
       username:
         type: string
@@ -319,14 +386,14 @@ definitions:
     properties:
       addresses:
         items:
-          $ref: '#/definitions/DTO.AddressDTO'
+          $ref: '#/definitions/DTO.CreateAddressDTO'
         type: array
       img_urls:
         items:
           type: string
         type: array
       poster:
-        $ref: '#/definitions/DTO.PosterDTO'
+        $ref: '#/definitions/DTO.CreatePosterDTO'
       tags:
         items:
           type: integer
@@ -425,21 +492,10 @@ definitions:
     properties:
       addresses:
         items:
-          $ref: '#/definitions/DTO.AddressDTO'
-        type: array
-      categories:
-        items:
-          type: integer
-        type: array
-      img_urls:
-        items:
-          type: string
+          $ref: '#/definitions/DTO.UpdateAddressDTO'
         type: array
       poster:
-        $ref: '#/definitions/DTO.PosterDTO'
-    required:
-    - categories
-    - img_urls
+        $ref: '#/definitions/DTO.UpdatePosterDTO'
     type: object
   UseCase.UpdateTagRequest:
     properties:
@@ -872,7 +928,7 @@ paths:
       summary: Get all Users
       tags:
       - admin
-  /api-call/generatePosterInfo:
+  /api-call/generate-poster-Info:
     get:
       consumes:
       - application/json
@@ -893,7 +949,7 @@ paths:
       summary: Generate poster info
       tags:
       - ApiCall
-  /api-call/predict:
+  /api-call/nsfw/photo:
     post:
       consumes:
       - application/json
@@ -913,7 +969,7 @@ paths:
       summary: Get photo nsfw AI
       tags:
       - ApiCall
-  /api-call/predict-txt:
+  /api-call/nsfw/text:
     get:
       consumes:
       - application/json
@@ -1041,14 +1097,9 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/WebSocket.MessageWithType'
-      - description: Chat ID
+      - description: Conversation ID
         in: query
-        name: id
-        required: true
-        type: integer
-      - description: Client ID
-        in: query
-        name: client_id
+        name: conv_id
         required: true
         type: integer
       produces:

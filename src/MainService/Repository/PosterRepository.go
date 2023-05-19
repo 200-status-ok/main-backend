@@ -31,10 +31,10 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 	var result *gorm.DB
 
 	if filterObject.SearchPhrase != "" || filterObject.TagIds != nil {
-		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
+		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").
 			Order(sortBy + " " + sortType)
 	} else {
-		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
+		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").
 			Limit(limit).Offset(offset).Order(sortBy + " " + sortType)
 	}
 

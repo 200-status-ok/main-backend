@@ -339,7 +339,7 @@
                 }
             }
         },
-        "/api-call/generatePosterInfo": {
+        "/api-call/generate-poster-Info": {
             "get": {
                 "description": "Generates info for a poster",
                 "consumes": [
@@ -371,7 +371,7 @@
                 }
             }
         },
-        "/api-call/predict": {
+        "/api-call/nsfw/photo": {
             "post": {
                 "description": "Get photo nsfw AI",
                 "consumes": [
@@ -402,7 +402,7 @@
                 }
             }
         },
-        "/api-call/predict-txt": {
+        "/api-call/nsfw/text": {
             "get": {
                 "description": "Get text nsfw",
                 "consumes": [
@@ -606,15 +606,8 @@
                     },
                     {
                         "type": "integer",
-                        "description": "Chat ID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Client ID",
-                        "name": "client_id",
+                        "description": "Conversation ID",
+                        "name": "conv_id",
                         "in": "query",
                         "required": true
                     }
@@ -1592,7 +1585,7 @@
                 }
             }
         },
-        "DTO.AddressDTO": {
+        "DTO.CreateAddressDTO": {
             "type": "object",
             "required": [
                 "city",
@@ -1624,7 +1617,7 @@
                 }
             }
         },
-        "DTO.PosterDTO": {
+        "DTO.CreatePosterDTO": {
             "type": "object",
             "required": [
                 "alert",
@@ -1679,6 +1672,102 @@
                 }
             }
         },
+        "DTO.UpdateAddressDTO": {
+            "type": "object",
+            "properties": {
+                "address_detail": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "city": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "province": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "DTO.UpdatePosterDTO": {
+            "type": "object",
+            "properties": {
+                "alert": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false",
+                        ""
+                    ]
+                },
+                "award": {
+                    "description": "todo if you want to update reward to 0, set it to -1",
+                    "type": "number"
+                },
+                "chat": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false",
+                        ""
+                    ]
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "img_urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "accepted",
+                        "rejected",
+                        ""
+                    ]
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "lost",
+                        "found",
+                        ""
+                    ]
+                },
+                "tag_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tel_id": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "user_phone": {
+                    "type": "string",
+                    "maxLength": 13
+                }
+            }
+        },
         "Model.Address": {
             "type": "object",
             "properties": {
@@ -1691,10 +1780,10 @@
                 "city": {
                     "type": "string"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1709,7 +1798,7 @@
                 "province": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1717,10 +1806,10 @@
         "Model.Conversation": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1747,7 +1836,7 @@
                 "poster_id": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1755,10 +1844,10 @@
         "Model.Image": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1767,7 +1856,7 @@
                 "image_id": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "url": {
@@ -1778,10 +1867,10 @@
         "Model.MarkedPoster": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1793,7 +1882,7 @@
                 "poster_id": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
@@ -1810,10 +1899,10 @@
                 "conversation_id": {
                     "type": "integer"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1828,7 +1917,7 @@
                 "type": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1839,10 +1928,10 @@
                 "amount": {
                     "type": "number"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1854,7 +1943,7 @@
                 "track_id": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
@@ -1874,10 +1963,10 @@
                 "award": {
                     "type": "number"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "description;": {
@@ -1916,11 +2005,8 @@
                 "title": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/Model.User"
                 },
                 "user_id": {
                     "type": "integer"
@@ -1944,10 +2030,10 @@
         "Model.Tag": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1962,7 +2048,7 @@
                         "$ref": "#/definitions/Model.Poster"
                     }
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1976,10 +2062,10 @@
                         "$ref": "#/definitions/Model.Payment"
                     }
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -2009,7 +2095,7 @@
                         "$ref": "#/definitions/Model.Poster"
                     }
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "username": {
@@ -2052,7 +2138,7 @@
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.AddressDTO"
+                        "$ref": "#/definitions/DTO.CreateAddressDTO"
                     }
                 },
                 "img_urls": {
@@ -2062,7 +2148,7 @@
                     }
                 },
                 "poster": {
-                    "$ref": "#/definitions/DTO.PosterDTO"
+                    "$ref": "#/definitions/DTO.CreatePosterDTO"
                 },
                 "tags": {
                     "type": "array",
@@ -2196,31 +2282,15 @@
         },
         "UseCase.UpdatePosterRequest": {
             "type": "object",
-            "required": [
-                "categories",
-                "img_urls"
-            ],
             "properties": {
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.AddressDTO"
-                    }
-                },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "img_urls": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/DTO.UpdateAddressDTO"
                     }
                 },
                 "poster": {
-                    "$ref": "#/definitions/DTO.PosterDTO"
+                    "$ref": "#/definitions/DTO.UpdatePosterDTO"
                 }
             }
         },

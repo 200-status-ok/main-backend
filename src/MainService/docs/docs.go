@@ -348,7 +348,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api-call/generatePosterInfo": {
+        "/api-call/generate-poster-Info": {
             "get": {
                 "description": "Generates info for a poster",
                 "consumes": [
@@ -380,7 +380,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api-call/predict": {
+        "/api-call/nsfw/photo": {
             "post": {
                 "description": "Get photo nsfw AI",
                 "consumes": [
@@ -411,7 +411,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api-call/predict-txt": {
+        "/api-call/nsfw/text": {
             "get": {
                 "description": "Get text nsfw",
                 "consumes": [
@@ -615,15 +615,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Chat ID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Client ID",
-                        "name": "client_id",
+                        "description": "Conversation ID",
+                        "name": "conv_id",
                         "in": "query",
                         "required": true
                     }
@@ -1601,7 +1594,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.AddressDTO": {
+        "DTO.CreateAddressDTO": {
             "type": "object",
             "required": [
                 "city",
@@ -1633,7 +1626,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.PosterDTO": {
+        "DTO.CreatePosterDTO": {
             "type": "object",
             "required": [
                 "alert",
@@ -1688,6 +1681,102 @@ const docTemplate = `{
                 }
             }
         },
+        "DTO.UpdateAddressDTO": {
+            "type": "object",
+            "properties": {
+                "address_detail": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "city": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "province": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "DTO.UpdatePosterDTO": {
+            "type": "object",
+            "properties": {
+                "alert": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false",
+                        ""
+                    ]
+                },
+                "award": {
+                    "description": "todo if you want to update reward to 0, set it to -1",
+                    "type": "number"
+                },
+                "chat": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false",
+                        ""
+                    ]
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "img_urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "accepted",
+                        "rejected",
+                        ""
+                    ]
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "lost",
+                        "found",
+                        ""
+                    ]
+                },
+                "tag_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tel_id": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "user_phone": {
+                    "type": "string",
+                    "maxLength": 13
+                }
+            }
+        },
         "Model.Address": {
             "type": "object",
             "properties": {
@@ -1700,10 +1789,10 @@ const docTemplate = `{
                 "city": {
                     "type": "string"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1718,7 +1807,7 @@ const docTemplate = `{
                 "province": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1726,10 +1815,10 @@ const docTemplate = `{
         "Model.Conversation": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1756,7 +1845,7 @@ const docTemplate = `{
                 "poster_id": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1764,10 +1853,10 @@ const docTemplate = `{
         "Model.Image": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1776,7 +1865,7 @@ const docTemplate = `{
                 "image_id": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "url": {
@@ -1787,10 +1876,10 @@ const docTemplate = `{
         "Model.MarkedPoster": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1802,7 +1891,7 @@ const docTemplate = `{
                 "poster_id": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
@@ -1819,10 +1908,10 @@ const docTemplate = `{
                 "conversation_id": {
                     "type": "integer"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1837,7 +1926,7 @@ const docTemplate = `{
                 "type": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1848,10 +1937,10 @@ const docTemplate = `{
                 "amount": {
                     "type": "number"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1863,7 +1952,7 @@ const docTemplate = `{
                 "track_id": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
@@ -1883,10 +1972,10 @@ const docTemplate = `{
                 "award": {
                     "type": "number"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "description;": {
@@ -1925,11 +2014,8 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/Model.User"
                 },
                 "user_id": {
                     "type": "integer"
@@ -1953,10 +2039,10 @@ const docTemplate = `{
         "Model.Tag": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -1971,7 +2057,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Poster"
                     }
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1985,10 +2071,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Payment"
                     }
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "id": {
@@ -2018,7 +2104,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Poster"
                     }
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "username": {
@@ -2061,7 +2147,7 @@ const docTemplate = `{
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.AddressDTO"
+                        "$ref": "#/definitions/DTO.CreateAddressDTO"
                     }
                 },
                 "img_urls": {
@@ -2071,7 +2157,7 @@ const docTemplate = `{
                     }
                 },
                 "poster": {
-                    "$ref": "#/definitions/DTO.PosterDTO"
+                    "$ref": "#/definitions/DTO.CreatePosterDTO"
                 },
                 "tags": {
                     "type": "array",
@@ -2205,31 +2291,15 @@ const docTemplate = `{
         },
         "UseCase.UpdatePosterRequest": {
             "type": "object",
-            "required": [
-                "categories",
-                "img_urls"
-            ],
             "properties": {
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.AddressDTO"
-                    }
-                },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "img_urls": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/DTO.UpdateAddressDTO"
                     }
                 },
                 "poster": {
-                    "$ref": "#/definitions/DTO.PosterDTO"
+                    "$ref": "#/definitions/DTO.UpdatePosterDTO"
                 }
             }
         },
@@ -2561,8 +2631,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {

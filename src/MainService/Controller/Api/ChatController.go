@@ -40,8 +40,7 @@ type JoinConversationReq struct {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param Message body WebSocket.MessageWithType true "Message"
-// @Param id query uint true "Chat ID"
-// @Param client_id query uint true "Client ID"
+// @Param conv_id query uint true "Conversation ID"
 // @Success 200 {object} string
 // @Router /chats/join [get]
 func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
