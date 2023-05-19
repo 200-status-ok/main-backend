@@ -24,7 +24,7 @@ func (r *AddressRepository) GetAddressById(id int) (Model.Address, error) {
 	return address, nil
 }
 
-func (r *AddressRepository) CreateAddress(addresses []DTO.AddressDTO, posterID uint) ([]Model.Address, error) {
+func (r *AddressRepository) CreateAddress(addresses []DTO.CreateAddressDTO, posterID uint) ([]Model.Address, error) {
 	var addressesModel []Model.Address
 	for _, address := range addresses {
 		addressesModel = append(addressesModel, Model.Address{
@@ -44,7 +44,7 @@ func (r *AddressRepository) CreateAddress(addresses []DTO.AddressDTO, posterID u
 	return addressesModel, nil
 }
 
-func (r *AddressRepository) UpdateAddress(addresses []DTO.AddressDTO, posterID uint) ([]Model.Address, error) {
+func (r *AddressRepository) UpdateAddress(addresses []DTO.CreateAddressDTO, posterID uint) ([]Model.Address, error) {
 	var addressesModel []Model.Address
 	for _, address := range addresses {
 		addressesModel = append(addressesModel, Model.Address{

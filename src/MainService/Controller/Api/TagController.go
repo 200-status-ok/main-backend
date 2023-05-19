@@ -78,7 +78,7 @@ func GetTags(c *gin.Context) {
 // @Produce  json
 // @Param image_url query string true "Image Url"
 // @Success 200 {object} View.GeneratedPosterInfoView
-// @Router /api-call/generatePosterInfo [get]
+// @Router /api-call/generate-poster-Info [get]
 func GeneratePosterInfo(c *gin.Context) {
 	UseCase.GeneratePosterInfoResponse(c)
 }

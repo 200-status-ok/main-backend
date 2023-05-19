@@ -1,11 +1,13 @@
 package Repository
 
 import (
+	"errors"
 	"fmt"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
 	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"sort"
 	"strings"
 )
@@ -118,7 +120,6 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 		}
 	}
 
-	//DBConfiguration.CloseDB()
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -129,35 +130,29 @@ func (r *PosterRepository) GetPosterById(id int) (Model2.Poster, error) {
 	var poster Model2.Poster
 	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
 		First(&poster, "id = ?", id)
-	//DBConfiguration.CloseDB()
 	if result.Error != nil {
 		return Model2.Poster{}, result.Error
 	}
 	return poster, nil
 }
 
-func (r *PosterRepository) DeletePosterById(id int, userId uint) error {
+func (r *PosterRepository) DeletePosterById(id uint, userId uint) error {
 	var poster Model2.Poster
-	// check the userId and posterId
-	result := r.db.First(&poster, "id = ? and user_id = ?", id, userId)
-	if result.Error != nil {
-		return result.Error
+
+	findResult := r.db.First(&poster, "id = ? AND user_id = ?", id, userId)
+	if findResult.Error != nil {
+		return findResult.Error
 	}
-	if err := r.db.Delete(&poster.Addresses, "poster_id = ?", id).Error; err != nil {
-		return err
+
+	deleteResult := r.db.Select(clause.Associations).Delete(&poster)
+	if deleteResult.Error != nil {
+		return deleteResult.Error
 	}
-	result = r.db.Where("poster_id = ?", id).Delete(&Model2.Image{})
-	if result.Error != nil {
-		return result.Error
-	}
-	_ = r.db.Model(&poster).Association("Tags").Clear()
-	if err := r.db.Delete(&poster, "id = ?", id).Error; err != nil {
-		return err
-	}
+
 	return nil
 }
 
-func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.AddressDTO, imageUrl []string, categories []int) (
+func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses []DTO2.CreateAddressDTO, imageUrls []string, categories []int) (
 	Model2.Poster, error) {
 	var posterModel Model2.Poster
 	var categoriesModel []Model2.Tag
@@ -169,8 +164,8 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 	posterModel.SetTelegramID(poster.TelID)
 	posterModel.SetHasAlert(poster.Alert)
 	posterModel.SetAward(poster.Award)
-	posterModel.HasChat = poster.Chat
-	posterModel.State = "pending"
+	posterModel.SetHasChat(poster.Chat)
+	posterModel.SetState("pending")
 
 	for _, category := range categories {
 		categoryModel, err := NewCategoryRepository(r.db).GetCategoryById(category)
@@ -180,77 +175,155 @@ func (r *PosterRepository) CreatePoster(poster DTO2.PosterDTO, addresses []DTO2.
 		categoriesModel = append(categoriesModel, categoryModel)
 	}
 	posterModel.SetCategories(categoriesModel)
+
+	var newAddresses []Model2.Address
+	for _, address := range addresses {
+		newAddress := Model2.Address{
+			Province:      address.Province,
+			City:          address.City,
+			AddressDetail: address.AddressDetail,
+			Latitude:      address.Latitude,
+			Longitude:     address.Longitude,
+		}
+		newAddresses = append(newAddresses, newAddress)
+	}
+	_ = r.db.Model(&posterModel).Association("Addresses").Append(newAddresses)
+
+	var images []Model2.Image
+	for _, url := range imageUrls {
+		image := Model2.Image{
+			Url: url,
+		}
+		images = append(images, image)
+	}
+	_ = r.db.Model(&posterModel).Association("Images").Append(images)
 
 	result := r.db.Create(&posterModel)
 	if result.Error != nil {
 		return Model2.Poster{}, result.Error
 	}
 
-	posterID := posterModel.GetID()
-
-	newAddress, err := NewAddressRepository(r.db).CreateAddress(addresses, posterID)
-	if err != nil {
-		return Model2.Poster{}, err
-	}
-	posterModel.SetAddress(newAddress)
-	if imageUrl == nil {
-		return posterModel, nil
-	} else {
-		newImages, err := NewImageRepository(r.db).CreateImage(imageUrl, posterID)
-		if err != nil {
-			return Model2.Poster{}, err
-		}
-		posterModel.SetImages(newImages)
-	}
 	return posterModel, nil
 }
 
-func (r *PosterRepository) UpdatePoster(id int, poster DTO2.PosterDTO, addresses []DTO2.AddressDTO, imageUrl []string, categories []int) (
-	Model2.Poster, error) {
-	var posterModel Model2.Poster
-	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
-		First(&posterModel, "id = ?", id)
-	if result.Error != nil {
-		return Model2.Poster{}, result.Error
-	}
-	var categoriesModel []Model2.Tag
-	posterModel.SetTitle(poster.Title)
-	posterModel.SetDescription(poster.Description)
-	posterModel.SetUserID(poster.UserID)
-	posterModel.SetStatus(poster.Status)
-	posterModel.SetUserPhone(poster.UserPhone)
-	posterModel.SetTelegramID(poster.TelID)
-	posterModel.SetHasAlert(poster.Alert)
-	posterModel.SetAward(poster.Award)
-	posterModel.SetState(poster.State)
+func (r *PosterRepository) UpdatePoster(id int, poster DTO2.UpdatePosterDTO, addresses []DTO2.UpdateAddressDTO) error {
 
-	for _, category := range categories {
-		categoryModel, err := NewCategoryRepository(r.db).GetCategoryById(category)
-		if err != nil {
-			return Model2.Poster{}, err
+	var updatedPosterModel Model2.Poster
+	updatedPosterModel.SetID(uint(id))
+
+	if poster.Title != "" {
+		updatedPosterModel.Title = poster.Title
+	}
+
+	if poster.Description != "" {
+		updatedPosterModel.Description = poster.Description
+	}
+
+	if poster.Status != "" {
+		updatedPosterModel.SetStatus(poster.Status)
+	}
+
+	if poster.TelID != "" {
+		updatedPosterModel.TelegramID = poster.TelID
+	}
+
+	if poster.UserPhone != "" {
+		updatedPosterModel.UserPhone = poster.UserPhone
+	}
+
+	fmt.Println("modar alert: ", poster.Alert)
+	if poster.Alert != "" { //todo modar fix alert
+		if poster.Alert == "true" {
+			updatedPosterModel.HasAlert = true
+		} else if poster.Alert == "false" {
+			fmt.Println("modar alert is false")
+			updatedPosterModel.HasAlert = false
 		}
-		categoriesModel = append(categoriesModel, categoryModel)
 	}
-	posterModel.SetCategories(categoriesModel)
 
-	result = r.db.Save(&posterModel)
+	fmt.Println("modar Chat: ", poster.Chat)
+	if poster.Chat != "" { //todo modar fix chat
+		if poster.Chat == "true" {
+			updatedPosterModel.HasChat = true
+		} else if poster.Chat == "false" {
+			updatedPosterModel.HasChat = false
+		}
+	}
+
+	if poster.Award != 0 {
+		updatedPosterModel.Award = poster.Award
+	}
+
+	if poster.UserID != 0 {
+		updatedPosterModel.UserID = poster.UserID
+	}
+
+	if poster.State != "" {
+		updatedPosterModel.State = poster.State
+	}
+
+	if len(poster.ImgUrls) != 0 {
+		var updatedImages []Model2.Image
+		for _, url := range poster.ImgUrls {
+			updatedImages = append(updatedImages, Model2.Image{
+				Url:      url,
+				PosterID: uint(id),
+			})
+		}
+		r.db.Where("poster_id = ?", id).Delete(&Model2.Image{})
+		_ = r.db.Model(&updatedPosterModel).Association("Images").Append(updatedImages)
+	}
+
+	//todo modar add tag and address support
+	//if len(poster.TagIds) != 0 {
+	//	var updatedTags []Model2.Tag
+	//	for _, tagId := range poster.TagIds {
+	//		updatedTags = append(updatedTags, Model2.Tag{
+	//			ID: tagId,
+	//		})
+	//	}
+	//	_ = r.db.Model(&updatedPosterModel).Association("Tags").Replace(updatedTags)
+	//}
+	//
+	//if len(addresses) != 0 {
+	//	var updatedAddresses []Model2.Address
+	//	for _, address := range addresses {
+	//		updatedAddresses = append(updatedAddresses, Model2.Address{
+	//			Province:      address.Province,
+	//			City:          address.City,
+	//			AddressDetail: address.AddressDetail,
+	//			Latitude:      address.Latitude,
+	//			Longitude:     address.Longitude,
+	//		})
+	//	}
+	//	_ = r.db.Model(&updatedPosterModel).Association("Addresses").Replace(updatedAddresses)
+	//}
+
+	fmt.Println("modar updatedPosterModel: ", updatedPosterModel)
+
+	//if len(poster.TagIds) != 0 {
+	//	var updatedTags []Model2.Tag
+	//	for _, tagId := range poster.TagIds {
+	//		updatedTags = append(updatedTags, Model2.Tag{
+	//			Url: url,
+	//		})
+	//	}
+	//	_ = r.db.Model(&updatedPosterModel).Association("Images").Replace(updatedTags)
+	//}
+
+	fmt.Println("modar updateStatus: ", updatedPosterModel.Status)
+
+	result := r.db.Where("id = ?", id).Updates(updatedPosterModel)
+
+	if result.RowsAffected == 0 {
+		return errors.New("poster not found")
+	}
+
 	if result.Error != nil {
-		return Model2.Poster{}, result.Error
+		return result.Error
 	}
 
-	posterID := posterModel.GetID()
-	updatedAddress, err := NewAddressRepository(r.db).UpdateAddress(addresses, posterID)
-	if err != nil {
-		return Model2.Poster{}, err
-	}
-	posterModel.SetAddress(updatedAddress)
-	updatedImage, err := NewImageRepository(r.db).UpdateImage(imageUrl, posterID)
-	if err != nil {
-		return Model2.Poster{}, err
-	}
-	posterModel.SetImages(updatedImage)
-
-	return posterModel, nil
+	return nil
 }
 
 func (r *PosterRepository) CreatePosterReport(posterID uint, issuerID uint, reportType string, description string) error {
@@ -274,7 +347,7 @@ func (r *PosterRepository) CreatePosterReport(posterID uint, issuerID uint, repo
 func (r *PosterRepository) GetAllPosterReports(limit, offset int, status string) ([]Model2.PosterReport, error) {
 	var posterReports []Model2.PosterReport
 
-	var result = r.db.Preload("Poster").Preload("Issuer").Preload("Poster.User").Where("deleted_at IS NULL").Limit(limit).Offset(offset).Order("created_at DESC")
+	var result = r.db.Preload("Poster").Preload("Issuer").Preload("Poster.User").Limit(limit).Offset(offset).Order("created_at DESC")
 
 	if status != "both" {
 		result = result.Where("status = ?", status)
@@ -282,7 +355,6 @@ func (r *PosterRepository) GetAllPosterReports(limit, offset int, status string)
 
 	result.Find(&posterReports)
 
-	//DBConfiguration.CloseDB()
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -293,7 +365,6 @@ func (r *PosterRepository) GetPosterReportById(id int) (Model2.PosterReport, err
 	var posterReport Model2.PosterReport
 
 	result := r.db.Preload("Poster").Preload("Issuer").First(&posterReport, "id = ?", id)
-	//DBConfiguration.CloseDB()
 
 	if result.Error != nil {
 		return Model2.PosterReport{}, result.Error
@@ -331,8 +402,6 @@ func (r *PosterRepository) UpdatePosterReport(id, posterID, issuerID uint, repor
 	if result.Error != nil {
 		return result.Error
 	}
-
-	//DBConfiguration.CloseDB()
 
 	return nil
 }

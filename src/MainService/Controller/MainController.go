@@ -82,9 +82,9 @@ func (s *Server) MainController() {
 		}
 		api := v1.Group("/api-call")
 		{
-			api.GET("/generatePosterInfo", Api2.GeneratePosterInfo)
-			api.POST("/predict", Api2.GetPhotoNSFWAi)
-			api.GET("/predict-txt/", Api2.GetTextNSFW)
+			api.GET("/generate-poster-Info", Api2.GeneratePosterInfo)
+			api.POST("/nsfw/photo", Api2.CheckPhotoNSFW)
+			api.GET("/nsfw/text", Api2.CheckTextNSFW)
 		}
 		chats := v1.Group("/chats").Use(Middleware.AuthMiddleware(s.TokenMaker))
 		{

@@ -1,6 +1,6 @@
 package DTO
 
-type PosterDTO struct {
+type CreatePosterDTO struct {
 	Title       string  `json:"title" binding:"required,min=5,max=255"`
 	Description string  `json:"description" binding:"min=5,max=1000"`
 	Status      string  `json:"status" binding:"required,oneof=lost found"`
@@ -11,6 +11,21 @@ type PosterDTO struct {
 	Award       float64 `json:"award"`
 	UserID      uint    `json:"user_id" binding:"required,min=1"`
 	State       string  `json:"state"`
+}
+
+type UpdatePosterDTO struct {
+	Title       string   `json:"title" binding:"max=255"`
+	Description string   `json:"description" binding:"max=1000"`
+	Status      string   `json:"status" binding:"oneof=lost found ''"`
+	TelID       string   `json:"tel_id" binding:"max=255"`
+	UserPhone   string   `json:"user_phone" binding:"max=13"`
+	Alert       string   `json:"alert" binding:"oneof=true false ''"`
+	Chat        string   `json:"chat" binding:"oneof=true false ''"`
+	Award       float64  `json:"award"` //todo if you want to update reward to 0, set it to -1
+	UserID      uint     `json:"user_id"`
+	State       string   `json:"state" binding:"oneof=pending accepted rejected ''"`
+	ImgUrls     []string `json:"img_urls"`
+	TagIds      []int    `json:"tag_ids"`
 }
 
 type FilterObject struct { //todo move this to another file
