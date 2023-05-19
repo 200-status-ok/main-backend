@@ -1,15 +1,21 @@
 package Model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type Address struct {
-	gorm.Model
-	Province      string  `gorm:"type:varchar(100);" json:"province"`
-	City          string  `gorm:"type:varchar(100);" json:"city"`
-	AddressDetail string  `gorm:"type:text;" json:"address_detail"`
-	Latitude      float64 `gorm:"type:decimal;" json:"latitude"`
-	Longitude     float64 `gorm:"type:decimal;" json:"longitude"`
-	PosterId      uint    `gorm:"type:int" json:"address_id"`
+	ID            uint           `gorm:"primarykey" json:"id"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	Province      string         `gorm:"type:varchar(100);" json:"province"`
+	City          string         `gorm:"type:varchar(100);" json:"city"`
+	AddressDetail string         `gorm:"type:text;" json:"address_detail"`
+	Latitude      float64        `gorm:"type:decimal;" json:"latitude"`
+	Longitude     float64        `gorm:"type:decimal;" json:"longitude"`
+	PosterId      uint           `gorm:"type:int" json:"address_id"`
 }
 
 func (a *Address) GetProvince() string {

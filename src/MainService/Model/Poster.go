@@ -1,6 +1,9 @@
 package Model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type PosterStatus string
 
@@ -10,21 +13,23 @@ const (
 )
 
 type Poster struct {
-	gorm.Model
-	Title       string       `gorm:"type:varchar(255);not null;" json:"title"`
-	Description string       `gorm:"type:text" json:"description;"`
-	Status      PosterStatus `gorm:"type:status;default:'lost';not null;" json:"status"`
-	UserPhone   string       `gorm:"type:varchar(15);" json:"user_phone"`
-	TelegramID  string       `gorm:"type:varchar(50);" json:"telegram_id"`
-	HasAlert    bool         `gorm:"type:bool;not null;default:false" json:"has_alert"`
-	HasChat     bool         `gorm:"type:bool;not null;default:false" json:"has_chat"`
-	Award       float64      `gorm:"type:decimal" json:"award"`
-	UserID      uint         `gorm:"type:int;" json:"user_id"`
-	Tags        []Tag        `gorm:"many2many:poster_tags;" json:"tags"`
-	Images      []Image      `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"image"`
-	Addresses   []Address    `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
-	User        User         `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"user"`
-	State       string       `gorm:"type:string;default:'pending';not null;" json:"state"`
+	ID          uint           `gorm:"primarykey" json:"id"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	Title       string         `gorm:"type:varchar(255);not null;" json:"title"`
+	Description string         `gorm:"type:text" json:"description;"`
+	Status      PosterStatus   `gorm:"type:status;default:'lost';not null;" json:"status"`
+	UserPhone   string         `gorm:"type:varchar(15);" json:"user_phone"`
+	TelegramID  string         `gorm:"type:varchar(50);" json:"telegram_id"`
+	HasAlert    bool           `gorm:"type:bool;not null;default:false" json:"has_alert"`
+	HasChat     bool           `gorm:"type:bool;not null;default:false" json:"has_chat"`
+	Award       float64        `gorm:"type:decimal" json:"award"`
+	UserID      uint           `gorm:"type:int;" json:"user_id"`
+	Tags        []Tag          `gorm:"many2many:poster_tags;" json:"tags"`
+	Images      []Image        `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"image"`
+	Addresses   []Address      `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
+	State       string         `gorm:"type:string;default:'pending';not null;" json:"state"`
 }
 
 func (p *Poster) GetTitle() string {

@@ -1,13 +1,19 @@
 package Model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type Payment struct {
-	gorm.Model
-	UserID  uint    `gorm:"not null" json:"user_id"`
-	Amount  float64 `gorm:"type:decimal(10,2);not null" json:"amount"`
-	TrackID string  `gorm:"not null" json:"track_id"`
-	Status  string  `gorm:"type:varchar(50);not null" json:"status"`
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	UserID    uint           `gorm:"not null" json:"user_id"`
+	Amount    float64        `gorm:"type:decimal(10,2);not null" json:"amount"`
+	TrackID   string         `gorm:"not null" json:"track_id"`
+	Status    string         `gorm:"type:varchar(50);not null" json:"status"`
 }
 
 func (p *Payment) GetID() uint {
