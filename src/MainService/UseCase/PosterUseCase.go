@@ -122,7 +122,7 @@ type CreatePosterRequest struct {
 	Poster    DTO2.CreatePosterDTO
 	Addresses []DTO2.CreateAddressDTO
 	ImgUrls   []string `json:"img_urls" binding:"required"`
-	Tags      []int    `json:"tags" binding:"required"`
+	Tags      []string `json:"tags" binding:"required"`
 }
 
 func CreatePosterResponse(c *gin.Context) {
@@ -457,7 +457,7 @@ type Data struct {
 	Districts []District `json:"districts"`
 }
 
-func MockPoster(count int, userID int, categories []int) error {
+func MockPoster(count int, userID int, tagNames []string) error {
 	file, err := os.Open("Utils/Tehran.json")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -491,7 +491,7 @@ func MockPoster(count int, userID int, categories []int) error {
 		fmt.Println(splitStr[randomNumber2])
 		randomNumber3 := rand.Intn(2)
 		fmt.Println(randomNumber3)
-		randomNumber4 := rand.Intn(len(categories))
+		randomNumber4 := rand.Intn(len(tagNames))
 		if randomNumber3 == 0 {
 			request := CreatePosterRequest{
 				Poster: DTO2.CreatePosterDTO{
@@ -513,8 +513,8 @@ func MockPoster(count int, userID int, categories []int) error {
 					},
 				},
 				ImgUrls: []string{},
-				Tags: []int{
-					categories[randomNumber4],
+				Tags: []string{
+					tagNames[randomNumber4],
 				},
 			}
 			posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
@@ -545,8 +545,8 @@ func MockPoster(count int, userID int, categories []int) error {
 					},
 				},
 				ImgUrls: []string{},
-				Tags: []int{
-					categories[randomNumber4],
+				Tags: []string{
+					tagNames[randomNumber4],
 				},
 			}
 			posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
@@ -562,9 +562,9 @@ func MockPoster(count int, userID int, categories []int) error {
 }
 
 type CreateMockDataRequest struct {
-	Count      int   `json:"count" binding:"required"`
-	UserId     int   `json:"user_id" binding:"required"`
-	Categories []int `json:"categories" binding:"required"`
+	Count    int      `json:"count" binding:"required"`
+	UserId   int      `json:"user_id" binding:"required"`
+	TagNames []string `json:"tag_names" binding:"required"`
 }
 
 func CreateMockDataResponse(c *gin.Context) {
@@ -574,7 +574,7 @@ func CreateMockDataResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := MockPoster(request.Count, request.UserId, request.Categories)
+	err := MockPoster(request.Count, request.UserId, request.TagNames)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

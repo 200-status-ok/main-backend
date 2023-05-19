@@ -11,6 +11,7 @@ type Tag struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	Name      string         `gorm:"type:varchar(255);not null;unique" json:"name"`
+	State     string         `gorm:"type:string;default:'rejected';not null;" json:"state"` //one of [rejected, accepted, pending]
 	Posters   []Poster       `gorm:"many2many:poster_tags" json:"posters"`
 }
 

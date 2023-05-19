@@ -35,7 +35,8 @@ func CreateTagResponse(c *gin.Context) {
 }
 
 type UpdateTagRequest struct {
-	Name string `json:"name" binding:"required,min=1,max=30"`
+	Name  string `json:"name" binding:"max=30"`
+	State string `json:"state" binding:"oneof=accepted rejected pending ''"`
 }
 type UpdateTagByIdRequest struct {
 	ID uint `uri:"id" binding:"required,min=1"`
@@ -52,16 +53,18 @@ func UpdateTagByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	tagRepository := Repository.NewCategoryRepository(DBConfiguration.GetDB())
-	tags, err := tagRepository.UpdateCategory(id.ID, Model.Tag{
-		Name: tag.Name,
+	err := tagRepository.UpdateTag(id.ID, Model.Tag{
+		Name:  tag.Name,
+		State: tag.State,
 	})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
-	View.CreateTagView(tags, c)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Tag updated successfully"})
 }
 
 type DeleteTagByIdRequest struct {
@@ -81,7 +84,7 @@ func DeleteTagByIdResponse(c *gin.Context) {
 		return
 	}
 	//DBConfiguration.CloseDB()
-	c.JSON(http.StatusOK, gin.H{})
+	c.JSON(http.StatusOK, gin.H{"message": "Tag deleted successfully"})
 }
 
 type GetTagByIdRequest struct {
@@ -104,14 +107,24 @@ func GetTagByIdResponse(c *gin.Context) {
 	View.CreateTagView(tags, c)
 }
 
+type GetTagsRequest struct {
+	State string `form:"state,omitempty" binding:"omitempty,oneof=all pending accepted rejected"`
+}
+
 func GetTagsResponse(c *gin.Context) {
+	var request GetTagsRequest
+	if err := c.ShouldBindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	tagRepository := Repository.NewCategoryRepository(DBConfiguration.GetDB())
-	tags, err := tagRepository.GetCategories()
+	tags, err := tagRepository.GetTags(request.State)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
+
 	View.GetAllTagView(tags, c)
 }
 

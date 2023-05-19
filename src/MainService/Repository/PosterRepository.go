@@ -31,10 +31,10 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 	var result *gorm.DB
 
 	if filterObject.SearchPhrase != "" || filterObject.TagIds != nil {
-		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").
+		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags", "state = ?", "accepted").
 			Order(sortBy + " " + sortType)
 	} else {
-		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags").
+		result = r.db.Preload("Addresses").Preload("Images").Preload("Tags", "state = ?", "accepted").
 			Limit(limit).Offset(offset).Order(sortBy + " " + sortType)
 	}
 
@@ -128,8 +128,9 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 
 func (r *PosterRepository) GetPosterById(id int) (Model2.Poster, error) {
 	var poster Model2.Poster
-	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").
+	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags", "state = ?", "accepted").
 		First(&poster, "id = ?", id)
+
 	if result.Error != nil {
 		return Model2.Poster{}, result.Error
 	}
@@ -150,12 +151,12 @@ func (r *PosterRepository) DeletePosterById(id uint, userId uint) error {
 	}
 
 	return nil
+
 }
 
-func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses []DTO2.CreateAddressDTO, imageUrls []string, categories []int) (
+func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses []DTO2.CreateAddressDTO, imageUrls []string, tagNames []string) (
 	Model2.Poster, error) {
 	var posterModel Model2.Poster
-	var categoriesModel []Model2.Tag
 	posterModel.SetTitle(poster.Title)
 	posterModel.SetDescription(poster.Description)
 	posterModel.SetUserID(poster.UserID)
@@ -167,14 +168,26 @@ func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses [
 	posterModel.SetHasChat(poster.Chat)
 	posterModel.SetState("pending")
 
-	for _, category := range categories {
-		categoryModel, err := NewCategoryRepository(r.db).GetCategoryById(category)
-		if err != nil {
-			return Model2.Poster{}, err
+	var newTags []Model2.Tag
+	tagRepository := NewCategoryRepository(r.db)
+
+	for _, tagName := range tagNames {
+		name := strings.ToLower(strings.Trim(tagName, " "))
+		tagModel, getErr := tagRepository.GetTagByName(name)
+		if getErr != nil {
+			newTag, creErr := tagRepository.CreateCategory(Model2.Tag{
+				Name:  name,
+				State: "pending",
+			})
+			if creErr != nil {
+				continue
+			}
+			newTags = append(newTags, newTag)
+		} else {
+			newTags = append(newTags, tagModel)
 		}
-		categoriesModel = append(categoriesModel, categoryModel)
 	}
-	posterModel.SetCategories(categoriesModel)
+	_ = r.db.Model(&posterModel).Association("Tags").Append(newTags)
 
 	var newAddresses []Model2.Address
 	for _, address := range addresses {
@@ -189,14 +202,14 @@ func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses [
 	}
 	_ = r.db.Model(&posterModel).Association("Addresses").Append(newAddresses)
 
-	var images []Model2.Image
+	var newImages []Model2.Image
 	for _, url := range imageUrls {
 		image := Model2.Image{
 			Url: url,
 		}
-		images = append(images, image)
+		newImages = append(newImages, image)
 	}
-	_ = r.db.Model(&posterModel).Association("Images").Append(images)
+	_ = r.db.Model(&posterModel).Association("Images").Append(newImages)
 
 	result := r.db.Create(&posterModel)
 	if result.Error != nil {

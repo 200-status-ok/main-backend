@@ -59,11 +59,12 @@ func GetTag(c *gin.Context) {
 }
 
 // GetTags godoc
-// @Summary Get a Tags
+// @Summary Get all Tags
 // @Description Retrieves Tags
 // @Tags Tags
 // @Accept  json
 // @Produce  json
+// @Param state query string false "State" enum(all, accepted, rejected, pending) default(all)
 // @Success 200 {array} View.TagView
 // @Router /tags [get]
 func GetTags(c *gin.Context) {
