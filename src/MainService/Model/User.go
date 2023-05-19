@@ -6,7 +6,10 @@ import (
 )
 
 type User struct {
-	gorm.Model
+	ID                  uint           `gorm:"primarykey" json:"id"`
+	CreatedAt           time.Time      `json:"created_at"`
+	UpdatedAt           time.Time      `json:"updated_at"`
+	DeletedAt           gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	Username            string         `gorm:"type:varchar(50);not null;unique" json:"username"`
 	Posters             []Poster       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"posters"`
 	Wallet              float64        `gorm:"type:decimal(10,2);default:0" json:"wallet"`

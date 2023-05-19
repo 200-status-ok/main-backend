@@ -1,11 +1,17 @@
 package Model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type Tag struct {
-	gorm.Model
-	Name    string   `gorm:"type:varchar(255);not null;unique" json:"name"`
-	Posters []Poster `gorm:"many2many:poster_tags" json:"posters"`
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	Name      string         `gorm:"type:varchar(255);not null;unique" json:"name"`
+	Posters   []Poster       `gorm:"many2many:poster_tags" json:"posters"`
 }
 
 func (c *Tag) GetName() string {

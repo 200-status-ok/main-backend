@@ -47,7 +47,10 @@ func (r *UserRepository) UserCreate(user *Model.User) (*Model.User, error) {
 
 func (r *UserRepository) FindById(id uint) (*Model.User, error) {
 	var user Model.User
-	err := r.db.Preload("Posters").Preload("MarkedPosters").Where("id = ?", id).First(&user).Error
+	err := r.db.Preload("Posters").Preload("Posters.Images").Preload("Posters.Addresses").Preload("Posters.Tags").
+		Preload("MarkedPosters").Preload("MarkedPosters.Poster").Preload("MarkedPosters.Poster.Images").Preload("MarkedPosters.Poster.Addresses").Preload("MarkedPosters.Poster.Tags").
+		Where("id = ?", id).
+		First(&user).Error
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
@@ -56,7 +59,9 @@ func (r *UserRepository) FindById(id uint) (*Model.User, error) {
 
 func (r *UserRepository) GetAllUsers() (*[]Model.User, error) {
 	var users []Model.User
-	err := r.db.Preload("Posters").Preload("MarkedPosters").Find(&users).Error
+	err := r.db.Preload("Posters").Preload("Posters.Images").Preload("Posters.Addresses").Preload("Posters.Tags").
+		Preload("MarkedPosters").Preload("MarkedPosters.Poster").Preload("MarkedPosters.Poster.Images").Preload("MarkedPosters.Poster.Addresses").Preload("MarkedPosters.Poster.Tags").
+		Find(&users).Error
 	if err != nil {
 		return nil, errors.New("error while getting all users")
 	}
@@ -80,14 +85,10 @@ func (r *UserRepository) DeleteUser(id uint) error {
 
 func (r *UserRepository) UpdateWallet(id uint, amount float64) (*Model.User, error) {
 	var user Model.User
-	result := r.db.First(&user, id)
+	result := r.db.Model(&user).Where("id = ?", id).Update("wallet", gorm.Expr("wallet + ?", amount))
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	user.SetWallet(user.GetWallet() + amount)
-	result = r.db.Save(&user)
-	if result.Error != nil {
-		return nil, result.Error
-	}
+
 	return &user, nil
 }

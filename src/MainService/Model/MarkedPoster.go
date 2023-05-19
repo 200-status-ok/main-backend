@@ -1,12 +1,18 @@
 package Model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type MarkedPoster struct {
-	gorm.Model
-	UserID   uint   `gorm:"not null" json:"user_id"`
-	PosterID uint   `gorm:"not null" json:"poster_id"`
-	Poster   Poster `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"poster"`
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	UserID    uint           `gorm:"not null" json:"user_id"`
+	PosterID  uint           `gorm:"not null" json:"poster_id"`
+	Poster    Poster         `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"poster"`
 }
 
 func (m *MarkedPoster) GetID() uint {

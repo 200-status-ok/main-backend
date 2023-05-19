@@ -2,12 +2,16 @@ package Model
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type Image struct {
-	gorm.Model
-	Url      string `gorm:"type:varchar(255)" json:"url"`
-	PosterID uint   `gorm:"not null" json:"image_id"`
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	Url       string         `gorm:"type:varchar(255)" json:"url"`
+	PosterID  uint           `gorm:"not null" json:"image_id"`
 }
 
 func (i *Image) GetUrl() string {
