@@ -128,7 +128,7 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 
 func (r *PosterRepository) GetPosterById(id int) (Model2.Poster, error) {
 	var poster Model2.Poster
-	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").Preload("User").
+	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").
 		First(&poster, "id = ?", id)
 	if result.Error != nil {
 		return Model2.Poster{}, result.Error
