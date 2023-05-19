@@ -10,13 +10,23 @@ type CategoryRepository struct {
 	db *gorm.DB
 }
 
-func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
+func NewCategoryRepository(db *gorm.DB) *CategoryRepository { //todo modar singleton
 	return &CategoryRepository{db: db}
 }
 
 func (r *CategoryRepository) GetCategoryById(id int) (Model.Tag, error) {
 	var category Model.Tag
 	result := r.db.First(&category, id)
+	if result.Error != nil {
+		return Model.Tag{}, result.Error
+	}
+
+	return category, nil
+}
+
+func (r *CategoryRepository) GetTagByName(name string) (Model.Tag, error) {
+	var category Model.Tag
+	result := r.db.Where("name = ?", name).First(&category)
 	if result.Error != nil {
 		return Model.Tag{}, result.Error
 	}
@@ -33,26 +43,24 @@ func (r *CategoryRepository) CreateCategory(category Model.Tag) (Model.Tag, erro
 	return category, nil
 }
 
-func (r *CategoryRepository) UpdateCategory(id uint, category Model.Tag) (Model.Tag, error) {
-	//result := r.db.Model(&category).Where("id = ?", id).Updates(category)
-	//if result.Error != nil {
-	//	return Model.Tag{}, result.Error
-	//}
-	//
-	//return category, nil
+func (r *CategoryRepository) UpdateTag(id uint, tag Model.Tag) error {
+	var updatedTagModel Model2.Tag
 
-	var categoryModel Model.Tag
-	result := r.db.First(&categoryModel, id)
-	if result.Error != nil {
-		return Model.Tag{}, result.Error
-	}
-	categoryModel.SetName(category.GetName())
-	result = r.db.Save(&categoryModel)
-	if result.Error != nil {
-		return Model.Tag{}, result.Error
+	if tag.Name != "" {
+		updatedTagModel.Name = tag.Name
 	}
 
-	return categoryModel, nil
+	if tag.State != "" {
+		updatedTagModel.State = tag.State
+	}
+
+	result := r.db.Model(&Model2.Tag{}).Where("id = ?", id).Updates(updatedTagModel)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
 
 func (r *CategoryRepository) DeleteCategory(id uint) error {
@@ -69,9 +77,17 @@ func (r *CategoryRepository) DeleteCategory(id uint) error {
 	return nil
 }
 
-func (r *CategoryRepository) GetCategories() ([]Model2.Tag, error) {
+func (r *CategoryRepository) GetTags(state string) ([]Model2.Tag, error) {
 	var categories []Model2.Tag
-	result := r.db.Find(&categories)
+
+	var result *gorm.DB
+
+	if state != "" && state != "all" {
+		result = r.db.Where("state = ?", state).Find(&categories)
+	} else {
+		result = r.db.Find(&categories)
+	}
+
 	if result.Error != nil {
 		return []Model2.Tag{}, result.Error
 	}
