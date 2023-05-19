@@ -1175,7 +1175,16 @@ const docTemplate = `{
                 "tags": [
                     "Tags"
                 ],
-                "summary": "Get a Tags",
+                "summary": "Get all Tags",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "all",
+                        "description": "State",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2064,6 +2073,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/Model.Poster"
                     }
                 },
+                "state": {
+                    "description": "one of [rejected, accepted, pending]",
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 }
@@ -2125,19 +2138,19 @@ const docTemplate = `{
         "UseCase.CreateMockDataRequest": {
             "type": "object",
             "required": [
-                "categories",
                 "count",
+                "tag_names",
                 "user_id"
             ],
             "properties": {
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "count": {
                     "type": "integer"
+                },
+                "tag_names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "user_id": {
                     "type": "integer"
@@ -2169,7 +2182,7 @@ const docTemplate = `{
                 "tags": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "type": "string"
                     }
                 }
             }
@@ -2312,14 +2325,19 @@ const docTemplate = `{
         },
         "UseCase.UpdateTagRequest": {
             "type": "object",
-            "required": [
-                "name"
-            ],
             "properties": {
                 "name": {
                     "type": "string",
-                    "maxLength": 30,
-                    "minLength": 1
+                    "maxLength": 30
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "accepted",
+                        "rejected",
+                        "pending",
+                        ""
+                    ]
                 }
             }
         },

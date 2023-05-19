@@ -329,6 +329,9 @@ definitions:
         items:
           $ref: '#/definitions/Model.Poster'
         type: array
+      state:
+        description: one of [rejected, accepted, pending]
+        type: string
       updated_at:
         type: string
     type: object
@@ -369,17 +372,17 @@ definitions:
     type: object
   UseCase.CreateMockDataRequest:
     properties:
-      categories:
-        items:
-          type: integer
-        type: array
       count:
         type: integer
+      tag_names:
+        items:
+          type: string
+        type: array
       user_id:
         type: integer
     required:
-    - categories
     - count
+    - tag_names
     - user_id
     type: object
   UseCase.CreatePosterRequest:
@@ -396,7 +399,7 @@ definitions:
         $ref: '#/definitions/DTO.CreatePosterDTO'
       tags:
         items:
-          type: integer
+          type: string
         type: array
     required:
     - img_urls
@@ -501,10 +504,14 @@ definitions:
     properties:
       name:
         maxLength: 30
-        minLength: 1
         type: string
-    required:
-    - name
+      state:
+        enum:
+        - accepted
+        - rejected
+        - pending
+        - ""
+        type: string
     type: object
   UseCase.UpdateUserRequest:
     properties:
@@ -1479,6 +1486,12 @@ paths:
       consumes:
       - application/json
       description: Retrieves Tags
+      parameters:
+      - default: all
+        description: State
+        in: query
+        name: state
+        type: string
       produces:
       - application/json
       responses:
@@ -1488,7 +1501,7 @@ paths:
             items:
               $ref: '#/definitions/View.TagView'
             type: array
-      summary: Get a Tags
+      summary: Get all Tags
       tags:
       - Tags
     post:
