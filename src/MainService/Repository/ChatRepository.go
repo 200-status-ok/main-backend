@@ -63,7 +63,7 @@ func (r *ChatRepository) CreateConversation(name string, conversationImage strin
 
 func (r *ChatRepository) GetPosterOwner(posterId uint) (Model.Poster, error) {
 	var poster Model.Poster
-	result := r.db.First(&poster, posterId)
+	result := r.db.Preload("Images").First(&poster, posterId)
 	if result.Error != nil {
 		return Model.Poster{}, result.Error
 	}
