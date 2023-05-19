@@ -27,7 +27,7 @@ func main() {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowCredentials = true
-	config.AllowHeaders = []string{"Authorization", "Content-Type"}
+	config.AllowHeaders = []string{"Authorization", "Content-Type", "Origin"}
 
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn:              "https://71cb6a234a004aa492c0a6482b9a07e4@o4505154999025664.ingest.sentry.io/4505160636760064",

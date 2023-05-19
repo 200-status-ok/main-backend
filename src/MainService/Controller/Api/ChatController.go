@@ -52,7 +52,6 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 	tokenMaker, _ := Token.NewJWTMaker(secretKey)
 	//payload := c.MustGet("authorization_payload").(*Token.Payload)
 	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
-
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -239,6 +238,7 @@ type ConversationHistoryQueryRequest struct {
 // @Router /chats/authorize/history/{conversation_id}/ [get]
 func ConversationHistory(c *gin.Context) {
 	chatRepository := Repository.NewChatRepository(DBConfiguration.GetDB())
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
 	var pathRequest ConversationHistoryPathRequest
 	if err := c.ShouldBindUri(&pathRequest); err != nil {
@@ -259,5 +259,5 @@ func ConversationHistory(c *gin.Context) {
 		return
 	}
 
-	View.GetConversationHistory(c, messages)
+	View.GetConversationHistory(c, messages, uint(payload.UserID))
 }
