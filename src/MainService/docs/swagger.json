@@ -431,7 +431,7 @@
                 }
             }
         },
-        "/chats/conversation": {
+        "/chats/authorize/conversation": {
             "post": {
                 "description": "Create or check to exist a chat conversation",
                 "consumes": [
@@ -465,7 +465,7 @@
                 }
             }
         },
-        "/chats/conversation/{conversation_id}": {
+        "/chats/authorize/conversation/{conversation_id}": {
             "get": {
                 "description": "Get conversation by id",
                 "consumes": [
@@ -497,7 +497,7 @@
                 }
             }
         },
-        "/chats/conversations": {
+        "/chats/authorize/conversations": {
             "get": {
                 "description": "Get all user conversations",
                 "consumes": [
@@ -523,7 +523,7 @@
                 }
             }
         },
-        "/chats/history/{conversation_id}/": {
+        "/chats/authorize/history/{conversation_id}/": {
             "get": {
                 "description": "Get conversation history",
                 "consumes": [
@@ -608,6 +608,13 @@
                         "type": "integer",
                         "description": "Conversation ID",
                         "name": "conv_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
                         "in": "query",
                         "required": true
                     }

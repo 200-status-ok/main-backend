@@ -5,6 +5,7 @@ import (
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
+	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
 	"github.com/403-access-denied/main-backend/src/MainService/WebSocket"
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,8 @@ func NewChatWS(hub *WebSocket.Hub) *ChatWS {
 }
 
 type JoinConversationReq struct {
-	ConversationID uint `form:"conv_id" binding:"required"`
+	ConversationID uint   `form:"conv_id" binding:"required"`
+	Token          string `form:"token" binding:"required"`
 }
 
 // JoinConversation JoinChat godoc
@@ -41,18 +43,22 @@ type JoinConversationReq struct {
 // @Security ApiKeyAuth
 // @Param Message body WebSocket.MessageWithType true "Message"
 // @Param conv_id query uint true "Conversation ID"
+// @Param token query string true "Token"
 // @Success 200 {object} string
 // @Router /chats/join [get]
 func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 	var request JoinConversationReq
-	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	secretKey := Utils.ReadFromEnvFile(".env", "JWT_SECRET")
+	tokenMaker, _ := Token.NewJWTMaker(secretKey)
+	//payload := c.MustGet("authorization_payload").(*Token.Payload)
 	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
 
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	token := request.Token
+	payload, err := tokenMaker.VerifyToken(token)
 	conversation, err := chatRepo.GetConversationById(request.ConversationID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -118,7 +124,7 @@ type ConversationInfo struct {
 // @Produce json
 // @Param conversation body ConversationInfo true "CreateConversation"
 // @Success 200 {object} string
-// @Router /chats/conversation [post]
+// @Router /chats/authorize/conversation [post]
 func CreateConversation(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request ConversationInfo
@@ -166,7 +172,7 @@ func CreateConversation(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {array} View.ConversationView
-// @Router /chats/conversations [get]
+// @Router /chats/authorize/conversations [get]
 func AllUserConversations(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
@@ -192,7 +198,7 @@ type GetConversationByIdPathRequest struct {
 // @Produce json
 // @Param conversation_id path int true "Conversation ID"
 // @Success 200 {object} string
-// @Router /chats/conversation/{conversation_id} [get]
+// @Router /chats/authorize/conversation/{conversation_id} [get]
 func GetConversationById(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var pathRequest GetConversationByIdPathRequest
@@ -230,7 +236,7 @@ type ConversationHistoryQueryRequest struct {
 // @Param page_id query int true "Page ID" minimum(1) default(1)
 // @Param page_size query int true "Page size" minimum(1) default(10)
 // @Success 200 {array} Model.Conversation
-// @Router /chats/history/{conversation_id}/ [get]
+// @Router /chats/authorize/history/{conversation_id}/ [get]
 func ConversationHistory(c *gin.Context) {
 	chatRepository := Repository.NewChatRepository(DBConfiguration.GetDB())
 

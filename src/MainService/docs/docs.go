@@ -440,7 +440,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/conversation": {
+        "/chats/authorize/conversation": {
             "post": {
                 "description": "Create or check to exist a chat conversation",
                 "consumes": [
@@ -474,7 +474,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/conversation/{conversation_id}": {
+        "/chats/authorize/conversation/{conversation_id}": {
             "get": {
                 "description": "Get conversation by id",
                 "consumes": [
@@ -506,7 +506,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/conversations": {
+        "/chats/authorize/conversations": {
             "get": {
                 "description": "Get all user conversations",
                 "consumes": [
@@ -532,7 +532,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/history/{conversation_id}/": {
+        "/chats/authorize/history/{conversation_id}/": {
             "get": {
                 "description": "Get conversation history",
                 "consumes": [
@@ -617,6 +617,13 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Conversation ID",
                         "name": "conv_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token",
+                        "name": "token",
                         "in": "query",
                         "required": true
                     }

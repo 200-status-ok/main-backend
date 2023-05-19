@@ -86,14 +86,16 @@ func (s *Server) MainController() {
 			api.POST("/nsfw/photo", Api2.CheckPhotoNSFW)
 			api.GET("/nsfw/text", Api2.CheckTextNSFW)
 		}
-		chats := v1.Group("/chats").Use(Middleware.AuthMiddleware(s.TokenMaker))
+		chats := v1.Group("/chats")
 		{
 			chats.GET("/join", s.ChatWs.JoinConversation)
-			chats.POST("/conversation", Api2.CreateConversation)
-			chats.GET("/conversations", Api2.AllUserConversations)
-			chats.GET("/conversation/:conversation_id", Api2.GetConversationById)
-			chats.GET("/history/:conversation_id", Api2.ConversationHistory)
-
+			chatAuthorize := chats.Group("/authorize").Use(Middleware.AuthMiddleware(s.TokenMaker))
+			{
+				chatAuthorize.POST("/conversation", Api2.CreateConversation)
+				chatAuthorize.GET("/conversations", Api2.AllUserConversations)
+				chatAuthorize.GET("/conversation/:conversation_id", Api2.GetConversationById)
+				chatAuthorize.GET("/history/:conversation_id", Api2.ConversationHistory)
+			}
 		}
 	}
 

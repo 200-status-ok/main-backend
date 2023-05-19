@@ -988,7 +988,7 @@ paths:
       summary: Get text nsfw
       tags:
       - ApiCall
-  /chats/conversation:
+  /chats/authorize/conversation:
     post:
       consumes:
       - application/json
@@ -1010,7 +1010,7 @@ paths:
       summary: Create or check to exist a chat conversation for two users
       tags:
       - Chat
-  /chats/conversation/{conversation_id}:
+  /chats/authorize/conversation/{conversation_id}:
     get:
       consumes:
       - application/json
@@ -1031,7 +1031,7 @@ paths:
       summary: Get conversation by id
       tags:
       - Chat
-  /chats/conversations:
+  /chats/authorize/conversations:
     get:
       consumes:
       - application/json
@@ -1048,7 +1048,7 @@ paths:
       summary: Get all user conversations
       tags:
       - Chat
-  /chats/history/{conversation_id}/:
+  /chats/authorize/history/{conversation_id}/:
     get:
       consumes:
       - application/json
@@ -1102,6 +1102,11 @@ paths:
         name: conv_id
         required: true
         type: integer
+      - description: Token
+        in: query
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
