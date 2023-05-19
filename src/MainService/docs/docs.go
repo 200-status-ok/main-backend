@@ -1663,8 +1663,7 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string",
-                    "maxLength": 1000,
-                    "minLength": 5
+                    "maxLength": 1000
                 },
                 "state": {
                     "type": "string"
@@ -1678,13 +1677,11 @@ const docTemplate = `{
                 },
                 "tel_id": {
                     "type": "string",
-                    "maxLength": 255,
-                    "minLength": 5
+                    "maxLength": 255
                 },
                 "title": {
                     "type": "string",
-                    "maxLength": 255,
-                    "minLength": 5
+                    "maxLength": 255
                 },
                 "user_id": {
                     "type": "integer",
