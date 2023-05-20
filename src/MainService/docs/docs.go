@@ -1688,6 +1688,13 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 1000
                 },
+                "special_ads": {
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "premium"
+                    ]
+                },
                 "state": {
                     "type": "string"
                 },
@@ -1772,6 +1779,14 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "special_ads": {
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "premium",
+                        ""
+                    ]
                 },
                 "state": {
                     "type": "string",
@@ -2031,6 +2046,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Model.Image"
                     }
+                },
+                "special_type": {
+                    "type": "string"
                 },
                 "state": {
                     "type": "string"
@@ -2546,6 +2564,9 @@ const docTemplate = `{
                     }
                 },
                 "phone_user": {
+                    "type": "string"
+                },
+                "special_type": {
                     "type": "string"
                 },
                 "state": {

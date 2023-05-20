@@ -92,3 +92,12 @@ func (r *UserRepository) UpdateWallet(id uint, amount float64) (*Model.User, err
 
 	return &user, nil
 }
+
+func (r *UserRepository) GetAmount(id uint) (float64, error) {
+	var user Model.User
+	result := r.db.Where("id = ?", id).First(&user)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return user.GetWallet(), nil
+}

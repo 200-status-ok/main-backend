@@ -30,6 +30,7 @@ type Poster struct {
 	Images      []Image        `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"image"`
 	Addresses   []Address      `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
 	State       string         `gorm:"type:string;default:'pending';not null;" json:"state"`
+	SpecialType string         `gorm:"type:string;default:'normal';not null;" json:"special_type"`
 }
 
 func (p *Poster) GetTitle() string {
@@ -150,4 +151,12 @@ func (p *Poster) GetHasChat() bool {
 
 func (p *Poster) SetHasChat(hasChat bool) {
 	p.HasChat = hasChat
+}
+
+func (p *Poster) GetSpecialType() string {
+	return p.SpecialType
+}
+
+func (p *Poster) SetSpecialType(specialAds string) {
+	p.SpecialType = specialAds
 }

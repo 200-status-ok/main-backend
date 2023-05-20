@@ -126,21 +126,44 @@ type CreatePosterRequest struct {
 }
 
 func CreatePosterResponse(c *gin.Context) {
+	var specialAdsPrice = 100000.0
 	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request CreatePosterRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	request.Poster.UserID = uint(payload.UserID)
-	poster, err := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Tags)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	walletAmount, err := userRepository.GetAmount(uint(payload.UserID))
+	if request.Poster.SpecialType == "premium" {
+		if walletAmount > specialAdsPrice {
+			_, err = userRepository.UpdateWallet(uint(payload.UserID), -specialAdsPrice)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			request.Poster.UserID = uint(payload.UserID)
+			poster, err2 := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Tags, "premium")
+			if err2 != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err2.Error()})
+				return
+			}
+			View.CreatePosterView(poster, c)
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "not enough money"})
+			return
+		}
+	} else {
+		request.Poster.UserID = uint(payload.UserID)
+		poster, err := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Tags, "normal")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		//DBConfiguration.CloseDB()
+		View.CreatePosterView(poster, c)
 	}
-	//DBConfiguration.CloseDB()
-	View.CreatePosterView(poster, c)
 }
 
 type UpdatePosterRequest struct {
@@ -518,7 +541,7 @@ func MockPoster(count int, userID int, tagNames []string) error {
 				},
 			}
 			posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
-			model, err := posterRepository.CreatePoster(request.Poster, request.Addresses, nil, request.Tags)
+			model, err := posterRepository.CreatePoster(request.Poster, request.Addresses, nil, request.Tags, "normal")
 			if err != nil {
 				fmt.Println(err)
 				return err
@@ -550,7 +573,7 @@ func MockPoster(count int, userID int, tagNames []string) error {
 				},
 			}
 			posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
-			model, err := posterRepository.CreatePoster(request.Poster, request.Addresses, nil, request.Tags)
+			model, err := posterRepository.CreatePoster(request.Poster, request.Addresses, nil, request.Tags, "normal")
 			if err != nil {
 				fmt.Println(err)
 				return err

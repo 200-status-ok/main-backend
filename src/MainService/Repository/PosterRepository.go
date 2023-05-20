@@ -154,7 +154,7 @@ func (r *PosterRepository) DeletePosterById(id uint, userId uint) error {
 
 }
 
-func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses []DTO2.CreateAddressDTO, imageUrls []string, tagNames []string) (
+func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses []DTO2.CreateAddressDTO, imageUrls []string, tagNames []string, special string) (
 	Model2.Poster, error) {
 	var posterModel Model2.Poster
 	posterModel.SetTitle(poster.Title)
@@ -167,6 +167,7 @@ func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses [
 	posterModel.SetAward(poster.Award)
 	posterModel.SetHasChat(poster.Chat)
 	posterModel.SetState("pending")
+	posterModel.SetSpecialType(special)
 
 	var newTags []Model2.Tag
 	tagRepository := NewCategoryRepository(r.db)
