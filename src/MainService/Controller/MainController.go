@@ -44,7 +44,8 @@ func (s *Server) MainController() {
 				userAuthRoutes.PATCH("/", Api2.UpdateUser)
 				userAuthRoutes.DELETE("/", Api2.DeleteUser)
 				userAuthRoutes.GET("/payment/user_wallet", Api2.Payment)
-				userAuthRoutes.GET("/payment/user_wallet/:id", Api2.PaymentVerify)
+				userAuthRoutes.GET("/payment/user_wallet/verify", Api2.PaymentVerify)
+				userAuthRoutes.GET("/payment/user_wallet/get_transactions", Api2.GetTransactions)
 			}
 			user.POST("/auth/otp/send", Api2.SendOTP)
 			user.POST("/auth/otp/login", Api2.LoginUser)

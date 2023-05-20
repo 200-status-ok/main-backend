@@ -99,7 +99,7 @@ func DeleteUser(c *gin.Context) {
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Param id query int true "User ID"
+// @Param url query string true "URL"
 // @Param amount query float64 true "Amount"
 // @Success 200
 // @Router /users/authorize/payment/user_wallet [get]
@@ -113,9 +113,21 @@ func Payment(c *gin.Context) {
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Payment ID"
+// @Param track_id query string true "Track ID"
 // @Success 200
-// @Router /users/authorize/payment/user_wallet/{id} [get]
+// @Router /users/authorize/payment/user_wallet/verify [get]
 func PaymentVerify(c *gin.Context) {
 	UseCase.PaymentVerifyResponse(c)
+}
+
+// GetTransactions godoc
+// @Summary Get Transactions
+// @Description Get Transactions
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} View.UserViewPayments
+// @Router /users/authorize/payment/user_wallet/get_transactions [get]
+func GetTransactions(c *gin.Context) {
+	UseCase.GetTransactionsResponse(c)
 }

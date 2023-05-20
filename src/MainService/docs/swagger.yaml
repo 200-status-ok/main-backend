@@ -695,6 +695,19 @@ definitions:
       wallet:
         type: number
     type: object
+  View.UserViewPayments:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      user_id:
+        type: integer
+    type: object
   WebSocket.MessageWithType:
     properties:
       content: {}
@@ -1725,11 +1738,11 @@ paths:
       - application/json
       description: Payment
       parameters:
-      - description: User ID
+      - description: URL
         in: query
-        name: id
+        name: url
         required: true
-        type: integer
+        type: string
       - description: Amount
         in: query
         name: amount
@@ -1743,17 +1756,32 @@ paths:
       summary: Payment
       tags:
       - users
-  /users/authorize/payment/user_wallet/{id}:
+  /users/authorize/payment/user_wallet/get_transactions:
+    get:
+      consumes:
+      - application/json
+      description: Get Transactions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/View.UserViewPayments'
+      summary: Get Transactions
+      tags:
+      - users
+  /users/authorize/payment/user_wallet/verify:
     get:
       consumes:
       - application/json
       description: Payment Verify
       parameters:
-      - description: Payment ID
-        in: path
-        name: id
+      - description: Track ID
+        in: query
+        name: track_id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:

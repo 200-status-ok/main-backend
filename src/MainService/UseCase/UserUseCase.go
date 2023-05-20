@@ -357,6 +357,7 @@ func DeleteUserByIdResponse(c *gin.Context) {
 
 type PaymentRequest struct {
 	Amount float64 `form:"amount" binding:"required,min=1"`
+	Url    string  `form:"url" binding:"required"`
 }
 type data struct {
 	Merchant    string  `json:"merchant"`
@@ -376,34 +377,25 @@ func PaymentResponse(c *gin.Context) {
 	var merchant = "zibal"
 	d := data{
 		Merchant:    merchant,
-		CallbackURL: "https://example.com/callback",
-		Description: "golang package",
+		CallbackURL: paymentReq.Url,
+		Description: "payment",
 		Amount:      paymentReq.Amount,
 	}
-	fmt.Println(d.OrderID)
 	jsonData, err := json.Marshal(d)
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
 		return
 	}
 	var url = "https://gateway.zibal.ir/v1/request"
-	// post request to zibal with gin
-
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
-
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
-
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
-	// Map result to a struct to easily access parameters
 	var structResult map[string]interface{}
 	br := bytes.NewReader([]byte(string(body)))
 	decodedJson := json.NewDecoder(br)
@@ -413,18 +405,11 @@ func PaymentResponse(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-
-	// Access response parameters
 	var resultNumber = structResult["result"]
 	var trackId = structResult["trackId"]
-	// Change response parameters types to string
 	trackIdStringValue := fmt.Sprint(trackId)
 	resultStringValue := fmt.Sprint(resultNumber)
-	fmt.Println(trackIdStringValue)
-	fmt.Println(resultStringValue)
-	// check if result is 100
 	if resultStringValue == "100" {
-		// redirect to zibal
 		PaymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
 		_, err := PaymentRepository.CreatePayment(Model.Payment{
 			Amount:  paymentReq.Amount,
@@ -437,14 +422,15 @@ func PaymentResponse(c *gin.Context) {
 			return
 		}
 		c.Redirect(http.StatusFound, "https://gateway.zibal.ir/start/"+trackIdStringValue)
+		c.JSON(http.StatusOK, gin.H{"trackId": trackIdStringValue})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error"})
 		return
 	}
 }
 
-type VerifyRequest struct {
-	ID uint `uri:"id" binding:"required,min=1"`
+type PaymentVerifyRequest struct {
+	TrackId string `form:"track_id" binding:"required"`
 }
 type dataVerify struct {
 	Merchant string `json:"merchant"`
@@ -452,14 +438,14 @@ type dataVerify struct {
 }
 
 func PaymentVerifyResponse(c *gin.Context) {
-	var verifyReq VerifyRequest
-	paymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
-	if err := c.ShouldBindUri(&verifyReq); err != nil {
+	var paymentVerifyReq PaymentVerifyRequest
+	if err := c.ShouldBindQuery(&paymentVerifyReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	paymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
 	var merchant = "zibal"
-	payment, err := paymentRepository.GetPaymentById(int(verifyReq.ID))
+	payment, err := paymentRepository.GetPaymentByTrackID(paymentVerifyReq.TrackId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -482,12 +468,7 @@ func PaymentVerifyResponse(c *gin.Context) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
-	// Map result to a struct to easily access parameters
 	var structResult map[string]interface{}
 	br := bytes.NewReader([]byte(string(body)))
 	decodedJson := json.NewDecoder(br)
@@ -497,28 +478,19 @@ func PaymentVerifyResponse(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-
-	// Access response parameters
 	var resultNumber = structResult["result"]
-	var paidAt = structResult["paidAt"]
 	var status = structResult["status"]
-	// Change response parameters types to string
 	resultStringValue := fmt.Sprint(resultNumber)
-	paidAtStringValue := fmt.Sprint(paidAt)
 	statusStringValue := fmt.Sprint(status)
-	fmt.Println(resultStringValue)
-	fmt.Println(paidAtStringValue)
-	fmt.Println(statusStringValue)
 	if resultStringValue == "100" {
 		if statusStringValue == "1" {
 			payment.Status = "paid"
 			userRep := Repository.NewUserRepository(DBConfiguration.GetDB())
-			user, err := userRep.UpdateWallet(payment.UserID, payment.Amount)
+			_, err := userRep.UpdateWallet(payment.UserID, payment.Amount)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			fmt.Println(user)
 			updatePayment, err := paymentRepository.UpdatePayment(payment.ID, payment)
 			if err != nil {
 				return
@@ -527,11 +499,33 @@ func PaymentVerifyResponse(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "payment is successful"})
 			return
 		} else {
+			payment.Status = "failed"
+			_, err := paymentRepository.UpdatePayment(payment.ID, payment)
+			if err != nil {
+				return
+			}
 			c.JSON(http.StatusBadRequest, gin.H{"error": "payment is not successful"})
 			return
 		}
 	} else {
+		payment.Status = "failed"
+		_, err := paymentRepository.UpdatePayment(payment.ID, payment)
+		if err != nil {
+			return
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"error": "payment is not successful"})
 		return
 	}
+}
+
+func GetTransactionsResponse(c *gin.Context) {
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	paymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
+	payments, err := paymentRepository.GetPaymentsOfUser(uint(payload.UserID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	View.GetUserPaymentsView(payments, c)
+	return
 }
