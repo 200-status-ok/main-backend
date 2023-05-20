@@ -6,6 +6,13 @@ import (
 	"net/http"
 )
 
+type UserViewPayments struct {
+	Id        uint    `json:"id"`
+	Amount    float64 `json:"amount"`
+	CreatedAt string  `json:"created_at"`
+	Status    string  `json:"status"`
+	UserID    uint    `json:"user_id"`
+}
 type UserViewID struct {
 	Id           uint                  `json:"id"`
 	Username     string                `json:"username"`
@@ -41,6 +48,20 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 			Wallet:       user.Wallet,
 			Posters:      user.Posters,
 			MarkedPoster: user.MarkedPosters,
+		})
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+func GetUserPaymentsView(payments []Model2.Payment, c *gin.Context) {
+	var result []UserViewPayments
+	for _, payment := range payments {
+		result = append(result, UserViewPayments{
+			Id:        payment.ID,
+			Amount:    payment.Amount,
+			CreatedAt: payment.CreatedAt.String(),
+			Status:    payment.Status,
+			UserID:    payment.UserID,
 		})
 	}
 	c.JSON(http.StatusOK, result)

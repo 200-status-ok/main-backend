@@ -1543,9 +1543,9 @@ const docTemplate = `{
                 "summary": "Payment",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "URL",
+                        "name": "url",
                         "in": "query",
                         "required": true
                     },
@@ -1564,7 +1564,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/authorize/payment/user_wallet/{id}": {
+        "/users/authorize/payment/user_wallet/get_transactions": {
+            "get": {
+                "description": "Get Transactions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get Transactions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/View.UserViewPayments"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/authorize/payment/user_wallet/verify": {
             "get": {
                 "description": "Payment Verify",
                 "consumes": [
@@ -1579,10 +1602,10 @@ const docTemplate = `{
                 "summary": "Payment Verify",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Payment ID",
-                        "name": "id",
-                        "in": "path",
+                        "type": "string",
+                        "description": "Track ID",
+                        "name": "track_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -2619,6 +2642,26 @@ const docTemplate = `{
                 }
             }
         },
+        "View.UserViewPayments": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "WebSocket.MessageWithType": {
             "type": "object",
             "properties": {
@@ -2653,6 +2696,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {
