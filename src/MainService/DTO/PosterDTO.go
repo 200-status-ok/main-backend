@@ -11,6 +11,7 @@ type CreatePosterDTO struct {
 	Award       float64 `json:"award"`
 	UserID      uint    `json:"user_id" binding:"required,min=1"`
 	State       string  `json:"state"`
+	SpecialType string  `json:"special_ads" binding:"oneof=normal premium"`
 }
 
 type UpdatePosterDTO struct {
@@ -26,6 +27,7 @@ type UpdatePosterDTO struct {
 	State       string   `json:"state" binding:"oneof=pending accepted rejected ''"`
 	ImgUrls     []string `json:"img_urls"`
 	TagIds      []int    `json:"tag_ids"`
+	SpecialType string   `json:"special_ads" binding:"oneof=normal premium ''"`
 }
 
 type FilterObject struct { //todo move this to another file

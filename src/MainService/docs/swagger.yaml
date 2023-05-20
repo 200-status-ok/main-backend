@@ -45,6 +45,11 @@ definitions:
       description:
         maxLength: 1000
         type: string
+      special_ads:
+        enum:
+        - normal
+        - premium
+        type: string
       state:
         type: string
       status:
@@ -112,6 +117,12 @@ definitions:
         items:
           type: string
         type: array
+      special_ads:
+        enum:
+        - normal
+        - premium
+        - ""
+        type: string
       state:
         enum:
         - pending
@@ -285,6 +296,8 @@ definitions:
         items:
           $ref: '#/definitions/Model.Image'
         type: array
+      special_type:
+        type: string
       state:
         type: string
       status:
@@ -633,6 +646,8 @@ definitions:
           $ref: '#/definitions/Model.Image'
         type: array
       phone_user:
+        type: string
+      special_type:
         type: string
       state:
         type: string
