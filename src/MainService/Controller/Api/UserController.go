@@ -104,8 +104,6 @@ func DeleteUser(c *gin.Context) {
 // @Success 200
 // @Router /users/authorize/payment/user_wallet [get]
 func Payment(c *gin.Context) {
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "https://haminjast.iran.liara.run")
-	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 	UseCase.PaymentResponse(c)
 }
 
@@ -119,8 +117,6 @@ func Payment(c *gin.Context) {
 // @Success 200
 // @Router /users/authorize/payment/user_wallet/verify [get]
 func PaymentVerify(c *gin.Context) {
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "https://haminjast.iran.liara.run")
-	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 	UseCase.PaymentVerifyResponse(c)
 }
 
