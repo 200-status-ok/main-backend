@@ -25,6 +25,7 @@ import (
 // @BasePath /api/v1
 func main() {
 	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"https://haminjast.iran.liara.run"}
 	config.AllowAllOrigins = true
 	config.AllowCredentials = true
 	config.AllowHeaders = []string{"Authorization", "Content-Type", "Origin", "Allow-Origin", "Accept",
@@ -32,7 +33,6 @@ func main() {
 		"Sec-Fetch-Dest", "Sec-Fetch-Mode", "Sec-Fetch-Site", "X-Requested-With", "X-Forwarded-For", "Access-Control-Allow-Origin",
 		"Access-Control-Allow-Methods", "Access-Control-Allow-Headers", "Access-Control-Allow-Credentials"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
-
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn:              "https://71cb6a234a004aa492c0a6482b9a07e4@o4505154999025664.ingest.sentry.io/4505160636760064",
 		EnableTracing:    true,
