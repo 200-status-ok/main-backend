@@ -25,6 +25,7 @@ import (
 // @BasePath /api/v1
 func main() {
 	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"https://haminjast.iran.liara.run"}
 	config.AllowAllOrigins = true
 	config.AllowCredentials = true
 	config.AllowHeaders = []string{"Authorization", "Content-Type", "Origin", "Allow-Origin", "Accept",
