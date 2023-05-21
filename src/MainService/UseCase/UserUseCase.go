@@ -368,66 +368,66 @@ type data struct {
 }
 
 func PaymentResponse(c *gin.Context) {
-	var paymentReq PaymentRequest
-	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	if err := c.ShouldBindQuery(&paymentReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	var merchant = "zibal"
-	d := data{
-		Merchant:    merchant,
-		CallbackURL: paymentReq.Url,
-		Description: "payment",
-		Amount:      paymentReq.Amount,
-	}
-	jsonData, err := json.Marshal(d)
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-		return
-	}
-	var url = "https://gateway.zibal.ir/v1/request"
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-	var structResult map[string]interface{}
-	br := bytes.NewReader([]byte(string(body)))
-	decodedJson := json.NewDecoder(br)
-	decodedJson.UseNumber()
-	err = decodedJson.Decode(&structResult)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	var resultNumber = structResult["result"]
-	var trackId = structResult["trackId"]
-	trackIdStringValue := fmt.Sprint(trackId)
-	resultStringValue := fmt.Sprint(resultNumber)
-	if resultStringValue == "100" {
-		PaymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
-		_, err := PaymentRepository.CreatePayment(Model.Payment{
-			Amount:  paymentReq.Amount,
-			UserID:  uint(payload.UserID),
-			TrackID: trackIdStringValue,
-			Status:  "pending",
-		})
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		//c.Redirect(http.StatusFound, "https://gateway.zibal.ir/start/"+trackIdStringValue)
-		c.JSON(http.StatusOK, gin.H{"trackID": trackIdStringValue,
-			"redirect": "https://gateway.zibal.ir/start/" + trackIdStringValue})
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "error"})
-		return
-	}
+	//var paymentReq PaymentRequest
+	//payload := c.MustGet("authorization_payload").(*Token.Payload)
+	//if err := c.ShouldBindQuery(&paymentReq); err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//var merchant = "zibal"
+	//d := data{
+	//	Merchant:    merchant,
+	//	CallbackURL: paymentReq.Url,
+	//	Description: "payment",
+	//	Amount:      paymentReq.Amount,
+	//}
+	//jsonData, err := json.Marshal(d)
+	//if err != nil {
+	//	fmt.Println("Error marshaling JSON:", err)
+	//	return
+	//}
+	//var url = "https://gateway.zibal.ir/v1/request"
+	//req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	//req.Header.Set("Content-Type", "application/json")
+	//client := &http.Client{}
+	//resp, err := client.Do(req)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer resp.Body.Close()
+	//body, _ := ioutil.ReadAll(resp.Body)
+	//var structResult map[string]interface{}
+	//br := bytes.NewReader([]byte(string(body)))
+	//decodedJson := json.NewDecoder(br)
+	//decodedJson.UseNumber()
+	//err = decodedJson.Decode(&structResult)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//var resultNumber = structResult["result"]
+	//var trackId = structResult["trackId"]
+	//trackIdStringValue := fmt.Sprint(trackId)
+	//resultStringValue := fmt.Sprint(resultNumber)
+	//if resultStringValue == "100" {
+	//	PaymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
+	//	_, err := PaymentRepository.CreatePayment(Model.Payment{
+	//		Amount:  paymentReq.Amount,
+	//		UserID:  uint(payload.UserID),
+	//		TrackID: trackIdStringValue,
+	//		Status:  "pending",
+	//	})
+	//	if err != nil {
+	//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//		return
+	//	}
+	//	//c.Redirect(http.StatusFound, "https://gateway.zibal.ir/start/"+trackIdStringValue)
+	//	c.JSON(http.StatusOK, gin.H{"trackID": trackIdStringValue,
+	//		"redirect": "https://gateway.zibal.ir/start/" + trackIdStringValue})
+	//} else {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": "error"})
+	//	return
+	//}
 }
 
 type PaymentVerifyRequest struct {
