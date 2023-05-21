@@ -463,6 +463,7 @@ func PaymentVerifyResponse(c *gin.Context) {
 	}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Access-Control-Allow-Origin", "*")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
