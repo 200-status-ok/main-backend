@@ -27,7 +27,7 @@ func main() {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowCredentials = true
-	config.AllowHeaders = []string{"Authorization", "Content-Type", "Origin"}
+	config.AllowHeaders = []string{"Authorization", "Content-Type", "Origin", "Access-Control-Allow-Origin"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 
 	err := sentry.Init(sentry.ClientOptions{
