@@ -421,21 +421,9 @@ func PaymentResponse(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		//trackID := trackIdStringValue
-		//fmt.Println("Response:", string(body))
-		//response, err := http.Get("https://gateway.zibal.ir/start/" + trackID)
-		//if err != nil {
-		//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		//	return
-		//}
-		//defer response.Body.Close()
-		//_, err = ioutil.ReadAll(response.Body)
-		//if err != nil {
-		//	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		//	return
-		//}
-		http.Redirect(c.Writer, c.Request, "https://gateway.zibal.ir/start/"+trackIdStringValue, http.StatusFound)
 		//c.Redirect(http.StatusFound, "https://gateway.zibal.ir/start/"+trackIdStringValue)
+		c.JSON(http.StatusOK, gin.H{"trackID": trackIdStringValue,
+			"redirect": "https://gateway.zibal.ir/start/" + trackIdStringValue})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error"})
 		return
