@@ -16,8 +16,12 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 func (r *UserRepository) FindByUsername(username string) (*Model.User, error) {
 	var user Model.User
-	err := r.db.Where("username = ?", username).First(&user).Error
+	err := r.db.Unscoped().Where("username = ?", username).First(&user).Error
 	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	if user.DeletedAt.Valid {
+		r.db.Unscoped().Delete(&user)
 		return nil, errors.New("user not found")
 	}
 	return &user, nil
