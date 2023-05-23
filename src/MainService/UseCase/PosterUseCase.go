@@ -185,10 +185,11 @@ func UpdatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	c.ShouldBindJSON(&request)
+
+	fmt.Println(
+		"daiwd" +
+			"hpadawd")
 
 	request.Poster.UserID = uint(payload.UserID)
 	err := posterRepository.UpdatePoster(id.ID, request.Poster, request.Addresses)
