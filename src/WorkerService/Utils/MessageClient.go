@@ -236,7 +236,7 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 		splitStr := strings.Split(newString3, ",")
 		for _, v := range []string{posterTexts.Title, posterTexts.Description} {
 			for j, _ := range splitStr {
-				if strings.Contains(splitStr[j], v) {
+				if strings.Contains(v, splitStr[j]) {
 					isBadText = true
 					break
 				}
