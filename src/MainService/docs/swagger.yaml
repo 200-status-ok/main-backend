@@ -1177,6 +1177,11 @@ paths:
         in: query
         name: state
         type: string
+      - default: all
+        description: Special_type
+        in: query
+        name: special_type
+        type: string
       produces:
       - application/json
       responses:

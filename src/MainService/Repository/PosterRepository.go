@@ -38,6 +38,9 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 			Limit(limit).Offset(offset).Order(sortBy + " " + sortType)
 	}
 
+	if filterObject.SpecialType != "" && filterObject.SpecialType != "all" {
+		result = result.Where("special_type = ?", filterObject.SpecialType)
+	}
 	if filterObject.State != "" && filterObject.State != "all" {
 		result = result.Where("state = ?", filterObject.State)
 	}

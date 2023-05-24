@@ -683,6 +683,13 @@ const docTemplate = `{
                         "description": "State",
                         "name": "state",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "all",
+                        "description": "Special_type",
+                        "name": "special_type",
+                        "in": "query"
                     }
                 ],
                 "responses": {
