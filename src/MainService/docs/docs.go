@@ -380,66 +380,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api-call/nsfw/photo": {
-            "post": {
-                "description": "Get photo nsfw AI",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ApiCall"
-                ],
-                "summary": "Get photo nsfw AI",
-                "parameters": [
-                    {
-                        "description": "Image Url",
-                        "name": "image_url",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UseCase.GetPhotoAiNSFWRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api-call/nsfw/text": {
-            "get": {
-                "description": "Get text nsfw",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ApiCall"
-                ],
-                "summary": "Get text nsfw",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Text",
-                        "name": "text",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/chats/authorize/conversation": {
             "post": {
                 "description": "Create or check to exist a chat conversation",
@@ -1913,7 +1853,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "image_id": {
+                "poster_id": {
                     "type": "integer"
                 },
                 "updated_at": {
@@ -2248,17 +2188,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 30,
                     "minLength": 11
-                }
-            }
-        },
-        "UseCase.GetPhotoAiNSFWRequest": {
-            "type": "object",
-            "required": [
-                "image_url"
-            ],
-            "properties": {
-                "image_url": {
-                    "type": "string"
                 }
             }
         },

@@ -11,10 +11,14 @@ services:
     ports:
       - "8000:8000"
     networks:
+      - database-network
       - worker-network
 
 
 networks:
   worker-network:
     name: rabbitmq_network
+    external: true
+  database-network:
+    name: database_network
     external: true

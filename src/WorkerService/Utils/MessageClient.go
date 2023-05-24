@@ -3,8 +3,15 @@ package Utils
 import (
 	"errors"
 	"fmt"
+	"github.com/403-access-denied/main-backend/src/WorkerService/Repository"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"gorm.io/gorm"
+	"io/ioutil"
+	"net/http"
+	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 type MessageClient struct {
@@ -16,7 +23,9 @@ func (client *MessageClient) ConnectBroker(connectionString string) error {
 		return errors.New("connectionString is empty")
 	}
 	var err error
-	client.Connection, err = amqp.Dial(connectionString)
+	client.Connection, err = amqp.DialConfig(connectionString, amqp.Config{
+		Heartbeat: 90 * time.Second,
+	})
 	if err != nil {
 		return err
 	}
@@ -91,7 +100,7 @@ func (client *MessageClient) Subscribe(exchangeName string, exchangeType string,
 
 type CustomArray []string
 
-func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName string) error {
+func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName string, db *gorm.DB) error {
 	if client.Connection == nil {
 		return errors.New("connection is nil")
 	}
@@ -129,9 +138,14 @@ func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName str
 	var forever = make(chan struct{})
 	for d := range message {
 		fmt.Println("Received a message: ", string(d.Body))
-		arr := CustomArray{}
-		arr = strings.Split(string(d.Body), "/")
-		arr.SendingNotification()
+		if queue.Name == "email_notification" || queue.Name == "sms_notification" {
+			arr := CustomArray{}
+			arr = strings.Split(string(d.Body), "/")
+			arr.SendingNotification()
+		} else if queue.Name == "nsfw-validation" {
+			posterID, _ := strconv.ParseUint(string(d.Body), 10, 64)
+			PhotoTextValidation(posterID, db)
+		}
 	}
 	<-forever
 	return nil
@@ -163,5 +177,87 @@ func (a CustomArray) SendingNotification() {
 			fmt.Println(err)
 			return
 		}
+	}
+}
+
+func PhotoTextValidation(posterID uint64, db *gorm.DB) {
+	posterRepository := Repository.NewPosterRepository(db)
+	var photoUrls []string
+	var posterTexts *Repository.PosterResult
+	isBadPhoto := false
+	isBadText := false
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	photoUrls, posterTexts, err := posterRepository.GetImagesTextsPosterByID(uint(posterID))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	go func() {
+		for _, imgUrl := range photoUrls {
+			url := fmt.Sprintf("https://api.apilayer.com/nudity_detection/url?url=%s", imgUrl)
+			client := &http.Client{}
+			req, err := http.NewRequest("GET", url, nil)
+			req.Header.Set("apikey", "z232GHVwPAec88LzsqdBjUhL5BZDgvGp")
+
+			if err != nil {
+				fmt.Println(err)
+			}
+			res, err := client.Do(req)
+			if res.Body != nil {
+				defer res.Body.Close()
+			}
+			body, err := ioutil.ReadAll(res.Body)
+			splitStr := strings.Split(string(body), ",")
+			splitStr2 := strings.Split(splitStr[0], ": ")
+			adultResult, err := strconv.Atoi(splitStr2[1])
+			if adultResult > 1 {
+				isBadPhoto = true
+				break
+			} else {
+				isBadPhoto = false
+			}
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		file, err := ioutil.ReadFile("Utils/data.txt")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		newString := strings.ReplaceAll(string(file), "\n", "")
+		newString2 := strings.ReplaceAll(newString, "\"", "")
+		newString3 := strings.ReplaceAll(newString2, "\r", "")
+		splitStr := strings.Split(newString3, ",")
+		for _, v := range []string{posterTexts.Title, posterTexts.Description} {
+			for j, _ := range splitStr {
+				if strings.Contains(splitStr[j], v) {
+					isBadText = true
+					break
+				}
+			}
+			if isBadText {
+				break
+			}
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
+	state := ""
+	if !isBadPhoto && !isBadText {
+		state = "accepted"
+	} else {
+		state = "rejected"
+	}
+	err = posterRepository.UpdatePosterState(uint(posterID), state)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 }

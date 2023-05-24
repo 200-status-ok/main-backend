@@ -11,7 +11,7 @@ type Image struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	Url       string         `gorm:"type:varchar(255)" json:"url"`
-	PosterID  uint           `gorm:"not null" json:"image_id"`
+	PosterID  uint           `gorm:"not null" json:"poster_id"`
 }
 
 func (i *Image) GetUrl() string {
