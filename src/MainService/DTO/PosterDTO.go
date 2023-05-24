@@ -40,6 +40,7 @@ type FilterObject struct { //todo move this to another file
 	Lon          float64
 	TagIds       []int
 	State        string
+	SpecialType  string
 }
 
 type GeneratedPosterTags struct { //todo modar move maybe, reGenerate

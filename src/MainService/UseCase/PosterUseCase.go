@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
+	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
@@ -34,6 +35,11 @@ type getPostersRequest struct {
 	Lon          float64 `form:"lon,omitempty"`
 	TagIds       []int   `form:"tag_ids,omitempty" swaggertype:"array,int"`
 	State        string  `form:"state,omitempty" binding:"omitempty,oneof=all pending accepted rejected"`
+	SpecialType  string  `form:"special_type,omitempty" binding:"omitempty,oneof=all premium"`
+}
+type ScoredPoster struct {
+	poster Model2.Poster
+	score  int
 }
 
 func GetPostersResponse(c *gin.Context) {
@@ -62,6 +68,7 @@ func GetPostersResponse(c *gin.Context) {
 		Lon:          request.Lon,
 		TagIds:       request.TagIds,
 		State:        request.State,
+		SpecialType:  request.SpecialType,
 	}
 
 	posters, err := posterRepository.GetAllPosters(request.PageSize, offset, request.Sort, request.SortBy, filterObject)
@@ -71,8 +78,29 @@ func GetPostersResponse(c *gin.Context) {
 		return
 	}
 
+	var validPremium []ScoredPoster
+	//sort poster by special type
+	for _, poster := range posters {
+		score := 0
+		if poster.SpecialType == "premium" {
+			score = 1
+		}
+		validPremium = append(validPremium, ScoredPoster{poster, score})
+	}
+	//sort by score
+	for i := 0; i < len(validPremium); i++ {
+		for j := i + 1; j < len(validPremium); j++ {
+			if validPremium[i].score < validPremium[j].score {
+				validPremium[i], validPremium[j] = validPremium[j], validPremium[i]
+			}
+		}
+	}
+	var validPosters []Model2.Poster
+	for _, scoredPoster := range validPremium {
+		validPosters = append(validPosters, scoredPoster.poster)
+	}
 	//DBConfiguration.CloseDB()
-	View.GetPostersView(posters, c)
+	View.GetPostersView(validPosters, c)
 }
 
 type GetPosterByIdRequest struct {

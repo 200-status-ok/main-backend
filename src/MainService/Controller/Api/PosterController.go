@@ -25,6 +25,7 @@ import (
 // @Param lon query float64 false "Longitude"
 // @Param tag_ids query []int false "TagIds" collectionFormat(multi) example(1,2,3)
 // @Param state query string false "State" enum(all, accepted, rejected, pending) default(all)
+// @Param special_type query string false "Special_type" enum(all, premium) default(all)
 // @Success 200 {array} View.PosterView
 // @Router /posters [get]
 func GetPosters(c *gin.Context) {
