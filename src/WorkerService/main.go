@@ -9,6 +9,7 @@ func main() {
 	r := gin.Default()
 
 	go UseCase.SendToUser()
+	go UseCase.CheckPhotoNSFW()
 
 	err := r.Run(":8000")
 	if err != nil {

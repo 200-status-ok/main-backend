@@ -5,6 +5,7 @@ services:
     env_file:
       - .env
     image: postgres:alpine3.17
+    hostname: database
     container_name: main-db
     ports:
       - "5432:5432"
@@ -16,6 +17,7 @@ services:
       - POSTGRES_DB=${DB_NAME}
     networks:
       - main-network
+      - database-network
 
   app:
     container_name: main-app
@@ -43,6 +45,9 @@ services:
       - main-network
 
 networks:
+  database-network:
+    driver: bridge
+    name: database_network
   main-network:
     driver: bridge
   worker-network:

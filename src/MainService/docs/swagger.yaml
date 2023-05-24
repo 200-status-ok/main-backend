@@ -208,7 +208,7 @@ definitions:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
-      image_id:
+      poster_id:
         type: integer
       updated_at:
         type: string
@@ -432,13 +432,6 @@ definitions:
         type: string
     required:
     - username
-    type: object
-  UseCase.GetPhotoAiNSFWRequest:
-    properties:
-      image_url:
-        type: string
-    required:
-    - image_url
     type: object
   UseCase.LoginAdminRequest:
     properties:
@@ -979,45 +972,6 @@ paths:
           schema:
             $ref: '#/definitions/View.GeneratedPosterInfoView'
       summary: Generate poster info
-      tags:
-      - ApiCall
-  /api-call/nsfw/photo:
-    post:
-      consumes:
-      - application/json
-      description: Get photo nsfw AI
-      parameters:
-      - description: Image Url
-        in: body
-        name: image_url
-        required: true
-        schema:
-          $ref: '#/definitions/UseCase.GetPhotoAiNSFWRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Get photo nsfw AI
-      tags:
-      - ApiCall
-  /api-call/nsfw/text:
-    get:
-      consumes:
-      - application/json
-      description: Get text nsfw
-      parameters:
-      - description: Text
-        in: query
-        name: text
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Get text nsfw
       tags:
       - ApiCall
   /chats/authorize/conversation:

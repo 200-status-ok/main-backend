@@ -177,6 +177,8 @@ func CreatePosterResponse(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err2.Error()})
 				return
 			}
+
+			SendToNSFWQueue(poster.ID, c)
 			View.CreatePosterView(poster, c)
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "not enough money"})
@@ -190,6 +192,7 @@ func CreatePosterResponse(c *gin.Context) {
 			return
 		}
 		//DBConfiguration.CloseDB()
+		SendToNSFWQueue(poster.ID, c)
 		View.CreatePosterView(poster, c)
 	}
 }
@@ -228,87 +231,31 @@ func UpdatePosterResponse(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Poster updated successfully"})
 }
 
-type GetPhotoAiNSFWRequest struct {
-	ImageUrl string `json:"image_url" binding:"required"`
-}
+func SendToNSFWQueue(posterID uint, c *gin.Context) {
+	appEnv := os.Getenv("APP_ENV2")
 
-func GetPhotoAiNSFWResponse(c *gin.Context) {
-	var request GetPhotoAiNSFWRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	boolean := false
-	_ = boolean
-	PhotoUrl := request.ImageUrl
-	fmt.Println(PhotoUrl)
-	channel := make(chan bool)
-	go func() {
-
-		url := fmt.Sprintf("https://api.apilayer.com/nudity_detection/url?url=%s", PhotoUrl)
-		fmt.Println(url)
-		client := &http.Client{}
-		req, err := http.NewRequest("GET", url, nil)
-		req.Header.Set("apikey", "z232GHVwPAec88LzsqdBjUhL5BZDgvGp")
-
+	messageBroker := Utils.MessageClient{}
+	if appEnv == "development" {
+		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
 		if err != nil {
-			fmt.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
-		res, err := client.Do(req)
-		if res.Body != nil {
-			defer res.Body.Close()
+	} else if appEnv == "production" {
+		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
-		body, err := ioutil.ReadAll(res.Body)
-		splitStr := strings.Split(string(body), ",")
-		splitStr2 := strings.Split(splitStr[0], ": ")
-		a, err := strconv.Atoi(splitStr2[1])
-		fmt.Println(a)
-		if a > 1 {
-			boolean = true
-		}
-		channel <- true
-	}()
-	fmt.Println("continue ...")
-	<-channel
-	if boolean {
-		c.JSON(http.StatusOK, gin.H{"message": "nsfw"})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"message": "sfw"})
 	}
-}
 
-type GetTextNSFWRequest struct {
-	Text string `form:"text" binding:"required"`
-}
-
-func GetTextNSFWResponse(c *gin.Context) {
-	var request GetTextNSFWRequest
-	if err := c.ShouldBindQuery(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	file, err := ioutil.ReadFile("Utils/data.txt")
+	msg := strconv.Itoa(int(posterID))
+	err := messageBroker.PublishOnQueue([]byte(msg), "nsfw-validation")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	boolean := false
-	_ = boolean
-	newString := strings.ReplaceAll(string(file), "\n", "")
-	newString2 := strings.ReplaceAll(newString, "\"", "")
-	newString3 := strings.ReplaceAll(newString2, "\r", "")
-	splitStr := strings.Split(newString3, ",")
-	text := request.Text
-	for i, _ := range splitStr {
-		if strings.Contains(text, splitStr[i]) {
-			boolean = true
-		}
-	}
-	if boolean {
-		c.JSON(http.StatusOK, gin.H{"message": "nsfw"})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"message": "sfw"})
-	}
+	messageBroker.Close()
 }
 
 type CreatePosterReportRequest struct {
@@ -444,7 +391,7 @@ func UploadPosterImageResponse(c *gin.Context) {
 	}
 	defer file.Close()
 
-	uploadUrl, err := Utils.UploadInArvanCloud(file, newName)
+	uploadUrl, err := Utils.UploadInLiaraCloud(file, newName)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

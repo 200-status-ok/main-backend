@@ -48,3 +48,27 @@ func UploadInArvanCloud(input multipart.File, fileName string) (string, error) {
 	}
 	return fmt.Sprintf("https://main-bucket.s3.ir-thr-at1.arvanstorage.ir/%s", fileName), nil
 }
+
+func UploadInLiaraCloud(input multipart.File, fileName string) (string, error) {
+	secretKey := ReadFromEnvFile(".env", "LIARA_SECRET_KEY")
+	accessKey := ReadFromEnvFile(".env", "LIARA_ACCESS_KEY")
+
+	sess, err := session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
+		Region:      aws.String("us-east-1"),
+		Endpoint:    aws.String("https://storage.iran.liara.space"),
+	})
+	if err != nil {
+		return "", err
+	}
+	uploader := s3manager.NewUploader(sess)
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String("main-bucket"),
+		Key:    aws.String(fileName),
+		Body:   input,
+	})
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("https://main-bucket.storage.iran.liara.space/%s", fileName), nil
+}

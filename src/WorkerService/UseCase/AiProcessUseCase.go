@@ -6,10 +6,9 @@ import (
 	Utils2 "github.com/403-access-denied/main-backend/src/WorkerService/Utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
-	"time"
 )
 
-func SendToUser() {
+func CheckPhotoNSFW() {
 	messageBroker := Utils2.MessageClient{}
 	var connectionString string
 	appEnv := os.Getenv("APP_ENV3")
@@ -33,36 +32,9 @@ func SendToUser() {
 	go SendHeartbeat(messageBroker.Connection, &messageBroker, connectionString)
 
 	go func() {
-		err := messageBroker.SubscribeOnQueue("email_notification", "email_notification", DBConfiguration.GetDB())
+		err := messageBroker.SubscribeOnQueue("nsfw-validation", "nsfw-validation", DBConfiguration.GetDB())
 		if err != nil {
-			fmt.Println("Error subscribing to email_notification queue:", err)
+			fmt.Println("Error subscribing to nsfw-validation queue: ", err)
 		}
 	}()
-
-	go func() {
-		err := messageBroker.SubscribeOnQueue("sms_notification", "sms_notification", DBConfiguration.GetDB())
-		if err != nil {
-			fmt.Println("Error subscribing to sms_notification queue:", err)
-		}
-	}()
-}
-
-func SendHeartbeat(conn *amqp.Connection, mBroker *Utils2.MessageClient, connString string) {
-	heartbeatInterval := 90 * time.Second
-	hearBeatTicker := time.NewTicker(heartbeatInterval)
-
-	for range hearBeatTicker.C {
-		if conn.IsClosed() {
-			fmt.Println("RabbitMQ connection closed")
-			err := mBroker.ConnectBroker(connString)
-			if err != nil {
-				fmt.Println("Error connecting to RabbitMQ:", err)
-			}
-			fmt.Println("Reconnecting to RabbitMQ")
-			return
-		}
-
-		fmt.Println("Sending heartbeat")
-	}
-
 }
