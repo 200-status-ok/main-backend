@@ -11,7 +11,8 @@ COPY go.sum .
 RUN go mod tidy && go mod download
 COPY . .
 
-RUN go build -o main . && go build -o migrate ./cmd/migrate/migration.go
+RUN go build -o main . && go build -o migrate ./cmd/migrate/migration.go \
+    && go build -o elastic ./cmd/migrate/esSetup.go
 #RUN go run cmd/migrate/migration.go
 
 EXPOSE 8080

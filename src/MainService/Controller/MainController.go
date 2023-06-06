@@ -45,7 +45,7 @@ func (s *Server) MainController() {
 				userAuthRoutes.DELETE("/", Api2.DeleteUser)
 				userAuthRoutes.GET("/payment/user_wallet", Api2.Payment)
 				userAuthRoutes.GET("/payment/user_wallet/verify", Api2.PaymentVerify)
-				userAuthRoutes.GET("/payment/user_wallet/get_transactions", Api2.GetTransactions)
+				userAuthRoutes.GET("/payment/user_wallet/transactions", Api2.GetTransactions)
 			}
 			user.POST("/auth/otp/send", Api2.SendOTP)
 			user.POST("/auth/otp/login", Api2.LoginUser)
@@ -62,9 +62,9 @@ func (s *Server) MainController() {
 				authPosters.PATCH("/:id", Api2.UpdatePoster)
 				authPosters.DELETE("/:id", Api2.DeletePoster)
 			}
-			poster.POST("/upload-image", Api2.UploadPosterImage)
-			poster.PATCH("/update-state", Api2.UpdatePosterState)
-			poster.POST("/create-mock-data", Api2.CreateMockData)
+			poster.POST("/image", Api2.UploadPosterImage)
+			poster.PATCH("/state", Api2.UpdatePosterState)
+			poster.POST("/mock-data", Api2.CreateMockData)
 		}
 		report := v1.Group("/reports")
 		{

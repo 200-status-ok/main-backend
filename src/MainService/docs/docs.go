@@ -612,7 +612,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "default": "asc",
+                        "default": "desc",
                         "description": "Sort direction",
                         "name": "sort",
                         "in": "query"
@@ -651,8 +651,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "description": "Only rewards",
-                        "name": "only_rewards",
+                        "description": "Only Awards",
+                        "name": "only_awards",
                         "in": "query"
                     },
                     {
@@ -698,7 +698,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/View.PosterView"
+                                "$ref": "#/definitions/View.AllPostersView"
                             }
                         }
                     }
@@ -807,7 +807,36 @@ const docTemplate = `{
                 }
             }
         },
-        "/posters/create-mock-data": {
+        "/posters/image": {
+            "post": {
+                "description": "Upload poster image",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posters"
+                ],
+                "summary": "Upload poster image",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Multiple files",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/posters/mock-data": {
             "post": {
                 "description": "Create mock data",
                 "consumes": [
@@ -838,7 +867,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posters/update-state": {
+        "/posters/state": {
             "patch": {
                 "description": "Updates a poster report by ID",
                 "consumes": [
@@ -865,35 +894,6 @@ const docTemplate = `{
                         "description": "State",
                         "name": "state",
                         "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/posters/upload-image": {
-            "post": {
-                "description": "Upload poster image",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posters"
-                ],
-                "summary": "Upload poster image",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Multiple files",
-                        "name": "files",
-                        "in": "formData",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -1511,7 +1511,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/authorize/payment/user_wallet/get_transactions": {
+        "/users/authorize/payment/user_wallet/transactions": {
             "get": {
                 "description": "Get Transactions",
                 "consumes": [
@@ -1635,7 +1635,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 1000
                 },
-                "special_ads": {
+                "special_type": {
                     "type": "string",
                     "enum": [
                         "normal",
@@ -1668,6 +1668,112 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 13,
                     "minLength": 11
+                }
+            }
+        },
+        "DTO.ESAddressDTO": {
+            "type": "object",
+            "properties": {
+                "address_detail": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "location": {
+                    "$ref": "#/definitions/DTO.Location"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "DTO.ESPosterDTO": {
+            "type": "object",
+            "required": [
+                "alert",
+                "chat",
+                "user_id"
+            ],
+            "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DTO.ESAddressDTO"
+                    }
+                },
+                "alert": {
+                    "type": "boolean"
+                },
+                "award": {
+                    "type": "number"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "special_type": {
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "premium"
+                    ]
+                },
+                "state": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tel_id": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "user_phone": {
+                    "type": "string",
+                    "maxLength": 13,
+                    "minLength": 11
+                }
+            }
+        },
+        "DTO.Location": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number"
+                },
+                "lon": {
+                    "type": "number"
                 }
             }
         },
@@ -2389,6 +2495,23 @@ const docTemplate = `{
                 }
             }
         },
+        "View.AllPostersView": {
+            "type": "object",
+            "properties": {
+                "max_page": {
+                    "type": "integer"
+                },
+                "posters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DTO.ESPosterDTO"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "View.ConversationView": {
             "type": "object",
             "properties": {
@@ -2478,12 +2601,6 @@ const docTemplate = `{
                 "award": {
                     "type": "number"
                 },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Tag"
-                    }
-                },
                 "created_at": {
                     "type": "string"
                 },
@@ -2510,6 +2627,12 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/Model.PosterStatus"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Model.Tag"
+                    }
                 },
                 "telegram_id": {
                     "type": "string"

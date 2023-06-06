@@ -127,7 +127,7 @@ func PaymentVerify(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} View.UserViewPayments
-// @Router /users/authorize/payment/user_wallet/get_transactions [get]
+// @Router /users/authorize/payment/user_wallet/transactions [get]
 func GetTransactions(c *gin.Context) {
 	UseCase.GetTransactionsResponse(c)
 }

@@ -37,6 +37,9 @@ migration: ## Run migration
 drop: ## Drop database
 	@go run MainService/cmd/migrate/drop.go
 
+es:
+	@go run cmd/migrate/esSetup.go
+
 init_swagger: ## Init swagger
 	@swag init --parseDependency --parseInternal
 

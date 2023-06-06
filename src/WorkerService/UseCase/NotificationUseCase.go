@@ -3,6 +3,7 @@ package UseCase
 import (
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/WorkerService/DBConfiguration"
+	"github.com/403-access-denied/main-backend/src/WorkerService/MessageCli"
 	Utils2 "github.com/403-access-denied/main-backend/src/WorkerService/Utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
@@ -10,7 +11,7 @@ import (
 )
 
 func SendToUser() {
-	messageBroker := Utils2.MessageClient{}
+	messageBroker := MessageCli.MessageClient{}
 	var connectionString string
 	appEnv := os.Getenv("APP_ENV3")
 	if appEnv == "development" {
@@ -47,7 +48,7 @@ func SendToUser() {
 	}()
 }
 
-func SendHeartbeat(conn *amqp.Connection, mBroker *Utils2.MessageClient, connString string) {
+func SendHeartbeat(conn *amqp.Connection, mBroker *MessageCli.MessageClient, connString string) {
 	heartbeatInterval := 90 * time.Second
 	hearBeatTicker := time.NewTicker(heartbeatInterval)
 

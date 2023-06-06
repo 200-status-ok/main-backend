@@ -15,7 +15,7 @@ type Conversation struct {
 	OwnerID   uint           `gorm:"type:int;not null;" json:"owner_id"`
 	MemberID  uint           `gorm:"type:int;not null;" json:"member_id"`
 	PosterID  uint           `gorm:"type:int;not null;" json:"poster_id"`
-	Messages  []Message      `gorm:"foreignKey:ConversationId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"messages"`
+	Messages  []Message      `gorm:"foreignKey:ConversationId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"messages"`
 }
 
 func (c *Conversation) GetID() uint {

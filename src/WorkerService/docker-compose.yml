@@ -17,7 +17,7 @@ services:
 
 networks:
   worker-network:
-    name: rabbitmq_network
+    name: stackBuilder_network
     external: true
   database-network:
     name: database_network

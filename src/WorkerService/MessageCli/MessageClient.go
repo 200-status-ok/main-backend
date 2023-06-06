@@ -1,9 +1,12 @@
-package Utils
+package MessageCli
 
 import (
 	"errors"
 	"fmt"
+	"github.com/403-access-denied/main-backend/src/WorkerService/DBConfiguration"
 	"github.com/403-access-denied/main-backend/src/WorkerService/Repository"
+	"github.com/403-access-denied/main-backend/src/WorkerService/Repository/ElasticSearch"
+	"github.com/403-access-denied/main-backend/src/WorkerService/Utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -136,6 +139,7 @@ func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName str
 		return err
 	}
 	var forever = make(chan struct{})
+
 	for d := range message {
 		fmt.Println("Received a message: ", string(d.Body))
 		if queue.Name == "email_notification" || queue.Name == "sms_notification" {
@@ -159,9 +163,9 @@ func (client *MessageClient) Close() {
 
 func (a CustomArray) SendingNotification() {
 	if a[0] == "email" {
-		emailService := NewEmail("mhmdrzsmip@gmail.com", a[2],
+		emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", a[2],
 			"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+a[1],
-			ReadFromEnvFile(".env", "GOOGLE_SECRET"))
+			Utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
 		err := emailService.SendEmailWithGoogle()
 		if err != nil {
 			fmt.Println(err)
@@ -171,8 +175,8 @@ func (a CustomArray) SendingNotification() {
 		pattern := map[string]string{
 			"code": a[1],
 		}
-		otpSms := NewSMS(ReadFromEnvFile(".env", "API_KEY"), pattern)
-		err := otpSms.SendSMSWithPattern(a[2], ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
+		otpSms := Utils.NewSMS(Utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
+		err := otpSms.SendSMSWithPattern(a[2], Utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -234,9 +238,15 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 		newString2 := strings.ReplaceAll(newString, "\"", "")
 		newString3 := strings.ReplaceAll(newString2, "\r", "")
 		splitStr := strings.Split(newString3, ",")
-		for _, v := range []string{posterTexts.Title, posterTexts.Description} {
+
+		splitTitle := strings.Split(posterTexts.Title, " ")
+		splitDescription := strings.Split(posterTexts.Description, " ")
+
+		concatenated := append(splitTitle, splitDescription...)
+
+		for _, v := range concatenated {
 			for j, _ := range splitStr {
-				if strings.Contains(v, splitStr[j]) {
+				if v == splitStr[j] {
 					isBadText = true
 					break
 				}
@@ -250,12 +260,21 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 
 	wg.Wait()
 	state := ""
+
 	if !isBadPhoto && !isBadText {
 		state = "accepted"
 	} else {
 		state = "rejected"
 	}
+
 	err = posterRepository.UpdatePosterState(uint(posterID), state)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	err = esPosterCli.UpdatePosterState(state, int(posterID))
 	if err != nil {
 		fmt.Println(err)
 		return

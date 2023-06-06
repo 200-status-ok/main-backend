@@ -12,7 +12,7 @@ type MarkedPoster struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	UserID    uint           `gorm:"not null" json:"user_id"`
 	PosterID  uint           `gorm:"not null" json:"poster_id"`
-	Poster    Poster         `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"poster"`
+	Poster    Poster         `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"poster"`
 }
 
 func (m *MarkedPoster) GetID() uint {

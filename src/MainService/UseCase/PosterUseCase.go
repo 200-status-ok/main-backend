@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
-	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
+	"github.com/403-access-denied/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
@@ -21,49 +21,48 @@ import (
 	"time"
 )
 
-type getPostersRequest struct {
-	PageID       int     `form:"page_id" binding:"required,min=1"`
-	PageSize     int     `form:"page_size" binding:"required,min=5"`
-	Sort         string  `form:"sort,omitempty" binding:"omitempty,oneof=asc desc"`
-	SortBy       string  `form:"sort_by,omitempty" binding:"omitempty,oneof=created_at updated_at id"`
-	Status       string  `form:"status,omitempty" binding:"oneof=lost found both"`
-	SearchPhrase string  `form:"search_phrase,omitempty"`
-	TimeStart    int64   `form:"time_start,omitempty"`
-	TimeEnd      int64   `form:"time_end,omitempty"`
-	OnlyRewards  bool    `form:"only_rewards,omitempty"`
-	Lat          float64 `form:"lat,omitempty"`
-	Lon          float64 `form:"lon,omitempty"`
-	TagIds       []int   `form:"tag_ids,omitempty" swaggertype:"array,int"`
-	State        string  `form:"state,omitempty" binding:"omitempty,oneof=all pending accepted rejected"`
-	SpecialType  string  `form:"special_type,omitempty" binding:"omitempty,oneof=all premium"`
-}
-type ScoredPoster struct {
-	poster Model2.Poster
-	score  int
+type GetPostersRequest struct {
+	PageID       int     `form:"page_id" binding:"required,min=1" json:"page_id"`
+	PageSize     int     `form:"page_size" binding:"required,min=5" json:"page_size"`
+	Sort         string  `form:"sort,omitempty" binding:"omitempty,oneof=asc desc" json:"sort"`
+	SortBy       string  `form:"sort_by,omitempty" binding:"omitempty,oneof=created_at updated_at id" json:"sort_by"`
+	Status       string  `form:"status,omitempty" binding:"oneof=lost found both" json:"status"`
+	SearchPhrase string  `form:"search_phrase,omitempty" json:"search_phrase"`
+	TimeStart    int64   `form:"time_start,omitempty" json:"time_start"`
+	TimeEnd      int64   `form:"time_end,omitempty" json:"time_end"`
+	OnlyAwards   bool    `form:"only_awards,omitempty" json:"only_awards"`
+	Lat          float64 `form:"lat,omitempty" json:"lat"`
+	Lon          float64 `form:"lon,omitempty" json:"lon"`
+	TagIds       []int   `form:"tag_ids,omitempty" swaggertype:"array,int" json:"tag_ids"`
+	State        string  `form:"state,omitempty" binding:"omitempty,oneof=all pending accepted rejected" json:"state"`
+	SpecialType  string  `form:"special_type,omitempty" binding:"omitempty,oneof=all normal premium" json:"special_type"`
 }
 
 func GetPostersResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
 
-	var request getPostersRequest
+	var request GetPostersRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	offset := (request.PageID - 1) * request.PageSize
-	request.Sort = c.DefaultQuery("sort", "asc")
+	request.Sort = c.DefaultQuery("sort", "desc")
 	request.SortBy = c.DefaultQuery("sort_by", "created_at")
 	request.Status = c.DefaultQuery("status", "both")
 	request.SearchPhrase = c.DefaultQuery("search_phrase", "")
-	//todo add other fields
+	request.State = c.DefaultQuery("state", "all")
+	request.SpecialType = c.DefaultQuery("special_type", "all")
 
 	filterObject := DTO2.FilterObject{
+		PageSize:     request.PageSize,
+		Offset:       (request.PageID - 1) * request.PageSize,
+		Sort:         request.Sort,
+		SortBy:       request.SortBy,
 		Status:       request.Status,
 		SearchPhrase: request.SearchPhrase,
 		TimeStart:    request.TimeStart,
 		TimeEnd:      request.TimeEnd,
-		OnlyRewards:  request.OnlyRewards,
+		OnlyAwards:   request.OnlyAwards,
 		Lat:          request.Lat,
 		Lon:          request.Lon,
 		TagIds:       request.TagIds,
@@ -71,36 +70,14 @@ func GetPostersResponse(c *gin.Context) {
 		SpecialType:  request.SpecialType,
 	}
 
-	posters, err := posterRepository.GetAllPosters(request.PageSize, offset, request.Sort, request.SortBy, filterObject)
+	posters, total, err := esPosterCli.GetPosters(filterObject)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var validPremium []ScoredPoster
-	//sort poster by special type
-	for _, poster := range posters {
-		score := 0
-		if poster.SpecialType == "premium" {
-			score = 1
-		}
-		validPremium = append(validPremium, ScoredPoster{poster, score})
-	}
-	//sort by score
-	for i := 0; i < len(validPremium); i++ {
-		for j := i + 1; j < len(validPremium); j++ {
-			if validPremium[i].score < validPremium[j].score {
-				validPremium[i], validPremium[j] = validPremium[j], validPremium[i]
-			}
-		}
-	}
-	var validPosters []Model2.Poster
-	for _, scoredPoster := range validPremium {
-		validPosters = append(validPosters, scoredPoster.poster)
-	}
-	//DBConfiguration.CloseDB()
-	View.GetPostersView(validPosters, c)
+	View.GetPostersView(posters, total, request.PageSize, c)
 }
 
 type GetPosterByIdRequest struct {
@@ -149,8 +126,8 @@ func DeletePosterByIdResponse(c *gin.Context) {
 type CreatePosterRequest struct {
 	Poster    DTO2.CreatePosterDTO
 	Addresses []DTO2.CreateAddressDTO
-	ImgUrls   []string `json:"img_urls" binding:"required"`
-	Tags      []string `json:"tags" binding:"required"`
+	ImgUrls   []string `json:"img_urls" binding:"required" json:"img_urls"`
+	Tags      []string `json:"tags" binding:"required" json:"tags"`
 }
 
 func CreatePosterResponse(c *gin.Context) {
@@ -163,6 +140,7 @@ func CreatePosterResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	walletAmount, err := userRepository.GetAmount(uint(payload.UserID))
 	if request.Poster.SpecialType == "premium" {
 		if walletAmount > specialAdsPrice {
@@ -421,7 +399,6 @@ func UpdatePosterStateResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
 
 	c.JSON(http.StatusOK, gin.H{"message": "Poster state updated!"})
 }

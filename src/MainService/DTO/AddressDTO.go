@@ -8,6 +8,18 @@ type CreateAddressDTO struct {
 	Longitude     float64 `json:"longitude" binding:"required"`
 }
 
+type ESAddressDTO struct {
+	Province      string   `json:"province"`
+	City          string   `json:"city"`
+	AddressDetail string   `json:"address_detail"`
+	Location      Location `json:"location"`
+}
+
+type Location struct {
+	Latitude  float64 `json:"lat"`
+	Longitude float64 `json:"lon"`
+}
+
 type UpdateAddressDTO struct {
 	Province      string  `json:"province" binding:"max=255"`
 	City          string  `json:"city" binding:"max=255"`

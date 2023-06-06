@@ -3,13 +3,14 @@ package UseCase
 import (
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/WorkerService/DBConfiguration"
+	"github.com/403-access-denied/main-backend/src/WorkerService/MessageCli"
 	Utils2 "github.com/403-access-denied/main-backend/src/WorkerService/Utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
 )
 
 func CheckPhotoNSFW() {
-	messageBroker := Utils2.MessageClient{}
+	messageBroker := MessageCli.MessageClient{}
 	var connectionString string
 	appEnv := os.Getenv("APP_ENV3")
 	if appEnv == "development" {

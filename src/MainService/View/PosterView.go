@@ -1,8 +1,10 @@
 package View
 
 import (
+	"github.com/403-access-denied/main-backend/src/MainService/DTO"
 	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/gin-gonic/gin"
+	"math"
 	"net/http"
 	"time"
 )
@@ -16,7 +18,7 @@ type PosterView struct {
 	UserPhone   string              `json:"phone_user"`
 	Addresses   []Model2.Address    `json:"address"`
 	Images      []Model2.Image      `json:"images"`
-	Tags        []Model2.Tag        `json:"categories"`
+	Tags        []Model2.Tag        `json:"tags"`
 	User        uint                `json:"user"`
 	Award       float64             `json:"award"`
 	CreatedAt   time.Time           `json:"created_at"`
@@ -25,25 +27,19 @@ type PosterView struct {
 	SpecialType string              `json:"special_type"`
 }
 
-func GetPostersView(posters []Model2.Poster, c *gin.Context) {
-	result := make([]PosterView, 0)
-	for _, poster := range posters {
-		result = append(result, PosterView{
-			ID:          poster.ID,
-			Title:       poster.Title,
-			Description: poster.Description,
-			Addresses:   poster.Addresses,
-			Images:      poster.Images,
-			Status:      poster.Status,
-			Tags:        poster.Tags,
-			User:        poster.UserID,
-			Award:       poster.Award,
-			CreatedAt:   poster.CreatedAt,
-			UpdatedAt:   poster.UpdatedAt,
-			State:       poster.State,
-			SpecialType: poster.SpecialType,
-		})
-	}
+type AllPostersView struct {
+	Total   int `json:"total"`
+	MaxPage int `json:"max_page"`
+	Posters []*DTO.ESPosterDTO
+}
+
+func GetPostersView(posters []*DTO.ESPosterDTO, totalPosters int, size int, c *gin.Context) {
+	var result AllPostersView
+
+	result.Total = totalPosters
+	result.MaxPage = int(math.Ceil(float64(totalPosters) / float64(size)))
+	result.Posters = posters
+
 	c.JSON(http.StatusOK, result)
 }
 
