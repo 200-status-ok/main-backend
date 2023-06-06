@@ -1,5 +1,7 @@
 package DTO
 
+import "time"
+
 type CreatePosterDTO struct {
 	Title       string  `json:"title" binding:"required,max=255"`
 	Description string  `json:"description" binding:"max=1000"`
@@ -11,7 +13,27 @@ type CreatePosterDTO struct {
 	Award       float64 `json:"award"`
 	UserID      uint    `json:"user_id" binding:"required,min=1"`
 	State       string  `json:"state"`
-	SpecialType string  `json:"special_ads" binding:"oneof=normal premium"`
+	SpecialType string  `json:"special_type" binding:"oneof=normal premium"`
+}
+
+type ESPosterDTO struct {
+	ID          uint           `json:"id"`
+	Title       string         `json:"title"`
+	Description string         `json:"description"`
+	Status      string         `json:"status"`
+	TelID       string         `json:"tel_id" binding:"max=255"`
+	UserPhone   string         `json:"user_phone" binding:"min=11,max=13"`
+	Alert       bool           `json:"alert" binding:"required"`
+	Chat        bool           `json:"chat" binding:"required"`
+	Award       float64        `json:"award"`
+	UserID      uint           `json:"user_id" binding:"required,min=1"`
+	State       string         `json:"state"`
+	SpecialType string         `json:"special_type" binding:"oneof=normal premium"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	Addresses   []ESAddressDTO `json:"addresses"`
+	Images      []string       `json:"images"`
+	Tags        []string       `json:"tags"`
 }
 
 type UpdatePosterDTO struct {
@@ -30,12 +52,16 @@ type UpdatePosterDTO struct {
 	SpecialType string   `json:"special_ads" binding:"oneof=normal premium ''"`
 }
 
-type FilterObject struct { //todo move this to another file
+type FilterObject struct {
+	PageSize     int
+	Offset       int
+	Sort         string
+	SortBy       string
 	Status       string
 	SearchPhrase string
 	TimeStart    int64
 	TimeEnd      int64
-	OnlyRewards  bool
+	OnlyAwards   bool
 	Lat          float64
 	Lon          float64
 	TagIds       []int

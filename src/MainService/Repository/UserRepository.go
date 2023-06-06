@@ -74,15 +74,37 @@ func (r *UserRepository) GetAllUsers() (*[]Model.User, error) {
 
 func (r *UserRepository) DeleteUser(id uint) error {
 	var user Model.User
+	if err := r.db.Preload("Posters").Preload("OwnConversations").Preload("MemberConversations").
+		Preload("MarkedPosters").Preload("Payments").First(&user, id).Error; err != nil {
+		return err
+	}
+
 	if err := r.db.Delete(&user.Posters, "user_id = ?", id).Error; err != nil {
 		return err
+	}
+	// delete images and addresses
+	for _, poster := range user.Posters {
+		if err := r.db.Delete(&poster.Images, "poster_id = ?", poster.ID).Error; err != nil {
+			return err
+		}
+		if err := r.db.Delete(&poster.Addresses, "poster_id = ?", poster.ID).Error; err != nil {
+			return err
+		}
 	}
 	if err := r.db.Delete(&user.MarkedPosters, "user_id = ?", id).Error; err != nil {
 		return err
 	}
-	err := r.db.Where("id = ?", id).Delete(&user).Error
-	if err != nil {
-		return errors.New("error while deleting user")
+	if err := r.db.Delete(&user.Payments, "user_id = ?", id).Error; err != nil {
+		return err
+	}
+	if err := r.db.Delete(&user.OwnConversations, "owner_id = ?", id).Error; err != nil {
+		return err
+	}
+	if err := r.db.Delete(&user.MemberConversations, "member_id = ?", id).Error; err != nil {
+		return err
+	}
+	if err := r.db.Delete(&user).Error; err != nil {
+		return err
 	}
 	return nil
 }

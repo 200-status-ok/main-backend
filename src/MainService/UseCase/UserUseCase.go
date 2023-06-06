@@ -7,6 +7,7 @@ import (
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	"github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
+	"github.com/403-access-denied/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	Utils2 "github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
@@ -347,7 +348,13 @@ func CreateUserResponse(c *gin.Context) {
 func DeleteUserByIdResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	esDeletePostersByUserId := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
 	err := userRepository.DeleteUser(uint(payload.UserID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err = esDeletePostersByUserId.DeletePosterByUserID(int(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

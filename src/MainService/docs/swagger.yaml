@@ -45,7 +45,7 @@ definitions:
       description:
         maxLength: 1000
         type: string
-      special_ads:
+      special_type:
         enum:
         - normal
         - premium
@@ -76,6 +76,78 @@ definitions:
     - status
     - title
     - user_id
+    type: object
+  DTO.ESAddressDTO:
+    properties:
+      address_detail:
+        type: string
+      city:
+        type: string
+      location:
+        $ref: '#/definitions/DTO.Location'
+      province:
+        type: string
+    type: object
+  DTO.ESPosterDTO:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/DTO.ESAddressDTO'
+        type: array
+      alert:
+        type: boolean
+      award:
+        type: number
+      chat:
+        type: boolean
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      images:
+        items:
+          type: string
+        type: array
+      special_type:
+        enum:
+        - normal
+        - premium
+        type: string
+      state:
+        type: string
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      tel_id:
+        maxLength: 255
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        minimum: 1
+        type: integer
+      user_phone:
+        maxLength: 13
+        minLength: 11
+        type: string
+    required:
+    - alert
+    - chat
+    - user_id
+    type: object
+  DTO.Location:
+    properties:
+      lat:
+        type: number
+      lon:
+        type: number
     type: object
   DTO.UpdateAddressDTO:
     properties:
@@ -566,6 +638,17 @@ definitions:
       username:
         type: string
     type: object
+  View.AllPostersView:
+    properties:
+      max_page:
+        type: integer
+      posters:
+        items:
+          $ref: '#/definitions/DTO.ESPosterDTO'
+        type: array
+      total:
+        type: integer
+    type: object
   View.ConversationView:
     properties:
       id:
@@ -624,10 +707,6 @@ definitions:
         type: array
       award:
         type: number
-      categories:
-        items:
-          $ref: '#/definitions/Model.Tag'
-        type: array
       created_at:
         type: string
       description:
@@ -646,6 +725,10 @@ definitions:
         type: string
       status:
         $ref: '#/definitions/Model.PosterStatus'
+      tags:
+        items:
+          $ref: '#/definitions/Model.Tag'
+        type: array
       telegram_id:
         type: string
       title:
@@ -1126,7 +1209,7 @@ paths:
         name: page_size
         required: true
         type: integer
-      - default: asc
+      - default: desc
         description: Sort direction
         in: query
         name: sort
@@ -1153,9 +1236,9 @@ paths:
         in: query
         name: time_end
         type: integer
-      - description: Only rewards
+      - description: Only Awards
         in: query
-        name: only_rewards
+        name: only_awards
         type: boolean
       - description: Latitude
         in: query
@@ -1189,7 +1272,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/View.PosterView'
+              $ref: '#/definitions/View.AllPostersView'
             type: array
       summary: Get a list of all posters
       tags:
@@ -1282,7 +1365,26 @@ paths:
       summary: Update a poster by ID
       tags:
       - posters
-  /posters/create-mock-data:
+  /posters/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload poster image
+      parameters:
+      - description: Multiple files
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Upload poster image
+      tags:
+      - posters
+  /posters/mock-data:
     post:
       consumes:
       - application/json
@@ -1302,7 +1404,7 @@ paths:
       summary: Create mock data
       tags:
       - posters
-  /posters/update-state:
+  /posters/state:
     patch:
       consumes:
       - application/json
@@ -1324,25 +1426,6 @@ paths:
         "200":
           description: OK
       summary: Update a poster state by ID
-      tags:
-      - posters
-  /posters/upload-image:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload poster image
-      parameters:
-      - description: Multiple files
-        in: formData
-        name: files
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Upload poster image
       tags:
       - posters
   /reports:
@@ -1730,7 +1813,7 @@ paths:
       summary: Payment
       tags:
       - users
-  /users/authorize/payment/user_wallet/get_transactions:
+  /users/authorize/payment/user_wallet/transactions:
     get:
       consumes:
       - application/json

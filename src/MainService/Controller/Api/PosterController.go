@@ -14,19 +14,19 @@ import (
 // @Produce  json
 // @Param page_id query int true "Page ID" minimum(1) default(1)
 // @Param page_size query int true "Page size" minimum(1) default(10)
-// @Param sort query string false "Sort direction" enum(asc, desc) default(asc)
+// @Param sort query string false "Sort direction" enum(asc, desc) default(desc)
 // @Param sort_by query string false "Sort by" enum(id, updated_at, created_at) default(created_at)
 // @Param search_phrase query string false "Search phrase"
 // @Param status query string false "Status" enum(lost, found, both) default(both)
 // @Param time_start query int false "Time start"
 // @Param time_end query int false "Time end"
-// @Param only_rewards query bool false "Only rewards"
+// @Param only_awards query bool false "Only Awards"
 // @Param lat query float64 false "Latitude"
 // @Param lon query float64 false "Longitude"
 // @Param tag_ids query []int false "TagIds" collectionFormat(multi) example(1,2,3)
 // @Param state query string false "State" enum(all, accepted, rejected, pending) default(all)
-// @Param special_type query string false "Special_type" enum(all, premium) default(all)
-// @Success 200 {array} View.PosterView
+// @Param special_type query string false "Special_type" enum(all, normal, premium) default(all)
+// @Success 200 {array} View.AllPostersView
 // @Router /posters [get]
 func GetPosters(c *gin.Context) {
 	span := sentry.StartSpan(c.Request.Context(), "GetPosters",
@@ -154,7 +154,7 @@ func UpdatePosterReport(c *gin.Context) {
 // @Param files formData file true "Multiple files"
 // @Produce  json
 // @Success 200
-// @Router /posters/upload-image [post]
+// @Router /posters/image [post]
 func UploadPosterImage(c *gin.Context) {
 	UseCase.UploadPosterImageResponse(c)
 }
@@ -168,7 +168,7 @@ func UploadPosterImage(c *gin.Context) {
 // @Param id query int true "ID"
 // @Param state query string false "State" enum(pending, accepted, rejected) default(accepted)
 // @Success 200
-// @Router /posters/update-state [patch]
+// @Router /posters/state [patch]
 func UpdatePosterState(c *gin.Context) {
 	UseCase.UpdatePosterStateResponse(c)
 }
@@ -181,7 +181,7 @@ func UpdatePosterState(c *gin.Context) {
 // @Produce  json
 // @Param mock body UseCase.CreateMockDataRequest true "Mock Data"
 // @Success 200
-// @Router /posters/create-mock-data [post]
+// @Router /posters/mock-data [post]
 func CreateMockData(c *gin.Context) {
 	UseCase.CreateMockDataResponse(c)
 }

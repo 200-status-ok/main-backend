@@ -3,13 +3,16 @@ package Repository
 import (
 	"errors"
 	"fmt"
+	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	DTO2 "github.com/403-access-denied/main-backend/src/MainService/DTO"
 	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
+	"github.com/403-access-denied/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"sort"
 	"strings"
+	"time"
 )
 
 type PosterRepository struct {
@@ -49,7 +52,7 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 		result = result.Where("status = ?", filterObject.Status)
 	}
 
-	if filterObject.OnlyRewards == true {
+	if filterObject.OnlyAwards == true {
 		result = result.Where("award > 0")
 	}
 
@@ -142,6 +145,7 @@ func (r *PosterRepository) GetPosterById(id int) (Model2.Poster, error) {
 
 func (r *PosterRepository) DeletePosterById(id uint, userId uint) error {
 	var poster Model2.Poster
+	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
 
 	findResult := r.db.First(&poster, "id = ? AND user_id = ?", id, userId)
 	if findResult.Error != nil {
@@ -151,6 +155,11 @@ func (r *PosterRepository) DeletePosterById(id uint, userId uint) error {
 	deleteResult := r.db.Select(clause.Associations).Delete(&poster)
 	if deleteResult.Error != nil {
 		return deleteResult.Error
+	}
+
+	err := esPosterCli.DeletePoster(int(poster.ID))
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -220,6 +229,47 @@ func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses [
 		return Model2.Poster{}, result.Error
 	}
 
+	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+
+	var esPoster DTO2.ESPosterDTO
+	esPoster.ID = posterModel.ID
+	esPoster.Title = posterModel.Title
+	esPoster.Description = posterModel.Description
+	esPoster.Status = string(posterModel.Status)
+	esPoster.UserID = posterModel.UserID
+	esPoster.UserPhone = posterModel.UserPhone
+	esPoster.TelID = posterModel.TelegramID
+	esPoster.Alert = posterModel.HasAlert
+	esPoster.Award = posterModel.Award
+	esPoster.Chat = posterModel.HasChat
+	esPoster.State = posterModel.State
+	esPoster.SpecialType = posterModel.SpecialType
+	esPoster.Tags = tagNames
+
+	var esAddresses []DTO2.ESAddressDTO
+	for _, v := range addresses {
+		var location DTO2.Location
+		location.Latitude = v.Latitude
+		location.Longitude = v.Longitude
+
+		esAddresses = append(esAddresses, DTO2.ESAddressDTO{
+			Province:      v.Province,
+			City:          v.City,
+			AddressDetail: v.AddressDetail,
+			Location:      location,
+		})
+	}
+
+	esPoster.Addresses = esAddresses
+	esPoster.CreatedAt = posterModel.CreatedAt
+	esPoster.UpdatedAt = posterModel.UpdatedAt
+	esPoster.Images = imageUrls
+
+	err := esPosterCli.InsertPoster(&esPoster)
+	if err != nil {
+		return posterModel, err
+	}
+
 	return posterModel, nil
 }
 
@@ -228,55 +278,68 @@ func (r *PosterRepository) UpdatePoster(id int, poster DTO2.UpdatePosterDTO, add
 	var updatedPosterModel Model2.Poster
 	updatedPosterModel.SetID(uint(id))
 
+	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	updateFields := make(map[string]interface{})
+
 	if poster.Title != "" {
 		updatedPosterModel.Title = poster.Title
+		updateFields["title"] = poster.Title
 	}
 
 	if poster.Description != "" {
 		updatedPosterModel.Description = poster.Description
+		updateFields["description"] = poster.Description
 	}
 
 	if poster.Status != "" {
 		updatedPosterModel.SetStatus(poster.Status)
+		updateFields["status"] = poster.Status
 	}
 
 	if poster.TelID != "" {
 		updatedPosterModel.TelegramID = poster.TelID
+		updateFields["tel_id"] = poster.TelID
 	}
 
 	if poster.UserPhone != "" {
 		updatedPosterModel.UserPhone = poster.UserPhone
+		updateFields["user_phone"] = poster.UserPhone
 	}
 
-	fmt.Println("modar alert: ", poster.Alert)
 	if poster.Alert != "" { //todo modar fix alert
 		if poster.Alert == "true" {
 			updatedPosterModel.HasAlert = true
+			updateFields["alert"] = true
 		} else if poster.Alert == "false" {
 			fmt.Println("modar alert is false")
 			updatedPosterModel.HasAlert = false
+			updateFields["alert"] = false
 		}
 	}
 
-	fmt.Println("modar Chat: ", poster.Chat)
 	if poster.Chat != "" { //todo modar fix chat
 		if poster.Chat == "true" {
 			updatedPosterModel.HasChat = true
+			updateFields["chat"] = true
 		} else if poster.Chat == "false" {
 			updatedPosterModel.HasChat = false
+			updateFields["chat"] = false
 		}
 	}
 
 	if poster.Award != 0 {
 		updatedPosterModel.Award = poster.Award
+		updateFields["award"] = poster.Award
 	}
 
 	if poster.UserID != 0 {
 		updatedPosterModel.UserID = poster.UserID
+		updateFields["user_id"] = poster.UserID
 	}
 
 	if poster.State != "" {
 		updatedPosterModel.State = poster.State
+		updateFields["state"] = poster.State
 	}
 
 	if len(poster.ImgUrls) != 0 {
@@ -289,6 +352,7 @@ func (r *PosterRepository) UpdatePoster(id int, poster DTO2.UpdatePosterDTO, add
 		}
 		r.db.Where("poster_id = ?", id).Delete(&Model2.Image{})
 		_ = r.db.Model(&updatedPosterModel).Association("Images").Append(updatedImages)
+		updateFields["images"] = poster.ImgUrls
 	}
 
 	//todo modar add tag and address support
@@ -302,21 +366,31 @@ func (r *PosterRepository) UpdatePoster(id int, poster DTO2.UpdatePosterDTO, add
 	//	_ = r.db.Model(&updatedPosterModel).Association("Tags").Replace(updatedTags)
 	//}
 	//
-	//if len(addresses) != 0 {
-	//	var updatedAddresses []Model2.Address
-	//	for _, address := range addresses {
-	//		updatedAddresses = append(updatedAddresses, Model2.Address{
-	//			Province:      address.Province,
-	//			City:          address.City,
-	//			AddressDetail: address.AddressDetail,
-	//			Latitude:      address.Latitude,
-	//			Longitude:     address.Longitude,
-	//		})
-	//	}
-	//	_ = r.db.Model(&updatedPosterModel).Association("Addresses").Replace(updatedAddresses)
-	//}
-
-	fmt.Println("modar updatedPosterModel: ", updatedPosterModel)
+	if len(addresses) != 0 {
+		var esAddresses []DTO2.ESAddressDTO
+		var updatedAddresses []Model2.Address
+		for _, address := range addresses {
+			esAddresses = append(esAddresses, DTO2.ESAddressDTO{
+				Province:      address.Province,
+				City:          address.City,
+				AddressDetail: address.AddressDetail,
+				Location: DTO2.Location{
+					Latitude:  address.Latitude,
+					Longitude: address.Longitude,
+				},
+			})
+			updatedAddresses = append(updatedAddresses, Model2.Address{
+				Province:      address.Province,
+				City:          address.City,
+				AddressDetail: address.AddressDetail,
+				Latitude:      address.Latitude,
+				Longitude:     address.Longitude,
+			})
+		}
+		r.db.Where("poster_id = ?", id).Delete(&Model2.Address{})
+		_ = r.db.Model(&updatedPosterModel).Association("Addresses").Append(updatedAddresses)
+		updateFields["addresses"] = esAddresses
+	}
 
 	//if len(poster.TagIds) != 0 {
 	//	var updatedTags []Model2.Tag
@@ -328,16 +402,22 @@ func (r *PosterRepository) UpdatePoster(id int, poster DTO2.UpdatePosterDTO, add
 	//	_ = r.db.Model(&updatedPosterModel).Association("Images").Replace(updatedTags)
 	//}
 
-	fmt.Println("modar updateStatus: ", updatedPosterModel.Status)
-
 	result := r.db.Where("id = ?", id).Updates(updatedPosterModel)
-
 	if result.RowsAffected == 0 {
 		return errors.New("poster not found")
 	}
 
 	if result.Error != nil {
 		return result.Error
+	}
+
+	updateFields["updated_at"] = time.Now()
+	updateDoc := make(map[string]interface{})
+	updateDoc["doc"] = updateFields
+
+	err := esPosterCli.UpdatePoster(updateDoc, id)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -424,21 +504,25 @@ func (r *PosterRepository) UpdatePosterReport(id, posterID, issuerID uint, repor
 }
 
 func (r *PosterRepository) UpdatePosterState(id uint, state string) error {
-
+	esPoster := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
 	var updatedPosterReportModel Model2.Poster
+	updateFields := make(map[string]interface{})
 
 	updatedPosterReportModel.State = state
+	updateFields["state"] = state
 
-	fmt.Println("modar id is: ", id)
-	fmt.Println("modar updatedPosterReportModel is: ", updatedPosterReportModel)
+	update := make(map[string]interface{})
+	update["doc"] = updateFields
 
 	result := r.db.Model(&Model2.Poster{}).Where("id = ?", id).Updates(updatedPosterReportModel)
-
 	if result.Error != nil {
 		return result.Error
 	}
 
-	//DBConfiguration.CloseDB()
+	err := esPoster.UpdatePoster(update, int(id))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

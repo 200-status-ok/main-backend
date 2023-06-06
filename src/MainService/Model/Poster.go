@@ -27,8 +27,8 @@ type Poster struct {
 	Award       float64        `gorm:"type:decimal" json:"award"`
 	UserID      uint           `gorm:"type:int;" json:"user_id"`
 	Tags        []Tag          `gorm:"many2many:poster_tags;" json:"tags"`
-	Images      []Image        `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"image"`
-	Addresses   []Address      `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"address"`
+	Images      []Image        `gorm:"foreignKey:PosterID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"image"`
+	Addresses   []Address      `gorm:"foreignKey:PosterId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"address"`
 	State       string         `gorm:"type:string;default:'pending';not null;" json:"state"`
 	SpecialType string         `gorm:"type:string;default:'normal';not null;" json:"special_type"`
 }

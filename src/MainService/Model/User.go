@@ -11,12 +11,12 @@ type User struct {
 	UpdatedAt           time.Time      `json:"updated_at"`
 	DeletedAt           gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	Username            string         `gorm:"type:varchar(50);not null;unique" json:"username"`
-	Posters             []Poster       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"posters"`
+	Posters             []Poster       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"posters"`
 	Wallet              float64        `gorm:"type:decimal(10,2);default:0" json:"wallet"`
-	OwnConversations    []Conversation `gorm:"foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"own_conversations"`
-	MemberConversations []Conversation `gorm:"foreignKey:MemberID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"member_conversations"`
-	MarkedPosters       []MarkedPoster `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"marked_posters"`
-	Payments            []Payment      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"Payments"`
+	OwnConversations    []Conversation `gorm:"foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"own_conversations"`
+	MemberConversations []Conversation `gorm:"foreignKey:MemberID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"member_conversations"`
+	MarkedPosters       []MarkedPoster `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"marked_posters"`
+	Payments            []Payment      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"Payments"`
 }
 
 func (u *User) GetUsername() string {
