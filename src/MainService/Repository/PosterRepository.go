@@ -166,12 +166,13 @@ func (r *PosterRepository) DeletePosterById(id uint, userId uint) error {
 
 }
 
-func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses []DTO2.CreateAddressDTO, imageUrls []string, tagNames []string, special string) (
+func (r *PosterRepository) CreatePoster(userID uint64, poster DTO2.CreatePosterDTO, addresses []DTO2.CreateAddressDTO,
+	imageUrls []string, tagNames []string, special string) (
 	Model2.Poster, error) {
 	var posterModel Model2.Poster
 	posterModel.SetTitle(poster.Title)
 	posterModel.SetDescription(poster.Description)
-	posterModel.SetUserID(poster.UserID)
+	posterModel.SetUserID(uint(userID))
 	posterModel.SetStatus(poster.Status)
 	posterModel.SetUserPhone(poster.UserPhone)
 	posterModel.SetTelegramID(poster.TelID)
@@ -192,6 +193,7 @@ func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses [
 				Name:  name,
 				State: "pending",
 			})
+
 			if creErr != nil {
 				continue
 			}
@@ -244,7 +246,16 @@ func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses [
 	esPoster.Chat = posterModel.HasChat
 	esPoster.State = posterModel.State
 	esPoster.SpecialType = posterModel.SpecialType
-	esPoster.Tags = tagNames
+
+	var esTags []DTO2.ESTagDTO
+	for _, v := range newTags {
+		esTags = append(esTags, DTO2.ESTagDTO{
+			ID:    v.ID,
+			Name:  v.Name,
+			State: v.State,
+		})
+	}
+	esPoster.Tags = esTags
 
 	var esAddresses []DTO2.ESAddressDTO
 	for _, v := range addresses {
@@ -273,7 +284,7 @@ func (r *PosterRepository) CreatePoster(poster DTO2.CreatePosterDTO, addresses [
 	return posterModel, nil
 }
 
-func (r *PosterRepository) UpdatePoster(id int, poster DTO2.UpdatePosterDTO, addresses []DTO2.UpdateAddressDTO) error {
+func (r *PosterRepository) UpdatePoster(id int, role string, poster DTO2.UpdatePosterDTO, addresses []DTO2.UpdateAddressDTO) error {
 
 	var updatedPosterModel Model2.Poster
 	updatedPosterModel.SetID(uint(id))
@@ -387,6 +398,11 @@ func (r *PosterRepository) UpdatePoster(id int, poster DTO2.UpdatePosterDTO, add
 				Longitude:     address.Longitude,
 			})
 		}
+		if strings.ToLower(role) == "user" {
+			updatedPosterModel.State = "pending"
+			updateFields["state"] = "pending"
+		}
+
 		r.db.Where("poster_id = ?", id).Delete(&Model2.Address{})
 		_ = r.db.Model(&updatedPosterModel).Association("Addresses").Append(updatedAddresses)
 		updateFields["addresses"] = esAddresses

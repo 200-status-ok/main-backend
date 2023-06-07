@@ -149,6 +149,10 @@ func (client *MessageClient) SubscribeOnQueue(queueName string, consumerName str
 		} else if queue.Name == "nsfw-validation" {
 			posterID, _ := strconv.ParseUint(string(d.Body), 10, 64)
 			PhotoTextValidation(posterID, db)
+		} else if queue.Name == "tag-validation" {
+			arr := CustomArray{}
+			arr = strings.Split(string(d.Body), ",")
+			arr.TagValidation(db)
 		}
 	}
 	<-forever
@@ -275,6 +279,54 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 
 	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
 	err = esPosterCli.UpdatePosterState(state, int(posterID))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func (a CustomArray) TagValidation(db *gorm.DB) {
+	posterRepository := Repository.NewPosterRepository(db)
+	file, err := ioutil.ReadFile("Utils/data.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	newString := strings.ReplaceAll(string(file), "\n", "")
+	newString2 := strings.ReplaceAll(newString, "\"", "")
+	newString3 := strings.ReplaceAll(newString2, "\r", "")
+	splitStr := strings.Split(newString3, ",")
+
+	result := make(map[string]string)
+	for _, tag := range a {
+		result[tag] = "accepted"
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(a))
+	for _, tag := range a {
+		go func(tag string) {
+			defer wg.Done()
+			for _, v := range strings.Split(tag, " ") {
+				for j, _ := range splitStr {
+					if v == splitStr[j] {
+						result[tag] = "rejected"
+						break
+					}
+				}
+			}
+		}(tag)
+	}
+	wg.Wait()
+	err = posterRepository.UpdateTags(result)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	err = esPosterCli.UpdateTags(result)
 	if err != nil {
 		fmt.Println(err)
 		return

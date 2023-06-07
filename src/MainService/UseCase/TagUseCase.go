@@ -30,7 +30,6 @@ func CreateTagResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
 	View.CreateTagView(tags, c)
 }
 

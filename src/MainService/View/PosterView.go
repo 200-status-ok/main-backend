@@ -15,11 +15,11 @@ type PosterView struct {
 	Status      Model2.PosterStatus `json:"status"`
 	Description string              `json:"description"`
 	TelegramId  string              `json:"telegram_id"`
-	UserPhone   string              `json:"phone_user"`
-	Addresses   []Model2.Address    `json:"address"`
+	UserPhone   string              `json:"user_phone"`
+	Addresses   []Model2.Address    `json:"addresses"`
 	Images      []Model2.Image      `json:"images"`
 	Tags        []Model2.Tag        `json:"tags"`
-	User        uint                `json:"user"`
+	User        uint                `json:"user_id"`
 	Award       float64             `json:"award"`
 	CreatedAt   time.Time           `json:"created_at"`
 	UpdatedAt   time.Time           `json:"updated_at"`

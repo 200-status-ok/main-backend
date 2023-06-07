@@ -22,7 +22,7 @@ func NewPosterES(es *elastic.Client) *ESPoster {
 	return &ESPoster{es: es}
 }
 
-func (p *ESPoster) CreateIndex() error {
+func (p *ESPoster) CreatePosterIndex() error {
 	req := esapi.IndicesCreateRequest{
 		Index: "posters",
 		Body: strings.NewReader(
@@ -123,7 +123,18 @@ func (p *ESPoster) CreateIndex() error {
 						}
 					  },
 					  "tags": {
-						"type": "keyword"
+						"properties": {
+						  "id": {
+							"type": "integer"
+						  },
+						  "name": {
+							"type": "text",
+							"analyzer": "persian"
+						  },
+						  "state": {
+							"type": "keyword"
+						  }
+						}
 					  },
                       "images": {
 						"type": "keyword"
@@ -146,7 +157,7 @@ func (p *ESPoster) CreateIndex() error {
 	return nil
 }
 
-func (p *ESPoster) DeleteIndex() error {
+func (p *ESPoster) DeletePosterIndex() error {
 	req := esapi.IndicesDeleteRequest{
 		Index: []string{"posters"},
 	}

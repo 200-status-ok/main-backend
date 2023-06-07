@@ -8,11 +8,11 @@ import (
 
 func main() {
 	esClient := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
-	err := esClient.DeleteIndex()
+	err := esClient.DeletePosterIndex()
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = esClient.CreateIndex()
+	err = esClient.CreatePosterIndex()
 
 	if err != nil {
 		fmt.Println(err)

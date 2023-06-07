@@ -53,3 +53,16 @@ func (r *PosterRepository) UpdatePosterState(posterID uint, state string) error 
 
 	return nil
 }
+
+func (r *PosterRepository) UpdateTags(result map[string]string) error {
+	for key, value := range result {
+		err := r.db.Table("tags").
+			Where("name = ?", key).
+			Update("state", value).Error
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

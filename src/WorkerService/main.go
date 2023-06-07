@@ -10,6 +10,7 @@ func main() {
 
 	go UseCase.SendToUser()
 	go UseCase.CheckPhotoNSFW()
+	go UseCase.CheckTagNSFW()
 
 	err := r.Run(":8000")
 	if err != nil {

@@ -149,28 +149,27 @@ func CreatePosterResponse(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			request.Poster.UserID = uint(payload.UserID)
-			poster, err2 := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Tags, "premium")
+			poster, err2 := posterRepository.CreatePoster(payload.UserID, request.Poster, request.Addresses, request.ImgUrls, request.Tags, "premium")
 			if err2 != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err2.Error()})
 				return
 			}
 
 			SendToNSFWQueue(poster.ID, c)
+			TagValidationQueue(request.Tags, c)
 			View.CreatePosterView(poster, c)
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "not enough money"})
 			return
 		}
 	} else {
-		request.Poster.UserID = uint(payload.UserID)
-		poster, err := posterRepository.CreatePoster(request.Poster, request.Addresses, request.ImgUrls, request.Tags, "normal")
+		poster, err := posterRepository.CreatePoster(payload.UserID, request.Poster, request.Addresses, request.ImgUrls, request.Tags, "normal")
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		//DBConfiguration.CloseDB()
 		SendToNSFWQueue(poster.ID, c)
+		TagValidationQueue(request.Tags, c)
 		View.CreatePosterView(poster, c)
 	}
 }
@@ -189,8 +188,8 @@ func UpdatePosterResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
 	var request UpdatePosterRequest
-	var id UpdatePosterByIdRequest
-	if err := c.ShouldBindUri(&id); err != nil {
+	var posterByIdRequest UpdatePosterByIdRequest
+	if err := c.ShouldBindUri(&posterByIdRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -200,19 +199,52 @@ func UpdatePosterResponse(c *gin.Context) {
 	}
 
 	request.Poster.UserID = uint(payload.UserID)
-	err := posterRepository.UpdatePoster(id.ID, request.Poster, request.Addresses)
+	err := posterRepository.UpdatePoster(posterByIdRequest.ID, payload.Role, request.Poster, request.Addresses)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	if strings.ToLower(payload.Role) == "user" {
+		SendToNSFWQueue(uint(posterByIdRequest.ID), c)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Poster updated successfully"})
+}
+
+func TagValidationQueue(tags []string, c *gin.Context) {
+	appEnv := os.Getenv("APP_ENV2")
+	messageBroker := Utils.MessageClient{}
+
+	if appEnv == "development" {
+		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	} else if appEnv == "production" {
+		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	msg := strings.Join(tags, ",")
+	err := messageBroker.PublishOnQueue([]byte(msg), "tag-validation")
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	messageBroker.Close()
 }
 
 func SendToNSFWQueue(posterID uint, c *gin.Context) {
 	appEnv := os.Getenv("APP_ENV2")
-
 	messageBroker := Utils.MessageClient{}
+
 	if appEnv == "development" {
 		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
 		if err != nil {
@@ -475,7 +507,6 @@ func MockPoster(count int, userID int, tagNames []string) error {
 					Status:      "lost",
 					Alert:       true,
 					Chat:        true,
-					UserID:      uint(userID),
 					State:       "pending",
 				},
 				Addresses: []DTO2.CreateAddressDTO{
@@ -493,7 +524,8 @@ func MockPoster(count int, userID int, tagNames []string) error {
 				},
 			}
 			posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
-			model, err := posterRepository.CreatePoster(request.Poster, request.Addresses, nil, request.Tags, "normal")
+			model, err := posterRepository.CreatePoster(uint64(userID), request.Poster, request.Addresses, nil,
+				request.Tags, "normal")
 			if err != nil {
 				fmt.Println(err)
 				return err
@@ -507,7 +539,6 @@ func MockPoster(count int, userID int, tagNames []string) error {
 					Status:      "found",
 					Alert:       true,
 					Chat:        true,
-					UserID:      uint(userID),
 					State:       "pending",
 				},
 				Addresses: []DTO2.CreateAddressDTO{
@@ -525,7 +556,8 @@ func MockPoster(count int, userID int, tagNames []string) error {
 				},
 			}
 			posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
-			model, err := posterRepository.CreatePoster(request.Poster, request.Addresses, nil, request.Tags, "normal")
+			model, err := posterRepository.CreatePoster(uint64(userID), request.Poster, request.Addresses, nil,
+				request.Tags, "normal")
 			if err != nil {
 				fmt.Println(err)
 				return err
