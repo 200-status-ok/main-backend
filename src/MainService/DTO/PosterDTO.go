@@ -11,7 +11,6 @@ type CreatePosterDTO struct {
 	Alert       bool    `json:"alert" binding:"required"`
 	Chat        bool    `json:"chat" binding:"required"`
 	Award       float64 `json:"award"`
-	UserID      uint    `json:"user_id" binding:"required,min=1"`
 	State       string  `json:"state"`
 	SpecialType string  `json:"special_type" binding:"oneof=normal premium"`
 }
@@ -33,7 +32,13 @@ type ESPosterDTO struct {
 	UpdatedAt   time.Time      `json:"updated_at"`
 	Addresses   []ESAddressDTO `json:"addresses"`
 	Images      []string       `json:"images"`
-	Tags        []string       `json:"tags"`
+	Tags        []ESTagDTO     `json:"tags"`
+}
+
+type ESTagDTO struct {
+	ID    uint   `json:"id"`
+	Name  string `json:"name"`
+	State string `json:"state" binding:"oneof=accepted rejected pending"`
 }
 
 type UpdatePosterDTO struct {

@@ -39,3 +39,34 @@ func CheckPhotoNSFW() {
 		}
 	}()
 }
+
+func CheckTagNSFW() {
+	messageBroker := MessageCli.MessageClient{}
+	var connectionString string
+	appEnv := os.Getenv("APP_ENV3")
+	if appEnv == "development" {
+		connectionString = Utils2.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION")
+		err := messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+		if err != nil {
+			panic(err)
+		}
+	} else if appEnv == "production" {
+		connectionString = Utils2.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION")
+		err := messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	closeCh := make(chan *amqp.Error)
+	messageBroker.Connection.NotifyClose(closeCh)
+
+	go SendHeartbeat(messageBroker.Connection, &messageBroker, connectionString)
+
+	go func() {
+		err := messageBroker.SubscribeOnQueue("tag-validation", "tag-validation", DBConfiguration.GetDB())
+		if err != nil {
+			fmt.Println("Error subscribing to tag-validation queue: ", err)
+		}
+	}()
+}

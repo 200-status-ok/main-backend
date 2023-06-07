@@ -63,9 +63,6 @@ definitions:
       title:
         maxLength: 255
         type: string
-      user_id:
-        minimum: 1
-        type: integer
       user_phone:
         maxLength: 13
         minLength: 11
@@ -75,7 +72,6 @@ definitions:
     - chat
     - status
     - title
-    - user_id
     type: object
   DTO.ESAddressDTO:
     properties:
@@ -121,7 +117,7 @@ definitions:
         type: string
       tags:
         items:
-          type: string
+          $ref: '#/definitions/DTO.ESTagDTO'
         type: array
       tel_id:
         maxLength: 255
@@ -141,6 +137,19 @@ definitions:
     - alert
     - chat
     - user_id
+    type: object
+  DTO.ESTagDTO:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      state:
+        enum:
+        - accepted
+        - rejected
+        - pending
+        type: string
     type: object
   DTO.Location:
     properties:
@@ -701,7 +710,7 @@ definitions:
     type: object
   View.PosterView:
     properties:
-      address:
+      addresses:
         items:
           $ref: '#/definitions/Model.Address'
         type: array
@@ -717,8 +726,6 @@ definitions:
         items:
           $ref: '#/definitions/Model.Image'
         type: array
-      phone_user:
-        type: string
       special_type:
         type: string
       state:
@@ -735,8 +742,10 @@ definitions:
         type: string
       updated_at:
         type: string
-      user:
+      user_id:
         type: integer
+      user_phone:
+        type: string
     type: object
   View.TagView:
     properties:

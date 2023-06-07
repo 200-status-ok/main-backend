@@ -1618,8 +1618,7 @@ const docTemplate = `{
                 "alert",
                 "chat",
                 "status",
-                "title",
-                "user_id"
+                "title"
             ],
             "properties": {
                 "alert": {
@@ -1659,10 +1658,6 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "maxLength": 255
-                },
-                "user_id": {
-                    "type": "integer",
-                    "minimum": 1
                 },
                 "user_phone": {
                     "type": "string",
@@ -1742,7 +1737,7 @@ const docTemplate = `{
                 "tags": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/DTO.ESTagDTO"
                     }
                 },
                 "tel_id": {
@@ -1763,6 +1758,25 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 13,
                     "minLength": 11
+                }
+            }
+        },
+        "DTO.ESTagDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "accepted",
+                        "rejected",
+                        "pending"
+                    ]
                 }
             }
         },
@@ -2592,7 +2606,7 @@ const docTemplate = `{
         "View.PosterView": {
             "type": "object",
             "properties": {
-                "address": {
+                "addresses": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Model.Address"
@@ -2615,9 +2629,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Model.Image"
                     }
-                },
-                "phone_user": {
-                    "type": "string"
                 },
                 "special_type": {
                     "type": "string"
@@ -2643,8 +2654,11 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string"
                 },
-                "user": {
+                "user_id": {
                     "type": "integer"
+                },
+                "user_phone": {
+                    "type": "string"
                 }
             }
         },
