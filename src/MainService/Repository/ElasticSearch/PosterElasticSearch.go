@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DTO"
 	elastic "github.com/elastic/go-elasticsearch/v8"
-	esapi "github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"io"
 	"net/url"
 	"strconv"
@@ -199,6 +199,38 @@ func (p *ESPoster) InsertPoster(poster *DTO.ESPosterDTO) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (p *ESPoster) InsertAllPosters(posters []*DTO.ESPosterDTO) error {
+	var bulkRequest []string
+	for _, poster := range posters {
+		jsonPoster, err := json.Marshal(poster)
+		if err != nil {
+			return err
+		}
+		bulkRequest = append(bulkRequest, fmt.Sprintf(`{ "index" : { "_index" : "posters", "_id" : "%d" } }`, poster.ID))
+		bulkRequest = append(bulkRequest, string(jsonPoster))
+	}
+
+	req := esapi.BulkRequest{
+		Index:   "posters",
+		Body:    strings.NewReader(strings.Join(bulkRequest, "\n") + "\n"),
+		Refresh: "true",
+	}
+
+	res, err := req.Do(context.Background(), p.es)
+	fmt.Println(res.StatusCode)
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+		}
+	}(res.Body)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

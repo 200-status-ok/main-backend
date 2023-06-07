@@ -28,6 +28,63 @@ type ScoredPoster struct {
 	score  int
 }
 
+func (r *PosterRepository) GetAllESPosters() ([]*DTO2.ESPosterDTO, error) {
+	var posters []Model2.Poster
+	result := r.db.Preload("Addresses").Preload("Images").Preload("Tags").Find(&posters).Error
+	if result != nil {
+		return []*DTO2.ESPosterDTO{}, result
+	}
+
+	var esPosters []*DTO2.ESPosterDTO
+	for _, poster := range posters {
+		var esTag []DTO2.ESTagDTO
+		for _, tag := range poster.Tags {
+			esTag = append(esTag, DTO2.ESTagDTO{
+				ID:    tag.ID,
+				Name:  tag.Name,
+				State: tag.State,
+			})
+		}
+		var esAddress []DTO2.ESAddressDTO
+		for _, address := range poster.Addresses {
+			var location DTO2.Location
+			location.Latitude = address.Latitude
+			location.Longitude = address.Longitude
+			esAddress = append(esAddress, DTO2.ESAddressDTO{
+				Province:      address.Province,
+				City:          address.City,
+				AddressDetail: address.AddressDetail,
+				Location:      location,
+			})
+		}
+		var imageUrls []string
+		for _, image := range poster.Images {
+			imageUrls = append(imageUrls, image.Url)
+		}
+		esPosters = append(esPosters, &DTO2.ESPosterDTO{
+			ID:          poster.ID,
+			Title:       poster.Title,
+			Description: poster.Description,
+			Status:      string(poster.Status),
+			TelID:       poster.TelegramID,
+			UserPhone:   poster.UserPhone,
+			Alert:       poster.HasAlert,
+			Chat:        poster.HasChat,
+			Award:       poster.Award,
+			UserID:      poster.UserID,
+			State:       poster.State,
+			SpecialType: poster.SpecialType,
+			CreatedAt:   poster.CreatedAt,
+			UpdatedAt:   poster.UpdatedAt,
+			Addresses:   esAddress,
+			Images:      imageUrls,
+			Tags:        esTag,
+		})
+	}
+
+	return esPosters, nil
+}
+
 func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy string, filterObject DTO2.FilterObject) ([]Model2.Poster, error) {
 	var posters []Model2.Poster
 

@@ -40,6 +40,9 @@ drop: ## Drop database
 es:
 	@go run cmd/migrate/esSetup.go
 
+bulk:
+	@go run cmd/migrate/bulkInsert.go
+
 init_swagger: ## Init swagger
 	@swag init --parseDependency --parseInternal
 
