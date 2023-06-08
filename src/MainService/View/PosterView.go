@@ -28,9 +28,9 @@ type PosterView struct {
 }
 
 type AllPostersView struct {
-	Total   int `json:"total"`
-	MaxPage int `json:"max_page"`
-	Posters []*DTO.ESPosterDTO
+	Total   int                `json:"total"`
+	MaxPage int                `json:"max_page"`
+	Posters []*DTO.ESPosterDTO `json:"posters"`
 }
 
 func GetPostersView(posters []*DTO.ESPosterDTO, totalPosters int, size int, c *gin.Context) {

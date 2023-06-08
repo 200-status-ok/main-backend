@@ -51,7 +51,7 @@ func (p *PosterES) UpdatePosterState(state string, docID int) error {
 
 func (p *PosterES) UpdateTags(result map[string]string) error {
 	for k, v := range result {
-		script := fmt.Sprintf("ctx._source.tags.stream().filter(tag -> tag.name == '%s').forEach(tag -> tag.state = '%s')",
+		script := fmt.Sprintf("if (ctx._source.tags != null) { ctx._source.tags.stream().filter(tag -> tag.name == '%s').forEach(tag -> tag.state = '%s')}",
 			k, v)
 		body := map[string]interface{}{
 			"script": map[string]interface{}{

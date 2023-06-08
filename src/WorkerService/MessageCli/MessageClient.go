@@ -214,6 +214,10 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 				fmt.Println(err)
 			}
 			res, err := client.Do(req)
+			if res.StatusCode != 200 {
+				wg.Done()
+				return
+			}
 			if res.Body != nil {
 				defer res.Body.Close()
 			}
