@@ -143,7 +143,7 @@ func CreatePosterResponse(c *gin.Context) {
 
 	walletAmount, err := userRepository.GetAmount(uint(payload.UserID))
 	if request.Poster.SpecialType == "premium" {
-		if walletAmount > specialAdsPrice {
+		if walletAmount >= specialAdsPrice {
 			_, err = userRepository.UpdateWallet(uint(payload.UserID), -specialAdsPrice)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
