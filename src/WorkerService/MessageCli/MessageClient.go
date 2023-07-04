@@ -208,7 +208,7 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 			url := fmt.Sprintf("https://api.apilayer.com/nudity_detection/url?url=%s", imgUrl)
 			client := &http.Client{}
 			req, err := http.NewRequest("GET", url, nil)
-			req.Header.Set("apikey", "z232GHVwPAec88LzsqdBjUhL5BZDgvGp")
+			req.Header.Set("apikey", "9nbYoRCe6Xkt9J4NweVB3EiXNFtEe1EP")
 
 			if err != nil {
 				fmt.Println(err)
