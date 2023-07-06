@@ -1,6 +1,7 @@
 package MessageCli
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/WorkerService/DBConfiguration"
@@ -11,6 +12,7 @@ import (
 	"gorm.io/gorm"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -19,6 +21,35 @@ import (
 
 type MessageClient struct {
 	Connection *amqp.Connection
+}
+
+type Response struct {
+	Status  string `json:"status"`
+	Request struct {
+		ID         string  `json:"id"`
+		Timestamp  float64 `json:"timestamp"`
+		Operations int     `json:"operations"`
+	} `json:"request"`
+	Nudity struct {
+		SexualActivity    float64 `json:"sexual_activity"`
+		SexualDisplay     float64 `json:"sexual_display"`
+		Erotica           float64 `json:"erotica"`
+		Suggestive        float64 `json:"suggestive"`
+		SuggestiveClasses struct {
+			Bikini        float64 `json:"bikini"`
+			Cleavage      float64 `json:"cleavage"`
+			MaleChest     float64 `json:"male_chest"`
+			Lingerie      float64 `json:"lingerie"`
+			Miniskirt     float64 `json:"miniskirt"`
+			MaleUnderwear float64 `json:"male_underwear"`
+			Other         float64 `json:"other"`
+		} `json:"suggestive_classes"`
+		None float64 `json:"none"`
+	} `json:"nudity"`
+	Media struct {
+		ID  string `json:"id"`
+		URI string `json:"uri"`
+	} `json:"media"`
 }
 
 func (client *MessageClient) ConnectBroker(connectionString string) error {
@@ -205,27 +236,46 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 
 	go func() {
 		for _, imgUrl := range photoUrls {
-			url := fmt.Sprintf("https://api.apilayer.com/nudity_detection/url?url=%s", imgUrl)
+			apiURL := "https://api.sightengine.com/1.0/check.json"
+			params := url.Values{}
+			params.Set("models", "nudity-2.0")
+			params.Set("api_user", "100550938")
+			params.Set("api_secret", "kL5VFLjyHLuY3ts4TAjW")
+			params.Set("url", imgUrl)
 			client := &http.Client{}
-			req, err := http.NewRequest("GET", url, nil)
-			req.Header.Set("apikey", "9nbYoRCe6Xkt9J4NweVB3EiXNFtEe1EP")
-
+			req, err := http.NewRequest("GET", apiURL+"?"+params.Encode(), nil)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("Error creating the request:", err)
+				return
 			}
-			res, err := client.Do(req)
-			if res.StatusCode != 200 {
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Println("Error sending the request:", err)
+				return
+			}
+			if resp.StatusCode != 200 {
 				wg.Done()
 				return
 			}
-			if res.Body != nil {
-				defer res.Body.Close()
+			if resp.Body != nil {
+				defer resp.Body.Close()
 			}
-			body, err := ioutil.ReadAll(res.Body)
-			splitStr := strings.Split(string(body), ",")
-			splitStr2 := strings.Split(splitStr[0], ": ")
-			adultResult, err := strconv.Atoi(splitStr2[1])
-			if adultResult > 1 {
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println("Error reading the response:", err)
+				return
+			}
+			var response Response
+			err = json.Unmarshal(body, &response)
+			if err != nil {
+				fmt.Println("Error unmarshaling response:", err)
+				return
+			}
+			if response.Nudity.None == 0.0 {
+				wg.Done()
+				return
+			}
+			if response.Nudity.None < 0.4 {
 				isBadPhoto = true
 				break
 			} else {
