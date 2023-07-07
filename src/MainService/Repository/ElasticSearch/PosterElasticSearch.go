@@ -419,7 +419,7 @@ func (p *ESPoster) GetPosters(filterObject DTO.FilterObject) ([]*DTO.ESPosterDTO
 	if filterObject.Lat != 0 && filterObject.Lon != 0 {
 		geoQuery := map[string]interface{}{
 			"geo_distance": map[string]interface{}{
-				"distance": "10km",
+				"distance": "1km",
 				"addresses.location": map[string]interface{}{
 					"lat": filterObject.Lat,
 					"lon": filterObject.Lon,

@@ -81,7 +81,7 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 		wsUseCase.Hub.ChatConversation[int(conversation.ID)].Member = memberClient
 		ownerClient := &WebSocket.Client{
 			Conn:           &websocket.Conn{},
-			Message:        make(chan *WebSocket.Message, 15),
+			Message:        make(chan *WebSocket.Message, 100),
 			ID:             int(conversation.OwnerID),
 			Role:           WebSocket.Owner,
 			ConversationID: int(conversation.ID),

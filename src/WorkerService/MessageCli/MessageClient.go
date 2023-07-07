@@ -322,7 +322,7 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 	if !isBadPhoto && !isBadText {
 		state = "accepted"
 	} else {
-		state = "rejected"
+		state = "soft-rejected"
 	}
 
 	err = posterRepository.UpdatePosterState(uint(posterID), state)
@@ -365,7 +365,7 @@ func (a CustomArray) TagValidation(db *gorm.DB) {
 			for _, v := range strings.Split(tag, " ") {
 				for j, _ := range splitStr {
 					if v == splitStr[j] {
-						result[tag] = "rejected"
+						result[tag] = "soft-rejected"
 						break
 					}
 				}
