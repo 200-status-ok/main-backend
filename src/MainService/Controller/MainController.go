@@ -70,7 +70,7 @@ func (s *Server) MainController() {
 		{
 			report.GET("/", Api2.GetPosterReports)
 			report.GET("/:id", Api2.GetPosterReport)
-			report.POST("/report-poster", Api2.CreatePosterReport)
+			report.Use(Middleware.AuthMiddleware(s.TokenMaker)).POST("/report-poster", Api2.CreatePosterReport)
 			report.PATCH("/:id", Api2.UpdatePosterReport)
 		}
 		tags := v1.Group("/tags")
