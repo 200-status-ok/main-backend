@@ -270,19 +270,19 @@ func SendToNSFWQueue(posterID uint, c *gin.Context) {
 
 type CreatePosterReportRequest struct {
 	PosterId    uint   `form:"poster_id" binding:"required"`
+	IssuerId    uint   `form:"issuer_id" binding:"required"`
 	ReportType  string `form:"report_type" binding:"required,oneof=spam inappropriate other"` //TODO: add more report types
 	Description string `form:"description"`
 }
 
 func CreatePosterReportResponse(c *gin.Context) {
 	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
-	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request CreatePosterReportRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := posterRepository.CreatePosterReport(request.PosterId, uint(payload.UserID), request.ReportType, request.Description)
+	err := posterRepository.CreatePosterReport(request.PosterId, request.IssuerId, request.ReportType, request.Description)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
