@@ -95,7 +95,6 @@ func DeletePoster(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param poster_id query int true "Poster ID"
-// @Param issuer_id query int true "Issuer ID"
 // @Param report_type query string true "Report Type" enum(spam, inappropriate, other) default(other)
 // @Param description query string false "Description"
 // @Success 200
