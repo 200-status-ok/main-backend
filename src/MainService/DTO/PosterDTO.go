@@ -7,7 +7,7 @@ type CreatePosterDTO struct {
 	Description string  `json:"description" binding:"max=1000"`
 	Status      string  `json:"status" binding:"required,oneof=lost found"`
 	TelID       string  `json:"tel_id" binding:"max=255"`
-	UserPhone   string  `json:"user_phone" binding:"min=11,max=13"`
+	UserPhone   string  `json:"user_phone" binding:"max=13"`
 	Alert       bool    `json:"alert" binding:"required"`
 	Chat        bool    `json:"chat" binding:"required"`
 	Award       float64 `json:"award"`

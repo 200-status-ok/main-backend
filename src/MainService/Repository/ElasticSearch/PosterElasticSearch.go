@@ -374,6 +374,7 @@ func (p *ESPoster) GetPosters(filterObject DTO.FilterObject) ([]*DTO.ESPosterDTO
 					},
 				},
 			},
+			"filter": []map[string]interface{}{},
 		},
 	}
 	if filterObject.Status != "both" {
@@ -444,6 +445,17 @@ func (p *ESPoster) GetPosters(filterObject DTO.FilterObject) ([]*DTO.ESPosterDTO
 		getPostersFields["query"].(map[string]interface{})["bool"].(map[string]interface{})["must"] = append(
 			getPostersFields["query"].(map[string]interface{})["bool"].(map[string]interface{})["must"].([]map[string]interface{}),
 			searchQuery)
+	}
+	if len(filterObject.TagIds) > 0 {
+		tagQuery := map[string]interface{}{
+			"terms": map[string]interface{}{
+				"tags.id": filterObject.TagIds,
+			},
+		}
+		getPostersFields["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"] = append(
+			getPostersFields["query"].(map[string]interface{})["bool"].(map[string]interface{})["filter"].([]map[string]interface{}),
+			tagQuery,
+		)
 	}
 
 	jsonData, err := json.Marshal(getPostersFields)

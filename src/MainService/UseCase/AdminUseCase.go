@@ -4,6 +4,7 @@ import (
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
 	"github.com/403-access-denied/main-backend/src/MainService/Model"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
+	"github.com/403-access-denied/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	Utils2 "github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
@@ -158,11 +159,17 @@ type DeleteUserRequest struct {
 func DeleteUserByIdAdminResponse(c *gin.Context) {
 	var request DeleteUserRequest
 	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	esDeletePostersByUserId := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	err := userRepository.DeleteUser(request.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err = esDeletePostersByUserId.DeletePosterByUserID(int(request.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
