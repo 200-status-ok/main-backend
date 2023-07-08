@@ -517,7 +517,7 @@ func (r *PosterRepository) CreatePosterReport(posterID uint, issuerID uint, repo
 func (r *PosterRepository) GetAllPosterReports(limit, offset int, status string) ([]Model2.PosterReport, error) {
 	var posterReports []Model2.PosterReport
 
-	var result = r.db.Preload("Poster").Preload("Issuer").Preload("Poster.User").Limit(limit).Offset(offset).Order("created_at DESC")
+	var result = r.db.Preload("Poster").Limit(limit).Offset(offset).Order("created_at DESC")
 
 	if status != "both" {
 		result = result.Where("status = ?", status)
