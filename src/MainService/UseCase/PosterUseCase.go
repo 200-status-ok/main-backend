@@ -34,7 +34,7 @@ type GetPostersRequest struct {
 	Lat          float64 `form:"lat,omitempty" json:"lat"`
 	Lon          float64 `form:"lon,omitempty" json:"lon"`
 	TagIds       []int   `form:"tag_ids,omitempty" swaggertype:"array,int" json:"tag_ids"`
-	State        string  `form:"state,omitempty" binding:"omitempty,oneof=all pending accepted rejected" json:"state"`
+	State        string  `form:"state,omitempty" binding:"omitempty" json:"state"`
 	SpecialType  string  `form:"special_type,omitempty" binding:"omitempty,oneof=all normal premium" json:"special_type"`
 }
 
