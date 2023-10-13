@@ -1,4 +1,4 @@
-package WebSocket
+package RealtimeChat
 
 import "github.com/getsentry/sentry-go"
 

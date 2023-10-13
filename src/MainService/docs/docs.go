@@ -550,7 +550,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/WebSocket.MessageWithType"
+                            "$ref": "#/definitions/RealtimeChat.MessageWithType"
                         }
                     },
                     {
@@ -2756,7 +2756,7 @@ const docTemplate = `{
                 }
             }
         },
-        "WebSocket.MessageWithType": {
+        "RealtimeChat.MessageWithType": {
             "type": "object",
             "properties": {
                 "content": {},

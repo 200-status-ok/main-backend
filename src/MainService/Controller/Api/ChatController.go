@@ -3,11 +3,11 @@ package Api
 import (
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
+	"github.com/403-access-denied/main-backend/src/MainService/RealtimeChat"
 	"github.com/403-access-denied/main-backend/src/MainService/Repository"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/403-access-denied/main-backend/src/MainService/View"
-	"github.com/403-access-denied/main-backend/src/MainService/WebSocket"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -22,10 +22,10 @@ var upgrader = websocket.Upgrader{
 }
 
 type ChatWS struct {
-	Hub *WebSocket.Hub
+	Hub *RealtimeChat.Hub
 }
 
-func NewChatWS(hub *WebSocket.Hub) *ChatWS {
+func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
 	return &ChatWS{Hub: hub}
 }
 
@@ -41,7 +41,7 @@ type JoinConversationReq struct {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param Message body WebSocket.MessageWithType true "Message"
+// @Param Message body RealtimeChat.MessageWithType true "Message"
 // @Param conv_id query uint true "Conversation ID"
 // @Param token query string true "Token"
 // @Success 200 {object} string
@@ -64,26 +64,26 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 	}
 
 	if _, ok := wsUseCase.Hub.ChatConversation[int(conversation.ID)]; !ok {
-		wsUseCase.Hub.ChatConversation[int(conversation.ID)] = &WebSocket.ConversationChat{
+		wsUseCase.Hub.ChatConversation[int(conversation.ID)] = &RealtimeChat.ConversationChat{
 			ID:     int(conversation.ID),
 			Name:   fmt.Sprintf("conversation-%d", conversation.ID),
-			Owner:  &WebSocket.Client{},
-			Member: &WebSocket.Client{},
+			Owner:  &RealtimeChat.Client{},
+			Member: &RealtimeChat.Client{},
 		}
-		memberClient := &WebSocket.Client{
+		memberClient := &RealtimeChat.Client{
 			Conn:           &websocket.Conn{},
-			Message:        make(chan *WebSocket.Message, 100),
+			Message:        make(chan *RealtimeChat.Message, 100),
 			ID:             int(conversation.MemberID),
-			Role:           WebSocket.Member,
+			Role:           RealtimeChat.Member,
 			ConversationID: int(conversation.ID),
 			IsConnected:    false,
 		}
 		wsUseCase.Hub.ChatConversation[int(conversation.ID)].Member = memberClient
-		ownerClient := &WebSocket.Client{
+		ownerClient := &RealtimeChat.Client{
 			Conn:           &websocket.Conn{},
-			Message:        make(chan *WebSocket.Message, 100),
+			Message:        make(chan *RealtimeChat.Message, 100),
 			ID:             int(conversation.OwnerID),
-			Role:           WebSocket.Owner,
+			Role:           RealtimeChat.Owner,
 			ConversationID: int(conversation.ID),
 			IsConnected:    false,
 		}
@@ -95,7 +95,7 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	var client *WebSocket.Client
+	var client *RealtimeChat.Client
 	if uint(payload.UserID) == conversation.OwnerID {
 		client = wsUseCase.Hub.ChatConversation[int(conversation.ID)].Owner
 	} else {

@@ -1,4 +1,4 @@
-package WebSocket
+package RealtimeChat
 
 import (
 	"encoding/json"
@@ -7,13 +7,18 @@ import (
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
 	"github.com/gorilla/websocket"
 	"log"
+	"time"
 )
 
 type ConvRole string
 
 const (
-	Owner  ConvRole = "owner"
-	Member ConvRole = "member"
+	writeWait               = 10 * time.Second
+	pongWait                = 60 * time.Second
+	pingPeriod              = (pongWait * 9) / 10
+	maxMessageSize          = 512
+	Owner          ConvRole = "owner"
+	Member         ConvRole = "member"
 )
 
 type Client struct {
@@ -48,6 +53,19 @@ func (c *Client) Read(hub *Hub) {
 			return
 		}
 	}()
+	c.Conn.SetReadLimit(maxMessageSize)
+	err := c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	c.Conn.SetPongHandler(func(string) error {
+		err := c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	for {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
@@ -94,15 +112,21 @@ func (c *Client) Read(hub *Hub) {
 }
 
 func (c *Client) Write() {
+	ticker := time.NewTicker(pingPeriod)
 	defer func() {
+		ticker.Stop()
 		err := c.Conn.Close()
 		if err != nil {
 			return
 		}
 	}()
 	for {
-		if c.IsConnected {
-			message, ok := <-c.Message
+		select {
+		case message, ok := <-c.Message:
+			err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return
+			}
 			if !ok {
 				err := c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				if err != nil {
@@ -110,11 +134,37 @@ func (c *Client) Write() {
 				}
 				break
 			}
-
-			err := c.Conn.WriteJSON(message)
+			w, err := c.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
-				c.Message <- message
-				break
+				return
+			}
+			err = json.NewEncoder(w).Encode(message)
+			if err != nil {
+				return
+			}
+
+			n := len(c.Message)
+			for i := 0; i < n; i++ {
+				_, err := w.Write([]byte{'\n'})
+				if err != nil {
+					return
+				}
+				err = json.NewEncoder(w).Encode(<-c.Message)
+				if err != nil {
+					return
+				}
+			}
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		case <-ticker.C:
+			err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return
+			}
+			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
 			}
 		}
 	}

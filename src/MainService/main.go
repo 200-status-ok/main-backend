@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/403-access-denied/main-backend/src/MainService/Controller"
 	"github.com/403-access-denied/main-backend/src/MainService/Controller/Api"
+	"github.com/403-access-denied/main-backend/src/MainService/RealtimeChat"
 	"github.com/403-access-denied/main-backend/src/MainService/Token"
 	"github.com/403-access-denied/main-backend/src/MainService/Utils"
-	"github.com/403-access-denied/main-backend/src/MainService/WebSocket"
 	"github.com/403-access-denied/main-backend/src/MainService/docs"
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
@@ -50,7 +50,7 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	secretKey := Utils.ReadFromEnvFile(".env", "JWT_SECRET")
 	token, _ := Token.NewJWTMaker(secretKey)
-	hub := WebSocket.NewHub()
+	hub := RealtimeChat.NewHub()
 	wsUseCase := Api.NewChatWS(hub)
 	server := Controller.Server{Router: r, TokenMaker: token, ChatWs: wsUseCase}
 	server.MainController()
