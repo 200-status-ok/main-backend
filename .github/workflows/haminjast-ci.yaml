@@ -27,7 +27,6 @@ jobs:
         name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ././src/MainService
-          file: Dockerfile
+          file: ./src/MainService/Dockerfile
           push: true
           tags: mohammadali2001/haminjast:latest
