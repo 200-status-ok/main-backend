@@ -10,22 +10,24 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up go
-        uses: actions/setup-go@v4
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          go-version: 1.17
-      - name: verify dependencies
-        run: go mod verify
-        working-directory: ./src/MainService
-      - name: Build and push Docker image
-        uses: mr-smithers-excellent/docker-build-push@v6
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      -
+        name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Build and push Docker image
+        uses: docker/build-push-action@v5
         with:
-            image: mohammadali2001/haminjast
-            tags: v1, latest
-            registry: docker.io
-            dockerfile: ./src/MainService/Dockerfile
-            username: ${{ secrets.DOCKER_USERNAME }}
-            password: ${{ secrets.DOCKER_PASSWORD }}
+          context: ./src/MainService
+          file: ./Dockerfile
+          push: true
+          tags: mohammadali2001/haminjast:latest

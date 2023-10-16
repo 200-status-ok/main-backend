@@ -21,3 +21,5 @@
 
 /src/MainService/tmp
 /src/WorkerService/tmp2
+
+.github/workflows/liara.yaml
