@@ -17,13 +17,13 @@ jobs:
       - name: verify dependencies
         run: go mod verify
       - name: build
-        run: go build -o ./bin/main ./src/MainService
+        run: go build -o ./bin/main ../../src/MainService
       - name: Build and push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
             image: mohammadali2001/haminjast
             tags: v1, latest
             registry: registry-url.io
-            dockerfile: ./src/MainService/Dockerfile
+            dockerfile: ../../src/MainService/Dockerfile
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
