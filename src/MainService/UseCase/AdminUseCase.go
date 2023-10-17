@@ -1,13 +1,13 @@
 package UseCase
 
 import (
-	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
-	"github.com/403-access-denied/main-backend/src/MainService/Model"
-	"github.com/403-access-denied/main-backend/src/MainService/Repository"
-	"github.com/403-access-denied/main-backend/src/MainService/Repository/ElasticSearch"
-	"github.com/403-access-denied/main-backend/src/MainService/Token"
-	Utils2 "github.com/403-access-denied/main-backend/src/MainService/Utils"
-	"github.com/403-access-denied/main-backend/src/MainService/View"
+	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
+	"github.com/200-status-ok/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/MainService/Repository"
+	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
+	"github.com/200-status-ok/main-backend/src/MainService/Token"
+	Utils2 "github.com/200-status-ok/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/MainService/View"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"

@@ -1,7 +1,7 @@
 package View
 
 import (
-	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
+	Model2 "github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/gin-gonic/gin"
 )
 

@@ -1,10 +1,10 @@
 package Controller
 
 import (
-	Api2 "github.com/403-access-denied/main-backend/src/MainService/Controller/Api"
-	"github.com/403-access-denied/main-backend/src/MainService/Controller/Api/Admin"
-	"github.com/403-access-denied/main-backend/src/MainService/Middleware"
-	"github.com/403-access-denied/main-backend/src/MainService/Token"
+	Api2 "github.com/200-status-ok/main-backend/src/MainService/Controller/Api"
+	"github.com/200-status-ok/main-backend/src/MainService/Controller/Api/Admin"
+	"github.com/200-status-ok/main-backend/src/MainService/Middleware"
+	"github.com/200-status-ok/main-backend/src/MainService/Token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +18,6 @@ func (s *Server) MainController() {
 	v1 := s.Router.Group("/api/v1")
 	{
 		v1.Use(Middleware.SentryMiddleware())
-		// todo replace the auth middleware with the admin middleware
 		authorizeAdmin := v1.Group("/admin").Use(Middleware.AdminAuthMiddleware(s.TokenMaker))
 		{
 			authorizeAdmin.GET("/user/:userid", Admin.GetUser)

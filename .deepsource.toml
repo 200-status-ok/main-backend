@@ -7,5 +7,5 @@ name = "shell"
 name = "go"
 
   [analyzers.meta]
-  import_root = "github.com/403-access-denied/main-backend"
+  import_root = "github.com/200-status-ok/main-backend"
   dependencies_vendored = true

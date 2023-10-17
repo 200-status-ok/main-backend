@@ -2,9 +2,9 @@ package RealtimeChat
 
 import (
 	"encoding/json"
-	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
-	"github.com/403-access-denied/main-backend/src/MainService/Repository"
-	"github.com/403-access-denied/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
+	"github.com/200-status-ok/main-backend/src/MainService/Repository"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
