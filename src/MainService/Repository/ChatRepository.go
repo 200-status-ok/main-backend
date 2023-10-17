@@ -1,7 +1,7 @@
 package Repository
 
 import (
-	"github.com/403-access-denied/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"gorm.io/gorm"
 )
 

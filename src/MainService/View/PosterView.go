@@ -1,8 +1,8 @@
 package View
 
 import (
-	"github.com/403-access-denied/main-backend/src/MainService/DTO"
-	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
+	Model2 "github.com/200-status-ok/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/gin-gonic/gin"
 	"math"
 	"net/http"
@@ -28,12 +28,12 @@ type PosterView struct {
 }
 
 type AllPostersView struct {
-	Total   int                `json:"total"`
-	MaxPage int                `json:"max_page"`
-	Posters []*DTO.ESPosterDTO `json:"posters"`
+	Total   int                 `json:"total"`
+	MaxPage int                 `json:"max_page"`
+	Posters []*dtos.ESPosterDTO `json:"posters"`
 }
 
-func GetPostersView(posters []*DTO.ESPosterDTO, totalPosters int, size int, c *gin.Context) {
+func GetPostersView(posters []*dtos.ESPosterDTO, totalPosters int, size int, c *gin.Context) {
 	var result AllPostersView
 
 	result.Total = totalPosters

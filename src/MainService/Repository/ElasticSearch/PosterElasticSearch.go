@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/403-access-denied/main-backend/src/MainService/DTO"
+	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	elastic "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"io"
@@ -176,7 +176,7 @@ func (p *ESPoster) DeletePosterIndex() error {
 	return nil
 }
 
-func (p *ESPoster) InsertPoster(poster *DTO.ESPosterDTO) error {
+func (p *ESPoster) InsertPoster(poster *dtos.ESPosterDTO) error {
 	jsonPoster, err := json.Marshal(poster)
 	if err != nil {
 		return err
@@ -202,7 +202,7 @@ func (p *ESPoster) InsertPoster(poster *DTO.ESPosterDTO) error {
 	return nil
 }
 
-func (p *ESPoster) InsertAllPosters(posters []*DTO.ESPosterDTO) error {
+func (p *ESPoster) InsertAllPosters(posters []*dtos.ESPosterDTO) error {
 	var bulkRequest []string
 	for _, poster := range posters {
 		jsonPoster, err := json.Marshal(poster)
@@ -328,10 +328,10 @@ type Total struct {
 }
 
 type Hit struct {
-	Source *DTO.ESPosterDTO `json:"_source"`
+	Source *dtos.ESPosterDTO `json:"_source"`
 }
 
-func (p *ESPoster) GetPosters(filterObject DTO.FilterObject) ([]*DTO.ESPosterDTO, int, error) {
+func (p *ESPoster) GetPosters(filterObject dtos.FilterObject) ([]*dtos.ESPosterDTO, int, error) {
 	getPostersFields := make(map[string]interface{})
 	getPostersFields["track_scores"] = true
 	getPostersFields["from"] = filterObject.Offset
@@ -460,7 +460,7 @@ func (p *ESPoster) GetPosters(filterObject DTO.FilterObject) ([]*DTO.ESPosterDTO
 
 	jsonData, err := json.Marshal(getPostersFields)
 	if err != nil {
-		return []*DTO.ESPosterDTO{}, 0, err
+		return []*dtos.ESPosterDTO{}, 0, err
 	}
 
 	res, err := p.es.Search(
@@ -469,7 +469,7 @@ func (p *ESPoster) GetPosters(filterObject DTO.FilterObject) ([]*DTO.ESPosterDTO
 		p.es.Search.WithTrackScores(true),
 	)
 	if err != nil {
-		return []*DTO.ESPosterDTO{}, 0, err
+		return []*dtos.ESPosterDTO{}, 0, err
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -480,19 +480,19 @@ func (p *ESPoster) GetPosters(filterObject DTO.FilterObject) ([]*DTO.ESPosterDTO
 
 	if res.IsError() {
 		if res.StatusCode == 404 || res.StatusCode == 400 {
-			return []*DTO.ESPosterDTO{}, 0, nil
+			return []*dtos.ESPosterDTO{}, 0, nil
 		}
-		return []*DTO.ESPosterDTO{}, 0, errors.New(fmt.Sprintf("Search request failed: %s", res.Status()))
+		return []*dtos.ESPosterDTO{}, 0, errors.New(fmt.Sprintf("Search request failed: %s", res.Status()))
 	}
 
 	var result SearchHits
 	err = json.NewDecoder(res.Body).Decode(&result)
 	if err != nil {
-		return []*DTO.ESPosterDTO{}, 0, err
+		return []*dtos.ESPosterDTO{}, 0, err
 	}
 
 	postersHits := result.Hits.Hits
-	var getPosters []*DTO.ESPosterDTO
+	var getPosters []*dtos.ESPosterDTO
 
 	for _, v := range postersHits {
 		getPosters = append(getPosters, v.Source)

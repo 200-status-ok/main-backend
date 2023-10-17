@@ -1,4 +1,4 @@
-package DTO
+package dtos
 
 type CreateAddressDTO struct {
 	Province      string  `json:"province" binding:"required,min=5,max=255"`

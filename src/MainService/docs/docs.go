@@ -1580,7 +1580,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.CreateAddressDTO": {
+        "dtos.CreateAddressDTO": {
             "type": "object",
             "required": [
                 "city",
@@ -1612,7 +1612,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.CreatePosterDTO": {
+        "dtos.CreatePosterDTO": {
             "type": "object",
             "required": [
                 "alert",
@@ -1666,7 +1666,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.ESAddressDTO": {
+        "dtos.ESAddressDTO": {
             "type": "object",
             "properties": {
                 "address_detail": {
@@ -1676,14 +1676,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "location": {
-                    "$ref": "#/definitions/DTO.Location"
+                    "$ref": "#/definitions/dtos.Location"
                 },
                 "province": {
                     "type": "string"
                 }
             }
         },
-        "DTO.ESPosterDTO": {
+        "dtos.ESPosterDTO": {
             "type": "object",
             "required": [
                 "alert",
@@ -1694,7 +1694,7 @@ const docTemplate = `{
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.ESAddressDTO"
+                        "$ref": "#/definitions/dtos.ESAddressDTO"
                     }
                 },
                 "alert": {
@@ -1737,7 +1737,7 @@ const docTemplate = `{
                 "tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.ESTagDTO"
+                        "$ref": "#/definitions/dtos.ESTagDTO"
                     }
                 },
                 "tel_id": {
@@ -1761,7 +1761,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.ESTagDTO": {
+        "dtos.ESTagDTO": {
             "type": "object",
             "properties": {
                 "id": {
@@ -1780,7 +1780,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.Location": {
+        "dtos.Location": {
             "type": "object",
             "properties": {
                 "lat": {
@@ -1791,7 +1791,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.UpdateAddressDTO": {
+        "dtos.UpdateAddressDTO": {
             "type": "object",
             "properties": {
                 "address_detail": {
@@ -1814,7 +1814,7 @@ const docTemplate = `{
                 }
             }
         },
-        "DTO.UpdatePosterDTO": {
+        "dtos.UpdatePosterDTO": {
             "type": "object",
             "properties": {
                 "alert": {
@@ -2272,7 +2272,7 @@ const docTemplate = `{
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.CreateAddressDTO"
+                        "$ref": "#/definitions/dtos.CreateAddressDTO"
                     }
                 },
                 "img_urls": {
@@ -2282,7 +2282,7 @@ const docTemplate = `{
                     }
                 },
                 "poster": {
-                    "$ref": "#/definitions/DTO.CreatePosterDTO"
+                    "$ref": "#/definitions/dtos.CreatePosterDTO"
                 },
                 "tags": {
                     "type": "array",
@@ -2409,11 +2409,11 @@ const docTemplate = `{
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.UpdateAddressDTO"
+                        "$ref": "#/definitions/dtos.UpdateAddressDTO"
                     }
                 },
                 "poster": {
-                    "$ref": "#/definitions/DTO.UpdatePosterDTO"
+                    "$ref": "#/definitions/dtos.UpdatePosterDTO"
                 }
             }
         },
@@ -2518,7 +2518,7 @@ const docTemplate = `{
                 "posters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.ESPosterDTO"
+                        "$ref": "#/definitions/dtos.ESPosterDTO"
                     }
                 },
                 "total": {

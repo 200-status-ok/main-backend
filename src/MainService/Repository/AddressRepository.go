@@ -1,8 +1,8 @@
 package Repository
 
 import (
-	"github.com/403-access-denied/main-backend/src/MainService/DTO"
-	"github.com/403-access-denied/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"gorm.io/gorm"
 )
 
@@ -24,7 +24,7 @@ func (r *AddressRepository) GetAddressById(id int) (Model.Address, error) {
 	return address, nil
 }
 
-func (r *AddressRepository) CreateAddress(addresses []DTO.CreateAddressDTO, posterID uint) ([]Model.Address, error) {
+func (r *AddressRepository) CreateAddress(addresses []dtos.CreateAddressDTO, posterID uint) ([]Model.Address, error) {
 	var addressesModel []Model.Address
 	for _, address := range addresses {
 		addressesModel = append(addressesModel, Model.Address{
@@ -44,7 +44,7 @@ func (r *AddressRepository) CreateAddress(addresses []DTO.CreateAddressDTO, post
 	return addressesModel, nil
 }
 
-func (r *AddressRepository) UpdateAddress(addresses []DTO.CreateAddressDTO, posterID uint) ([]Model.Address, error) {
+func (r *AddressRepository) UpdateAddress(addresses []dtos.CreateAddressDTO, posterID uint) ([]Model.Address, error) {
 	var addressesModel []Model.Address
 	for _, address := range addresses {
 		addressesModel = append(addressesModel, Model.Address{

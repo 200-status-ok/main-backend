@@ -1,9 +1,9 @@
 package View
 
 import (
-	"github.com/403-access-denied/main-backend/src/MainService/DTO"
-	Model2 "github.com/403-access-denied/main-backend/src/MainService/Model"
-	"github.com/403-access-denied/main-backend/src/MainService/Utils"
+	Model2 "github.com/200-status-ok/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/gin-gonic/gin"
 	"math"
 	"net/http"
@@ -40,7 +40,7 @@ type GeneratedPosterInfoView struct {
 	Description string   `json:"description"`
 }
 
-func GeneratePosterInfoView(generatedTags DTO.GeneratedPosterTags, generatedColors DTO.GeneratedPosterColors, c *gin.Context) {
+func GeneratePosterInfoView(generatedTags dtos.GeneratedPosterTags, generatedColors dtos.GeneratedPosterColors, c *gin.Context) {
 
 	var titlesResult []string
 	for i := 0; i < int(math.Min(float64(len(generatedTags.Result.Tags)), 4)); i++ {

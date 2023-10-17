@@ -2,9 +2,9 @@ package UseCase
 
 import (
 	"fmt"
-	"github.com/403-access-denied/main-backend/src/WorkerService/DBConfiguration"
-	"github.com/403-access-denied/main-backend/src/WorkerService/MessageCli"
-	Utils2 "github.com/403-access-denied/main-backend/src/WorkerService/Utils"
+	"github.com/200-status-ok/main-backend/src/WorkerService/DBConfiguration"
+	"github.com/200-status-ok/main-backend/src/WorkerService/MessageCli"
+	Utils2 "github.com/200-status-ok/main-backend/src/WorkerService/Utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
 	"time"

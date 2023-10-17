@@ -1,7 +1,7 @@
 package DBConfiguration
 
 import (
-	"github.com/403-access-denied/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	elastic "github.com/elastic/go-elasticsearch/v8"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

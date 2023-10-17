@@ -3,11 +3,11 @@ package UseCase
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
-	"github.com/403-access-denied/main-backend/src/MainService/DTO"
-	"github.com/403-access-denied/main-backend/src/MainService/Model"
-	"github.com/403-access-denied/main-backend/src/MainService/Repository"
-	"github.com/403-access-denied/main-backend/src/MainService/View"
+	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
+	"github.com/200-status-ok/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/MainService/Repository"
+	"github.com/200-status-ok/main-backend/src/MainService/View"
+	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -139,8 +139,8 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 		return
 	}
 
-	c1 := make(chan DTO.GeneratedPosterTags)
-	c2 := make(chan DTO.GeneratedPosterColors)
+	c1 := make(chan dtos.GeneratedPosterTags)
+	c2 := make(chan dtos.GeneratedPosterColors)
 
 	apiKey := "acc_52760e43313cc5e"
 	apiSecret := "eab29250d009f3ae079998c5b3e6c83d"
@@ -166,17 +166,17 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 
 		if err != nil {
 			fmt.Println("Error: Error when sending request to the server:", err)
-			c1 <- DTO.GeneratedPosterTags{}
+			c1 <- dtos.GeneratedPosterTags{}
 			return
 		}
 
 		defer resp.Body.Close()
 
-		var generatedPosterTags DTO.GeneratedPosterTags
+		var generatedPosterTags dtos.GeneratedPosterTags
 		err = json.NewDecoder(resp.Body).Decode(&generatedPosterTags)
 		if err != nil {
 			fmt.Println("Error decoding JSON response:", err)
-			c1 <- DTO.GeneratedPosterTags{}
+			c1 <- dtos.GeneratedPosterTags{}
 			return
 		}
 
@@ -184,7 +184,7 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			c1 <- DTO.GeneratedPosterTags{}
+			c1 <- dtos.GeneratedPosterTags{}
 			return
 		}
 
@@ -207,17 +207,17 @@ func GeneratePosterInfoResponse(c *gin.Context) {
 
 		if err != nil {
 			fmt.Println("Error: Error when sending request to the server:", err)
-			c2 <- DTO.GeneratedPosterColors{}
+			c2 <- dtos.GeneratedPosterColors{}
 			return
 		}
 
 		defer resp.Body.Close()
 
-		var generatedPosterColors DTO.GeneratedPosterColors
+		var generatedPosterColors dtos.GeneratedPosterColors
 		err = json.NewDecoder(resp.Body).Decode(&generatedPosterColors)
 		if err != nil {
 			fmt.Println("Error decoding JSON response:", err)
-			c2 <- DTO.GeneratedPosterColors{}
+			c2 <- dtos.GeneratedPosterColors{}
 			return
 		}
 

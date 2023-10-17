@@ -1,8 +1,8 @@
 package Middleware
 
 import (
-	"github.com/403-access-denied/main-backend/src/MainService/Token"
-	"github.com/403-access-denied/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/MainService/Token"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/gin-gonic/gin"
 	"strings"
 )

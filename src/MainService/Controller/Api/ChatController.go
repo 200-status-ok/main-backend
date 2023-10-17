@@ -2,12 +2,12 @@ package Api
 
 import (
 	"fmt"
-	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
-	"github.com/403-access-denied/main-backend/src/MainService/RealtimeChat"
-	"github.com/403-access-denied/main-backend/src/MainService/Repository"
-	"github.com/403-access-denied/main-backend/src/MainService/Token"
-	"github.com/403-access-denied/main-backend/src/MainService/Utils"
-	"github.com/403-access-denied/main-backend/src/MainService/View"
+	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
+	"github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
+	"github.com/200-status-ok/main-backend/src/MainService/Repository"
+	"github.com/200-status-ok/main-backend/src/MainService/Token"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/MainService/View"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"

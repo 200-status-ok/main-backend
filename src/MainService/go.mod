@@ -1,4 +1,4 @@
-module github.com/403-access-denied/main-backend/src/MainService
+module github.com/200-status-ok/main-backend/src/MainService
 
 go 1.20
 
