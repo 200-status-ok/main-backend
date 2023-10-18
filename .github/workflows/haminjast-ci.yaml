@@ -28,6 +28,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./src/services/MainService
-          file: ./src/MainService/Dockerfile
+          file: ./src/services/MainService/Dockerfile
           push: true
           tags: mohammadali2001/haminjast:latest
