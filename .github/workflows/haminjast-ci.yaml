@@ -6,7 +6,7 @@ on:
     branches: [main]
 defaults:
   run:
-    working-directory: ./src/services/MainServices
+    working-directory: ./src/services/MainService
 jobs:
   build:
     runs-on: ubuntu-latest
