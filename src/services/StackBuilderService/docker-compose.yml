@@ -33,7 +33,7 @@ services:
     volumes:
       - elasticsearch-data-volume:/usr/share/elasticsearch/data
     ports:
-      - "9200:9200"
+      - "9400:9200"
     networks:
       - stackBuilder-network
 
@@ -44,7 +44,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
-      - "5601:5601"
+      - "5900:5601"
     depends_on:
       - elasticsearch
     networks:

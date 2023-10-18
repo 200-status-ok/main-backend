@@ -6,7 +6,7 @@ on:
     branches: [main]
 defaults:
   run:
-    working-directory: ./src/MainServices
+    working-directory: ./src/services/MainServices
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
         name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./src/MainService
+          context: ./src/services/MainService
           file: ./src/MainService/Dockerfile
           push: true
           tags: mohammadali2001/haminjast:latest
