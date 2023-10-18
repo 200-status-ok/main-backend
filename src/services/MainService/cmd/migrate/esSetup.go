@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/403-access-denied/main-backend/src/MainService/DBConfiguration"
-	"github.com/403-access-denied/main-backend/src/MainService/Repository/ElasticSearch"
+	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
+	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
 )
 
 func main() {
