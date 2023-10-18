@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/403-access-denied/main-backend/src/MainService/Controller"
-	"github.com/403-access-denied/main-backend/src/MainService/Controller/Api"
-	"github.com/403-access-denied/main-backend/src/MainService/RealtimeChat"
-	"github.com/403-access-denied/main-backend/src/MainService/Token"
-	"github.com/403-access-denied/main-backend/src/MainService/Utils"
-	"github.com/403-access-denied/main-backend/src/MainService/docs"
+	"github.com/200-status-ok/main-backend/src/MainService/Controller"
+	"github.com/200-status-ok/main-backend/src/MainService/Controller/Api"
+	"github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
+	"github.com/200-status-ok/main-backend/src/MainService/Token"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/MainService/docs"
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-contrib/cors"
