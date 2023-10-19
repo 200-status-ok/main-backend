@@ -3,11 +3,11 @@ package Repository
 import (
 	"errors"
 	"fmt"
-	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
 	Model2 "github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
-	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	DTO2 "github.com/200-status-ok/main-backend/src/MainService/dtos"
+	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"sort"
@@ -120,8 +120,8 @@ func (r *PosterRepository) GetAllPosters(limit, offset int, sortType, sortBy str
 	if filterObject.Lat != 0 && filterObject.Lon != 0 {
 		result = result.Select("posters.*").Joins("LEFT JOIN addresses ON posters.id = addresses.poster_id AND addresses.deleted_at IS NULL").
 			Where("Addresses.latitude BETWEEN ? AND ? AND Addresses.longitude BETWEEN ? AND ? AND posters.deleted_at IS NULL",
-				filterObject.Lat-Utils.BaseLocationRadarRadius, filterObject.Lat+Utils.BaseLocationRadarRadius,
-				filterObject.Lon-Utils.BaseLocationRadarRadius, filterObject.Lon+Utils.BaseLocationRadarRadius)
+				filterObject.Lat-utils.BaseLocationRadarRadius, filterObject.Lat+utils.BaseLocationRadarRadius,
+				filterObject.Lon-utils.BaseLocationRadarRadius, filterObject.Lon+utils.BaseLocationRadarRadius)
 	}
 
 	result.Find(&posters)
@@ -202,7 +202,7 @@ func (r *PosterRepository) GetPosterById(id int) (Model2.Poster, error) {
 
 func (r *PosterRepository) DeletePosterById(id uint, userId uint) error {
 	var poster Model2.Poster
-	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 
 	findResult := r.db.First(&poster, "id = ? AND user_id = ?", id, userId)
 	if findResult.Error != nil {
@@ -288,7 +288,7 @@ func (r *PosterRepository) CreatePoster(userID uint64, poster DTO2.CreatePosterD
 		return Model2.Poster{}, result.Error
 	}
 
-	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 
 	var esPoster DTO2.ESPosterDTO
 	esPoster.ID = posterModel.ID
@@ -346,7 +346,7 @@ func (r *PosterRepository) UpdatePoster(id int, role string, poster DTO2.UpdateP
 	var updatedPosterModel Model2.Poster
 	updatedPosterModel.SetID(uint(id))
 
-	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	updateFields := make(map[string]interface{})
 
 	if poster.Title != "" {
@@ -577,7 +577,7 @@ func (r *PosterRepository) UpdatePosterReport(id, posterID, issuerID uint, repor
 }
 
 func (r *PosterRepository) UpdatePosterState(id uint, state string) error {
-	esPoster := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	esPoster := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	var updatedPosterReportModel Model2.Poster
 	updateFields := make(map[string]interface{})
 

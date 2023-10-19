@@ -2,7 +2,7 @@ FROM golang:alpine3.17 AS build
 
 WORKDIR /app
 
-ENV APP_ENV3=production
+ENV APP_ENV2=production
 RUN apk add --no-cache bash && apk add make
 
 COPY go.mod .
@@ -13,6 +13,6 @@ COPY . .
 
 RUN go build -o main .
 
-EXPOSE 8000
+EXPOSE 8081
 
 ENTRYPOINT ["./main"]

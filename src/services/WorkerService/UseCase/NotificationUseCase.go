@@ -2,9 +2,9 @@ package UseCase
 
 import (
 	"fmt"
-	"github.com/200-status-ok/main-backend/src/WorkerService/DBConfiguration"
 	"github.com/200-status-ok/main-backend/src/WorkerService/MessageCli"
-	Utils2 "github.com/200-status-ok/main-backend/src/WorkerService/Utils"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
 	"time"
@@ -13,16 +13,16 @@ import (
 func SendToUser() {
 	messageBroker := MessageCli.MessageClient{}
 	var connectionString string
-	appEnv := os.Getenv("APP_ENV3")
+	appEnv := os.Getenv("APP_ENV2")
 	if appEnv == "development" {
-		connectionString = Utils2.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION")
-		err := messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+		connectionString = utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION")
+		err := messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
 		if err != nil {
 			panic(err)
 		}
 	} else if appEnv == "production" {
-		connectionString = Utils2.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION")
-		err := messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		connectionString = utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION")
+		err := messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
 		if err != nil {
 			panic(err)
 		}
@@ -34,14 +34,14 @@ func SendToUser() {
 	go SendHeartbeat(messageBroker.Connection, &messageBroker, connectionString)
 
 	go func() {
-		err := messageBroker.SubscribeOnQueue("email_notification", "email_notification", DBConfiguration.GetDB())
+		err := messageBroker.SubscribeOnQueue("email_notification", "email_notification", pgsql.GetDB())
 		if err != nil {
 			fmt.Println("Error subscribing to email_notification queue:", err)
 		}
 	}()
 
 	go func() {
-		err := messageBroker.SubscribeOnQueue("sms_notification", "sms_notification", DBConfiguration.GetDB())
+		err := messageBroker.SubscribeOnQueue("sms_notification", "sms_notification", pgsql.GetDB())
 		if err != nil {
 			fmt.Println("Error subscribing to sms_notification queue:", err)
 		}

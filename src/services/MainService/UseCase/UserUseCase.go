@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
 	Utils2 "github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
+	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
@@ -39,13 +41,13 @@ func SendOTPResponse(c *gin.Context) {
 	appEnv := os.Getenv("APP_ENV2")
 
 	if appEnv == "development" {
-		redisClient = Utils2.NewRedisClient(Utils2.ReadFromEnvFile(".env", "LOCAL_REDIS_HOST"),
-			Utils2.ReadFromEnvFile(".env", "LOCAL_REDIS_PORT"),
+		redisClient = Utils2.NewRedisClient(utils.ReadFromEnvFile(".env", "LOCAL_REDIS_HOST"),
+			utils.ReadFromEnvFile(".env", "LOCAL_REDIS_PORT"),
 			"", 0)
 	} else if appEnv == "production" {
-		redisClient = Utils2.NewRedisClient(Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_HOST"),
-			Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PORT"),
-			Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PASSWORD"), 0)
+		redisClient = Utils2.NewRedisClient(utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_HOST"),
+			utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PORT"),
+			utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PASSWORD"), 0)
 	}
 
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -73,13 +75,13 @@ func SendOTPResponse(c *gin.Context) {
 	})
 	messageBroker := Utils2.MessageClient{}
 	if appEnv == "development" {
-		err = messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+		err = messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	} else if appEnv == "production" {
-		err = messageBroker.ConnectBroker(Utils2.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		err = messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -116,16 +118,16 @@ func VerifyOtpResponse(c *gin.Context) {
 	appEnv := os.Getenv("APP_ENV2")
 
 	if appEnv == "development" {
-		redisClient = Utils2.NewRedisClient(Utils2.ReadFromEnvFile(".env", "LOCAL_REDIS_HOST"),
-			Utils2.ReadFromEnvFile(".env", "LOCAL_REDIS_PORT"),
+		redisClient = Utils2.NewRedisClient(utils.ReadFromEnvFile(".env", "LOCAL_REDIS_HOST"),
+			utils.ReadFromEnvFile(".env", "LOCAL_REDIS_PORT"),
 			"", 0)
 	} else if appEnv == "production" {
-		redisClient = Utils2.NewRedisClient(Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_HOST"),
-			Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PORT"),
-			Utils2.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PASSWORD"), 0)
+		redisClient = Utils2.NewRedisClient(utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_HOST"),
+			utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PORT"),
+			utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PASSWORD"), 0)
 	}
 
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	if err := c.ShouldBindJSON(&verifyReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -183,7 +185,7 @@ func VerifyOtpResponse(c *gin.Context) {
 		userId = userExist.ID
 	}
 
-	jwtMaker, err := Token.NewJWTMaker(Utils2.ReadFromEnvFile(".env", "JWT_SECRET"))
+	jwtMaker, err := Token.NewJWTMaker(utils.ReadFromEnvFile(".env", "JWT_SECRET"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -241,7 +243,7 @@ func GoogleCallbackResponse(c *gin.Context) {
 		return
 	}
 
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	var userID uint64
 	userExist, err := userRepository.FindByUsername(googleRes.Email)
 	if err != nil && err.Error() != "user not found" {
@@ -269,7 +271,7 @@ func GoogleCallbackResponse(c *gin.Context) {
 		userID = uint64(userExist.ID)
 	}
 
-	jwtMaker, err := Token.NewJWTMaker(Utils2.ReadFromEnvFile(".env", "JWT_SECRET"))
+	jwtMaker, err := Token.NewJWTMaker(utils.ReadFromEnvFile(".env", "JWT_SECRET"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -284,7 +286,7 @@ func GoogleCallbackResponse(c *gin.Context) {
 
 func GetUserByIdResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	user, err := userRepository.FindById(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -300,7 +302,7 @@ type UpdateUserRequest struct {
 func UpdateUserByIdResponse(c *gin.Context) {
 	var updateUserReq UpdateUserRequest
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 
 	if err := c.ShouldBindJSON(&updateUserReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -326,7 +328,7 @@ type CreateUserRequest struct {
 
 func CreateUserResponse(c *gin.Context) {
 	var createUserReq CreateUserRequest
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	if err := c.ShouldBindJSON(&createUserReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -347,8 +349,8 @@ func CreateUserResponse(c *gin.Context) {
 
 func DeleteUserByIdResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
-	esDeletePostersByUserId := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	esDeletePostersByUserId := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	err := userRepository.DeleteUser(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -417,7 +419,7 @@ func PaymentResponse(c *gin.Context) {
 	trackIdStringValue := fmt.Sprint(trackId)
 	resultStringValue := fmt.Sprint(resultNumber)
 	if resultStringValue == "100" {
-		PaymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
+		PaymentRepository := Repository.NewPaymentRepository(pgsql.GetDB())
 		_, err := PaymentRepository.CreatePayment(Model.Payment{
 			Amount:  paymentReq.Amount,
 			UserID:  uint(payload.UserID),
@@ -451,7 +453,7 @@ func PaymentVerifyResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	paymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
+	paymentRepository := Repository.NewPaymentRepository(pgsql.GetDB())
 	var merchant = "zibal"
 	payment, err := paymentRepository.GetPaymentByTrackID(paymentVerifyReq.TrackId)
 	if err != nil {
@@ -493,7 +495,7 @@ func PaymentVerifyResponse(c *gin.Context) {
 	if resultStringValue == "100" {
 		if statusStringValue == "1" {
 			payment.Status = "paid"
-			userRep := Repository.NewUserRepository(DBConfiguration.GetDB())
+			userRep := Repository.NewUserRepository(pgsql.GetDB())
 			_, err := userRep.UpdateWallet(payment.UserID, payment.Amount)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -528,7 +530,7 @@ func PaymentVerifyResponse(c *gin.Context) {
 
 func GetTransactionsResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	paymentRepository := Repository.NewPaymentRepository(DBConfiguration.GetDB())
+	paymentRepository := Repository.NewPaymentRepository(pgsql.GetDB())
 	payments, err := paymentRepository.GetPaymentsOfUser(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

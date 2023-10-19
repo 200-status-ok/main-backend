@@ -3,14 +3,15 @@ package Utils
 import (
 	"context"
 	"errors"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"net/http"
 )
 
-var googleClientId = ReadFromEnvFile(".env", "GOOGLE_CLIENT_ID")
-var googleClientSecret = ReadFromEnvFile(".env", "GOOGLE_CLIENT_SECRET")
+var googleClientId = utils.ReadFromEnvFile(".env", "GOOGLE_CLIENT_ID")
+var googleClientSecret = utils.ReadFromEnvFile(".env", "GOOGLE_CLIENT_SECRET")
 
 var googleOauthConfig = &oauth2.Config{
 	RedirectURL:  "https://main-backend.iran.liara.run/api/v1/users/auth/google/callback",

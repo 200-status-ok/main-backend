@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	models = append(models, &Model.Payment{})
 	models = append(models, &Model.Admin{})
 
-	err := DBConfiguration.MigrateModel(models)
+	err := pgsql.MigrateModel(models)
 	if err != nil {
 		return
 	}

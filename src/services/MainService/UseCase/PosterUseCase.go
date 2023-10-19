@@ -3,13 +3,15 @@ package UseCase
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
 	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
 	DTO2 "github.com/200-status-ok/main-backend/src/MainService/dtos"
+	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"math/rand"
@@ -39,7 +41,7 @@ type GetPostersRequest struct {
 }
 
 func GetPostersResponse(c *gin.Context) {
-	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 
 	var request GetPostersRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
@@ -85,7 +87,7 @@ type GetPosterByIdRequest struct {
 }
 
 func GetPosterByIdResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 	var request GetPosterByIdRequest
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -105,7 +107,7 @@ type DeletePosterByIdRequest struct {
 }
 
 func DeletePosterByIdResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
 	var request DeletePosterByIdRequest
@@ -132,8 +134,8 @@ type CreatePosterRequest struct {
 
 func CreatePosterResponse(c *gin.Context) {
 	var specialAdsPrice = 100000.0
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request CreatePosterRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -184,7 +186,7 @@ type UpdatePosterByIdRequest struct {
 }
 
 func UpdatePosterResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
 	var request UpdatePosterRequest
@@ -217,13 +219,13 @@ func TagValidationQueue(tags []string, c *gin.Context) {
 	messageBroker := Utils.MessageClient{}
 
 	if appEnv == "development" {
-		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+		err := messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	} else if appEnv == "production" {
-		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		err := messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -246,13 +248,13 @@ func SendToNSFWQueue(posterID uint, c *gin.Context) {
 	messageBroker := Utils.MessageClient{}
 
 	if appEnv == "development" {
-		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+		err := messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	} else if appEnv == "production" {
-		err := messageBroker.ConnectBroker(Utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		err := messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -276,7 +278,7 @@ type CreatePosterReportRequest struct {
 }
 
 func CreatePosterReportResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 	var request CreatePosterReportRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -298,7 +300,7 @@ type getPosterReportsRequest struct {
 }
 
 func GetPosterReportsResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 
 	var request getPosterReportsRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
@@ -325,7 +327,7 @@ type GetPosterReportByIdRequest struct {
 }
 
 func GetPosterReportByIdResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 
 	var request GetPosterReportByIdRequest
 	if err := c.ShouldBindUri(&request); err != nil {
@@ -356,7 +358,7 @@ type UpdatePosterReportByIdRequest struct {
 }
 
 func UpdatePosterReportResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 
 	var request UpdatePosterReportRequest
 	var id UpdatePosterReportByIdRequest
@@ -416,7 +418,7 @@ type UpdatePosterStateRequest struct {
 }
 
 func UpdatePosterStateResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 
 	var request UpdatePosterStateRequest
 
@@ -523,7 +525,7 @@ func MockPoster(count int, userID int, tagNames []string) error {
 					tagNames[randomNumber4],
 				},
 			}
-			posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+			posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 			model, err := posterRepository.CreatePoster(uint64(userID), request.Poster, request.Addresses, nil,
 				request.Tags, "normal")
 			if err != nil {
@@ -555,7 +557,7 @@ func MockPoster(count int, userID int, tagNames []string) error {
 					tagNames[randomNumber4],
 				},
 			}
-			posterRepository := Repository.NewPosterRepository(DBConfiguration.GetDB())
+			posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 			model, err := posterRepository.CreatePoster(uint64(userID), request.Poster, request.Addresses, nil,
 				request.Tags, "normal")
 			if err != nil {

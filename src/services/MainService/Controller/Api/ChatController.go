@@ -2,12 +2,12 @@ package Api
 
 import (
 	"fmt"
-	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
 	"github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
-	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -48,10 +48,10 @@ type JoinConversationReq struct {
 // @Router /chats/join [get]
 func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 	var request JoinConversationReq
-	secretKey := Utils.ReadFromEnvFile(".env", "JWT_SECRET")
+	secretKey := utils.ReadFromEnvFile(".env", "JWT_SECRET")
 	tokenMaker, _ := Token.NewJWTMaker(secretKey)
 	//payload := c.MustGet("authorization_payload").(*Token.Payload)
-	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
+	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -131,7 +131,7 @@ func CreateConversation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
+	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
 	poster, err := chatRepo.GetPosterOwner(uint(request.PosterID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -174,7 +174,7 @@ func CreateConversation(c *gin.Context) {
 // @Router /chats/authorize/conversations [get]
 func AllUserConversations(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
+	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
 
 	user, err := chatRepo.GetAllUserConversations(uint(payload.UserID))
 	if err != nil {
@@ -206,7 +206,7 @@ func GetConversationById(c *gin.Context) {
 		return
 	}
 
-	chatRepo := Repository.NewChatRepository(DBConfiguration.GetDB())
+	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
 	conversation, err := chatRepo.GetUserConversationById(pathRequest.ConversationID, uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -237,7 +237,7 @@ type ConversationHistoryQueryRequest struct {
 // @Success 200 {array} Model.Conversation
 // @Router /chats/authorize/history/{conversation_id}/ [get]
 func ConversationHistory(c *gin.Context) {
-	chatRepository := Repository.NewChatRepository(DBConfiguration.GetDB())
+	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
 	var pathRequest ConversationHistoryPathRequest

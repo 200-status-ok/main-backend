@@ -1,13 +1,15 @@
 package UseCase
 
 import (
-	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
 	Utils2 "github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
+	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -24,7 +26,7 @@ type SignupAdminRequest struct {
 }
 
 func SignupAdminResponse(c *gin.Context) {
-	adminRepository := Repository.NewAdminRepository(DBConfiguration.GetDB())
+	adminRepository := Repository.NewAdminRepository(pgsql.GetDB())
 	var request SignupAdminRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -57,7 +59,7 @@ type LoginAdminRequest struct {
 }
 
 func LoginAdminResponse(c *gin.Context) {
-	adminRepository := Repository.NewAdminRepository(DBConfiguration.GetDB())
+	adminRepository := Repository.NewAdminRepository(pgsql.GetDB())
 	var request LoginAdminRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -73,7 +75,7 @@ func LoginAdminResponse(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username or password"})
 		return
 	}
-	jwtMaker, err := Token.NewJWTMaker(Utils2.ReadFromEnvFile(".env", "JWT_SECRET"))
+	jwtMaker, err := Token.NewJWTMaker(utils.ReadFromEnvFile(".env", "JWT_SECRET"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -96,7 +98,7 @@ func GetUserByIdAdminResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	user, err := userRepository.FindById(request.UserID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -106,7 +108,7 @@ func GetUserByIdAdminResponse(c *gin.Context) {
 }
 
 func GetUsersResponse(c *gin.Context) {
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	users, err := userRepository.GetAllUsers()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -126,7 +128,7 @@ type UserInfo struct {
 func UpdateUserByIdAdminResponse(c *gin.Context) {
 	var request UpdateUserByAdminRequest
 	var userInfo UserInfo
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -158,8 +160,8 @@ type DeleteUserRequest struct {
 
 func DeleteUserByIdAdminResponse(c *gin.Context) {
 	var request DeleteUserRequest
-	userRepository := Repository.NewUserRepository(DBConfiguration.GetDB())
-	esDeletePostersByUserId := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	esDeletePostersByUserId := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

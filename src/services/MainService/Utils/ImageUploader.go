@@ -2,6 +2,7 @@ package Utils
 
 import (
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -11,8 +12,8 @@ import (
 )
 
 func UploadInArvanCloud(input multipart.File, fileName string) (string, error) {
-	secretKey := ReadFromEnvFile(".env", "ARVAN_SECRET_KEY")
-	accessKey := ReadFromEnvFile(".env", "ARVAN_ACCESS_KEY")
+	secretKey := utils.ReadFromEnvFile(".env", "ARVAN_SECRET_KEY")
+	accessKey := utils.ReadFromEnvFile(".env", "ARVAN_ACCESS_KEY")
 
 	sess, err := session.NewSession(&aws.Config{
 		Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
@@ -50,8 +51,8 @@ func UploadInArvanCloud(input multipart.File, fileName string) (string, error) {
 }
 
 func UploadInLiaraCloud(input multipart.File, fileName string) (string, error) {
-	secretKey := ReadFromEnvFile(".env", "LIARA_SECRET_KEY")
-	accessKey := ReadFromEnvFile(".env", "LIARA_ACCESS_KEY")
+	secretKey := utils.ReadFromEnvFile(".env", "LIARA_SECRET_KEY")
+	accessKey := utils.ReadFromEnvFile(".env", "LIARA_ACCESS_KEY")
 
 	sess, err := session.NewSession(&aws.Config{
 		Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),

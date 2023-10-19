@@ -2,9 +2,9 @@ package RealtimeChat
 
 import (
 	"encoding/json"
-	"github.com/200-status-ok/main-backend/src/MainService/DBConfiguration"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -45,7 +45,7 @@ type MessageWithType struct {
 }
 
 func (c *Client) Read(hub *Hub) {
-	chatRepository := Repository.NewChatRepository(DBConfiguration.GetDB())
+	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	defer func() {
 		hub.Unregister <- c
 		err := c.Conn.Close()

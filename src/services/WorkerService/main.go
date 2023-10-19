@@ -12,7 +12,7 @@ func main() {
 	go UseCase.CheckPhotoNSFW()
 	go UseCase.CheckTagNSFW()
 
-	err := r.Run(":8000")
+	err := r.Run(":8081")
 	if err != nil {
 		return
 	}

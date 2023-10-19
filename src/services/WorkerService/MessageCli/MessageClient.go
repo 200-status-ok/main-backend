@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/200-status-ok/main-backend/src/WorkerService/DBConfiguration"
 	"github.com/200-status-ok/main-backend/src/WorkerService/Repository"
 	"github.com/200-status-ok/main-backend/src/WorkerService/Repository/ElasticSearch"
 	"github.com/200-status-ok/main-backend/src/WorkerService/Utils"
+	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -200,7 +201,7 @@ func (a CustomArray) SendingNotification() {
 	if a[0] == "email" {
 		emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", a[2],
 			"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+a[1],
-			Utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
+			utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
 		err := emailService.SendEmailWithGoogle()
 		if err != nil {
 			fmt.Println(err)
@@ -210,8 +211,8 @@ func (a CustomArray) SendingNotification() {
 		pattern := map[string]string{
 			"code": a[1],
 		}
-		otpSms := Utils.NewSMS(Utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
-		err := otpSms.SendSMSWithPattern(a[2], Utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
+		otpSms := Utils.NewSMS(utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
+		err := otpSms.SendSMSWithPattern(a[2], utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -331,7 +332,7 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 		return
 	}
 
-	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	err = esPosterCli.UpdatePosterState(state, int(posterID))
 	if err != nil {
 		fmt.Println(err)
@@ -379,7 +380,7 @@ func (a CustomArray) TagValidation(db *gorm.DB) {
 		return
 	}
 
-	esPosterCli := ElasticSearch.NewPosterES(DBConfiguration.GetElastic())
+	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	err = esPosterCli.UpdateTags(result)
 	if err != nil {
 		fmt.Println(err)

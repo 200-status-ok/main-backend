@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:alpine3.17
+    hostname: database
+    container_name: main-db
+    ports:
+      - "6000:5432"
+    volumes:
+      - ../src/services/MainService/docker/postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=main
+    networks:
+      - main-network
+      - database-network
+
+  app:
+    container_name: main-app
+    build:
+      context: ../src/services/MainService/
+      dockerfile: ./docker/golang/Dockerfile
+    volumes:
+      - ../src/services/MainService:/src/main/app
+      - ../src/pkg:/src/pkg
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - main-network
+      - stack-network
+
+  worker-app:
+    container_name: worker-app
+    build:
+      context: ../src/services/WorkerService/
+      dockerfile: ./docker/golang/Dockerfile
+    volumes:
+      - ../src/services/WorkerService:/src/main/app
+      - ../src/pkg:/src/pkg
+    ports:
+      - "8081:8081"
+    depends_on:
+      - database
+    networks:
+      - main-network
+      - stack-network
+
+  redis:
+    image: redis:alpine3.17
+    container_name: main-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../src/services/MainService/docker/redis/data:/data
+    networks:
+      - main-network
+
+networks:
+  database-network:
+    driver: bridge
+    name: database_network
+  main-network:
+    driver: bridge
+  stack-network:
+    name: stackBuilder_network
+    external: true

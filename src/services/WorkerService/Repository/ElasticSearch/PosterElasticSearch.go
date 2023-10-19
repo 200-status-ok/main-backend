@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	Utils2 "github.com/200-status-ok/main-backend/src/WorkerService/Utils"
+	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	elastic "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"io"
@@ -62,9 +62,9 @@ func (p *PosterES) UpdateTags(result map[string]string) error {
 		appEnv := os.Getenv("APP_ENV3")
 		var url string
 		if appEnv == "development" {
-			url = Utils2.ReadFromEnvFile(".env", "LOCAL_ELASTIC_URL")
+			url = utils.ReadFromEnvFile(".env", "LOCAL_ELASTIC_URL")
 		} else if appEnv == "production" {
-			url = Utils2.ReadFromEnvFile(".env", "PRODUCTION_ELASTIC_URL")
+			url = utils.ReadFromEnvFile(".env", "PRODUCTION_ELASTIC_URL")
 		}
 
 		url = url + "posters/_update_by_query?refresh=true"

@@ -1,4 +1,4 @@
-package Utils
+package utils
 
 const (
 	BaseLocationRadarRadius = 0.002
