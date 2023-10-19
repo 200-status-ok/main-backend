@@ -10,7 +10,7 @@ COPY ../../go.mod .
 COPY ../../go.sum .
 
 RUN go mod tidy && go mod download
-COPY ../../. .
+COPY ../.. .
 
 EXPOSE 8081
 
