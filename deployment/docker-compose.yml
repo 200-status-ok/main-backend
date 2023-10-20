@@ -29,6 +29,7 @@ services:
       - "8080:8080"
     depends_on:
       - database
+      - rabbitmq
     networks:
       - main-network
       - stack-network
@@ -45,6 +46,7 @@ services:
       - "8081:8081"
     depends_on:
       - database
+      - rabbitmq
     networks:
       - main-network
       - stack-network
@@ -59,6 +61,23 @@ services:
     networks:
       - main-network
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.9.9-management-alpine
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_VHOST=/
+    volumes:
+      - ../src/services/MainService/docker/rabbitmq/data:/var/lib/rabbitmq
+    networks:
+        - main-network
+        - stack-network
+
 networks:
   database-network:
     driver: bridge
@@ -66,5 +85,4 @@ networks:
   main-network:
     driver: bridge
   stack-network:
-    name: stackBuilder_network
-    external: true
+    driver: bridge
