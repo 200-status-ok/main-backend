@@ -371,6 +371,35 @@
                 }
             }
         },
+        "/api-call/image-upload": {
+            "post": {
+                "description": "Upload image",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiCall"
+                ],
+                "summary": "Upload image",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Multiple files",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/chats/authorize/conversation": {
             "post": {
                 "description": "Create or check to exist a chat conversation",
@@ -541,7 +570,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/WebSocket.MessageWithType"
+                            "$ref": "#/definitions/RealtimeChat.MessageWithType"
                         }
                     },
                     {
@@ -794,35 +823,6 @@
                         "schema": {
                             "$ref": "#/definitions/View.PosterView"
                         }
-                    }
-                }
-            }
-        },
-        "/posters/image": {
-            "post": {
-                "description": "Upload poster image",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posters"
-                ],
-                "summary": "Upload poster image",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Multiple files",
-                        "name": "files",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }
@@ -1571,321 +1571,6 @@
                 }
             }
         },
-        "DTO.CreateAddressDTO": {
-            "type": "object",
-            "required": [
-                "city",
-                "latitude",
-                "longitude",
-                "province"
-            ],
-            "properties": {
-                "address_detail": {
-                    "type": "string",
-                    "maxLength": 1000,
-                    "minLength": 5
-                },
-                "city": {
-                    "type": "string",
-                    "maxLength": 255,
-                    "minLength": 5
-                },
-                "latitude": {
-                    "type": "number"
-                },
-                "longitude": {
-                    "type": "number"
-                },
-                "province": {
-                    "type": "string",
-                    "maxLength": 255,
-                    "minLength": 5
-                }
-            }
-        },
-        "DTO.CreatePosterDTO": {
-            "type": "object",
-            "required": [
-                "alert",
-                "chat",
-                "status",
-                "title"
-            ],
-            "properties": {
-                "alert": {
-                    "type": "boolean"
-                },
-                "award": {
-                    "type": "number"
-                },
-                "chat": {
-                    "type": "boolean"
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 1000
-                },
-                "special_type": {
-                    "type": "string",
-                    "enum": [
-                        "normal",
-                        "premium"
-                    ]
-                },
-                "state": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string",
-                    "enum": [
-                        "lost",
-                        "found"
-                    ]
-                },
-                "tel_id": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "user_phone": {
-                    "type": "string",
-                    "maxLength": 13,
-                    "minLength": 11
-                }
-            }
-        },
-        "DTO.ESAddressDTO": {
-            "type": "object",
-            "properties": {
-                "address_detail": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "location": {
-                    "$ref": "#/definitions/DTO.Location"
-                },
-                "province": {
-                    "type": "string"
-                }
-            }
-        },
-        "DTO.ESPosterDTO": {
-            "type": "object",
-            "required": [
-                "alert",
-                "chat",
-                "user_id"
-            ],
-            "properties": {
-                "addresses": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/DTO.ESAddressDTO"
-                    }
-                },
-                "alert": {
-                    "type": "boolean"
-                },
-                "award": {
-                    "type": "number"
-                },
-                "chat": {
-                    "type": "boolean"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "special_type": {
-                    "type": "string",
-                    "enum": [
-                        "normal",
-                        "premium"
-                    ]
-                },
-                "state": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/DTO.ESTagDTO"
-                    }
-                },
-                "tel_id": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "user_phone": {
-                    "type": "string",
-                    "maxLength": 13,
-                    "minLength": 11
-                }
-            }
-        },
-        "DTO.ESTagDTO": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string",
-                    "enum": [
-                        "accepted",
-                        "rejected",
-                        "pending"
-                    ]
-                }
-            }
-        },
-        "DTO.Location": {
-            "type": "object",
-            "properties": {
-                "lat": {
-                    "type": "number"
-                },
-                "lon": {
-                    "type": "number"
-                }
-            }
-        },
-        "DTO.UpdateAddressDTO": {
-            "type": "object",
-            "properties": {
-                "address_detail": {
-                    "type": "string",
-                    "maxLength": 1000
-                },
-                "city": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "latitude": {
-                    "type": "number"
-                },
-                "longitude": {
-                    "type": "number"
-                },
-                "province": {
-                    "type": "string",
-                    "maxLength": 255
-                }
-            }
-        },
-        "DTO.UpdatePosterDTO": {
-            "type": "object",
-            "properties": {
-                "alert": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "false",
-                        ""
-                    ]
-                },
-                "award": {
-                    "description": "todo if you want to update reward to 0, set it to -1",
-                    "type": "number"
-                },
-                "chat": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "false",
-                        ""
-                    ]
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 1000
-                },
-                "img_urls": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "special_ads": {
-                    "type": "string",
-                    "enum": [
-                        "normal",
-                        "premium",
-                        ""
-                    ]
-                },
-                "state": {
-                    "type": "string",
-                    "enum": [
-                        "pending",
-                        "accepted",
-                        "rejected",
-                        ""
-                    ]
-                },
-                "status": {
-                    "type": "string",
-                    "enum": [
-                        "lost",
-                        "found",
-                        ""
-                    ]
-                },
-                "tag_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "tel_id": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "title": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "user_phone": {
-                    "type": "string",
-                    "maxLength": 13
-                }
-            }
-        },
         "Model.Address": {
             "type": "object",
             "properties": {
@@ -2231,6 +1916,15 @@
                 }
             }
         },
+        "RealtimeChat.MessageWithType": {
+            "type": "object",
+            "properties": {
+                "content": {},
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "UseCase.CreateMockDataRequest": {
             "type": "object",
             "required": [
@@ -2263,7 +1957,7 @@
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.CreateAddressDTO"
+                        "$ref": "#/definitions/dtos.CreateAddressDTO"
                     }
                 },
                 "img_urls": {
@@ -2273,7 +1967,7 @@
                     }
                 },
                 "poster": {
-                    "$ref": "#/definitions/DTO.CreatePosterDTO"
+                    "$ref": "#/definitions/dtos.CreatePosterDTO"
                 },
                 "tags": {
                     "type": "array",
@@ -2400,11 +2094,11 @@
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.UpdateAddressDTO"
+                        "$ref": "#/definitions/dtos.UpdateAddressDTO"
                     }
                 },
                 "poster": {
-                    "$ref": "#/definitions/DTO.UpdatePosterDTO"
+                    "$ref": "#/definitions/dtos.UpdatePosterDTO"
                 }
             }
         },
@@ -2509,7 +2203,7 @@
                 "posters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/DTO.ESPosterDTO"
+                        "$ref": "#/definitions/dtos.ESPosterDTO"
                     }
                 },
                 "total": {
@@ -2747,12 +2441,317 @@
                 }
             }
         },
-        "WebSocket.MessageWithType": {
+        "dtos.CreateAddressDTO": {
+            "type": "object",
+            "required": [
+                "city",
+                "latitude",
+                "longitude",
+                "province"
+            ],
+            "properties": {
+                "address_detail": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "minLength": 5
+                },
+                "city": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 5
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "province": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 5
+                }
+            }
+        },
+        "dtos.CreatePosterDTO": {
+            "type": "object",
+            "required": [
+                "alert",
+                "chat",
+                "status",
+                "title"
+            ],
+            "properties": {
+                "alert": {
+                    "type": "boolean"
+                },
+                "award": {
+                    "type": "number"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "special_type": {
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "premium"
+                    ]
+                },
+                "state": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "lost",
+                        "found"
+                    ]
+                },
+                "tel_id": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "user_phone": {
+                    "type": "string",
+                    "maxLength": 13
+                }
+            }
+        },
+        "dtos.ESAddressDTO": {
             "type": "object",
             "properties": {
-                "content": {},
-                "type": {
+                "address_detail": {
                     "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "location": {
+                    "$ref": "#/definitions/dtos.Location"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ESPosterDTO": {
+            "type": "object",
+            "required": [
+                "alert",
+                "chat",
+                "user_id"
+            ],
+            "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ESAddressDTO"
+                    }
+                },
+                "alert": {
+                    "type": "boolean"
+                },
+                "award": {
+                    "type": "number"
+                },
+                "chat": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "special_type": {
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "premium"
+                    ]
+                },
+                "state": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.ESTagDTO"
+                    }
+                },
+                "tel_id": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "user_phone": {
+                    "type": "string",
+                    "maxLength": 13,
+                    "minLength": 11
+                }
+            }
+        },
+        "dtos.ESTagDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "accepted",
+                        "rejected",
+                        "pending"
+                    ]
+                }
+            }
+        },
+        "dtos.Location": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number"
+                },
+                "lon": {
+                    "type": "number"
+                }
+            }
+        },
+        "dtos.UpdateAddressDTO": {
+            "type": "object",
+            "properties": {
+                "address_detail": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "city": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "province": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "dtos.UpdatePosterDTO": {
+            "type": "object",
+            "properties": {
+                "alert": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false",
+                        ""
+                    ]
+                },
+                "award": {
+                    "description": "todo if you want to update reward to 0, set it to -1",
+                    "type": "number"
+                },
+                "chat": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false",
+                        ""
+                    ]
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "img_urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "special_ads": {
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "premium",
+                        ""
+                    ]
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "accepted",
+                        "rejected",
+                        ""
+                    ]
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "lost",
+                        "found",
+                        ""
+                    ]
+                },
+                "tag_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tel_id": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "user_phone": {
+                    "type": "string",
+                    "maxLength": 13
                 }
             }
         },
