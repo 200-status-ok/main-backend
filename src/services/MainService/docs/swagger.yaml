@@ -10,229 +10,6 @@ definitions:
     - name
     - poster_id
     type: object
-  DTO.CreateAddressDTO:
-    properties:
-      address_detail:
-        maxLength: 1000
-        minLength: 5
-        type: string
-      city:
-        maxLength: 255
-        minLength: 5
-        type: string
-      latitude:
-        type: number
-      longitude:
-        type: number
-      province:
-        maxLength: 255
-        minLength: 5
-        type: string
-    required:
-    - city
-    - latitude
-    - longitude
-    - province
-    type: object
-  DTO.CreatePosterDTO:
-    properties:
-      alert:
-        type: boolean
-      award:
-        type: number
-      chat:
-        type: boolean
-      description:
-        maxLength: 1000
-        type: string
-      special_type:
-        enum:
-        - normal
-        - premium
-        type: string
-      state:
-        type: string
-      status:
-        enum:
-        - lost
-        - found
-        type: string
-      tel_id:
-        maxLength: 255
-        type: string
-      title:
-        maxLength: 255
-        type: string
-      user_phone:
-        maxLength: 13
-        minLength: 11
-        type: string
-    required:
-    - alert
-    - chat
-    - status
-    - title
-    type: object
-  DTO.ESAddressDTO:
-    properties:
-      address_detail:
-        type: string
-      city:
-        type: string
-      location:
-        $ref: '#/definitions/DTO.Location'
-      province:
-        type: string
-    type: object
-  DTO.ESPosterDTO:
-    properties:
-      addresses:
-        items:
-          $ref: '#/definitions/DTO.ESAddressDTO'
-        type: array
-      alert:
-        type: boolean
-      award:
-        type: number
-      chat:
-        type: boolean
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: integer
-      images:
-        items:
-          type: string
-        type: array
-      special_type:
-        enum:
-        - normal
-        - premium
-        type: string
-      state:
-        type: string
-      status:
-        type: string
-      tags:
-        items:
-          $ref: '#/definitions/DTO.ESTagDTO'
-        type: array
-      tel_id:
-        maxLength: 255
-        type: string
-      title:
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        minimum: 1
-        type: integer
-      user_phone:
-        maxLength: 13
-        minLength: 11
-        type: string
-    required:
-    - alert
-    - chat
-    - user_id
-    type: object
-  DTO.ESTagDTO:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-      state:
-        enum:
-        - accepted
-        - rejected
-        - pending
-        type: string
-    type: object
-  DTO.Location:
-    properties:
-      lat:
-        type: number
-      lon:
-        type: number
-    type: object
-  DTO.UpdateAddressDTO:
-    properties:
-      address_detail:
-        maxLength: 1000
-        type: string
-      city:
-        maxLength: 255
-        type: string
-      latitude:
-        type: number
-      longitude:
-        type: number
-      province:
-        maxLength: 255
-        type: string
-    type: object
-  DTO.UpdatePosterDTO:
-    properties:
-      alert:
-        enum:
-        - "true"
-        - "false"
-        - ""
-        type: string
-      award:
-        description: todo if you want to update reward to 0, set it to -1
-        type: number
-      chat:
-        enum:
-        - "true"
-        - "false"
-        - ""
-        type: string
-      description:
-        maxLength: 1000
-        type: string
-      img_urls:
-        items:
-          type: string
-        type: array
-      special_ads:
-        enum:
-        - normal
-        - premium
-        - ""
-        type: string
-      state:
-        enum:
-        - pending
-        - accepted
-        - rejected
-        - ""
-        type: string
-      status:
-        enum:
-        - lost
-        - found
-        - ""
-        type: string
-      tag_ids:
-        items:
-          type: integer
-        type: array
-      tel_id:
-        maxLength: 255
-        type: string
-      title:
-        maxLength: 255
-        type: string
-      user_id:
-        type: integer
-      user_phone:
-        maxLength: 13
-        type: string
-    type: object
   Model.Address:
     properties:
       address_detail:
@@ -461,6 +238,12 @@ definitions:
       wallet:
         type: number
     type: object
+  RealtimeChat.MessageWithType:
+    properties:
+      content: {}
+      type:
+        type: string
+    type: object
   UseCase.CreateMockDataRequest:
     properties:
       count:
@@ -480,14 +263,14 @@ definitions:
     properties:
       addresses:
         items:
-          $ref: '#/definitions/DTO.CreateAddressDTO'
+          $ref: '#/definitions/dtos.CreateAddressDTO'
         type: array
       img_urls:
         items:
           type: string
         type: array
       poster:
-        $ref: '#/definitions/DTO.CreatePosterDTO'
+        $ref: '#/definitions/dtos.CreatePosterDTO'
       tags:
         items:
           type: string
@@ -579,10 +362,10 @@ definitions:
     properties:
       addresses:
         items:
-          $ref: '#/definitions/DTO.UpdateAddressDTO'
+          $ref: '#/definitions/dtos.UpdateAddressDTO'
         type: array
       poster:
-        $ref: '#/definitions/DTO.UpdatePosterDTO'
+        $ref: '#/definitions/dtos.UpdatePosterDTO'
     type: object
   UseCase.UpdateTagRequest:
     properties:
@@ -653,7 +436,7 @@ definitions:
         type: integer
       posters:
         items:
-          $ref: '#/definitions/DTO.ESPosterDTO'
+          $ref: '#/definitions/dtos.ESPosterDTO'
         type: array
       total:
         type: integer
@@ -808,10 +591,226 @@ definitions:
       user_id:
         type: integer
     type: object
-  WebSocket.MessageWithType:
+  dtos.CreateAddressDTO:
     properties:
-      content: {}
-      type:
+      address_detail:
+        maxLength: 1000
+        minLength: 5
+        type: string
+      city:
+        maxLength: 255
+        minLength: 5
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      province:
+        maxLength: 255
+        minLength: 5
+        type: string
+    required:
+    - city
+    - latitude
+    - longitude
+    - province
+    type: object
+  dtos.CreatePosterDTO:
+    properties:
+      alert:
+        type: boolean
+      award:
+        type: number
+      chat:
+        type: boolean
+      description:
+        maxLength: 1000
+        type: string
+      special_type:
+        enum:
+        - normal
+        - premium
+        type: string
+      state:
+        type: string
+      status:
+        enum:
+        - lost
+        - found
+        type: string
+      tel_id:
+        maxLength: 255
+        type: string
+      title:
+        maxLength: 255
+        type: string
+      user_phone:
+        maxLength: 13
+        type: string
+    required:
+    - alert
+    - chat
+    - status
+    - title
+    type: object
+  dtos.ESAddressDTO:
+    properties:
+      address_detail:
+        type: string
+      city:
+        type: string
+      location:
+        $ref: '#/definitions/dtos.Location'
+      province:
+        type: string
+    type: object
+  dtos.ESPosterDTO:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/dtos.ESAddressDTO'
+        type: array
+      alert:
+        type: boolean
+      award:
+        type: number
+      chat:
+        type: boolean
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      images:
+        items:
+          type: string
+        type: array
+      special_type:
+        enum:
+        - normal
+        - premium
+        type: string
+      state:
+        type: string
+      status:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/dtos.ESTagDTO'
+        type: array
+      tel_id:
+        maxLength: 255
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        minimum: 1
+        type: integer
+      user_phone:
+        maxLength: 13
+        minLength: 11
+        type: string
+    required:
+    - alert
+    - chat
+    - user_id
+    type: object
+  dtos.ESTagDTO:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      state:
+        enum:
+        - accepted
+        - rejected
+        - pending
+        type: string
+    type: object
+  dtos.Location:
+    properties:
+      lat:
+        type: number
+      lon:
+        type: number
+    type: object
+  dtos.UpdateAddressDTO:
+    properties:
+      address_detail:
+        maxLength: 1000
+        type: string
+      city:
+        maxLength: 255
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      province:
+        maxLength: 255
+        type: string
+    type: object
+  dtos.UpdatePosterDTO:
+    properties:
+      alert:
+        enum:
+        - "true"
+        - "false"
+        - ""
+        type: string
+      award:
+        description: todo if you want to update reward to 0, set it to -1
+        type: number
+      chat:
+        enum:
+        - "true"
+        - "false"
+        - ""
+        type: string
+      description:
+        maxLength: 1000
+        type: string
+      img_urls:
+        items:
+          type: string
+        type: array
+      special_ads:
+        enum:
+        - normal
+        - premium
+        - ""
+        type: string
+      state:
+        enum:
+        - pending
+        - accepted
+        - rejected
+        - ""
+        type: string
+      status:
+        enum:
+        - lost
+        - found
+        - ""
+        type: string
+      tag_ids:
+        items:
+          type: integer
+        type: array
+      tel_id:
+        maxLength: 255
+        type: string
+      title:
+        maxLength: 255
+        type: string
+      user_id:
+        type: integer
+      user_phone:
+        maxLength: 13
         type: string
     type: object
   gorm.DeletedAt:
@@ -1066,6 +1065,25 @@ paths:
       summary: Generate poster info
       tags:
       - ApiCall
+  /api-call/image-upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload image
+      parameters:
+      - description: Multiple files
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Upload image
+      tags:
+      - ApiCall
   /chats/authorize/conversation:
     post:
       consumes:
@@ -1174,7 +1192,7 @@ paths:
         name: Message
         required: true
         schema:
-          $ref: '#/definitions/WebSocket.MessageWithType'
+          $ref: '#/definitions/RealtimeChat.MessageWithType'
       - description: Conversation ID
         in: query
         name: conv_id
@@ -1372,25 +1390,6 @@ paths:
           schema:
             $ref: '#/definitions/View.PosterView'
       summary: Update a poster by ID
-      tags:
-      - posters
-  /posters/image:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload poster image
-      parameters:
-      - description: Multiple files
-        in: formData
-        name: files
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Upload poster image
       tags:
       - posters
   /posters/mock-data:

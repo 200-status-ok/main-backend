@@ -146,19 +146,6 @@ func UpdatePosterReport(c *gin.Context) {
 	UseCase.UpdatePosterReportResponse(c)
 }
 
-// UploadPosterImage godoc
-// @Summary Upload poster image
-// @Description Upload poster image
-// @Tags posters
-// @Accept  multipart/form-data
-// @Param files formData file true "Multiple files"
-// @Produce  json
-// @Success 200
-// @Router /posters/image [post]
-func UploadPosterImage(c *gin.Context) {
-	UseCase.UploadPosterImageResponse(c)
-}
-
 // UpdatePosterState godoc
 // @Summary Update a poster state by ID
 // @Description Updates a poster report by ID
