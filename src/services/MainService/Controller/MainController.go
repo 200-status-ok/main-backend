@@ -61,7 +61,6 @@ func (s *Server) MainController() {
 				authPosters.PATCH("/:id", Api2.UpdatePoster)
 				authPosters.DELETE("/:id", Api2.DeletePoster)
 			}
-			poster.POST("/image", Api2.UploadPosterImage)
 			poster.PATCH("/state", Api2.UpdatePosterState)
 			poster.POST("/mock-data", Api2.CreateMockData)
 		}
@@ -83,6 +82,7 @@ func (s *Server) MainController() {
 		api := v1.Group("/api-call")
 		{
 			api.GET("/generate-poster-Info", Api2.GeneratePosterInfo)
+			api.POST("/image-upload", Api2.ImageUpload)
 		}
 		chats := v1.Group("/chats")
 		{

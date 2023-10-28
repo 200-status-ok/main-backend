@@ -17,7 +17,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -381,35 +380,6 @@ func UpdatePosterReportResponse(c *gin.Context) {
 	//DBConfiguration.CloseDB()
 
 	c.JSON(http.StatusOK, gin.H{"message": "Report resolved"})
-}
-
-func UploadPosterImageResponse(c *gin.Context) {
-	formHeader, err := c.FormFile("poster_image")
-	fileName := formHeader.Filename
-	extension := path.Ext(fileName)
-
-	currentTime := time.Now().Format("20060102_150405")
-	randomString := strconv.FormatInt(rand.Int63(), 16)
-	newName := currentTime + "_" + randomString + extension
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	file, err := formHeader.Open()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	defer file.Close()
-
-	uploadUrl, err := Utils.UploadInLiaraCloud(file, newName)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"url": uploadUrl})
 }
 
 type UpdatePosterStateRequest struct {

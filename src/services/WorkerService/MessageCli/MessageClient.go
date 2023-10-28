@@ -58,13 +58,16 @@ func (client *MessageClient) ConnectBroker(connectionString string) error {
 		return errors.New("connectionString is empty")
 	}
 	var err error
-	client.Connection, err = amqp.DialConfig(connectionString, amqp.Config{
-		Heartbeat: 90 * time.Second,
-	})
-	if err != nil {
-		return err
+	for attempt := 1; attempt <= 5; attempt++ {
+		client.Connection, err = amqp.DialConfig(connectionString, amqp.Config{
+			Heartbeat: 90 * time.Second,
+		})
+		if err == nil {
+			return nil
+		}
+		time.Sleep(5 * time.Second)
 	}
-	return nil
+	return err
 }
 
 func (client *MessageClient) Subscribe(exchangeName string, exchangeType string, consumerName string) error {
