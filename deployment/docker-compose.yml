@@ -32,7 +32,7 @@ services:
       - rabbitmq
     networks:
       - main-network
-      - stack-network
+      - stackBuilder_network
 
   worker-app:
     container_name: worker-app
@@ -49,7 +49,7 @@ services:
       - rabbitmq
     networks:
       - main-network
-      - stack-network
+      - stackBuilder_network
 
   redis:
     image: redis:alpine3.17
@@ -76,7 +76,7 @@ services:
       - ../src/services/MainService/docker/rabbitmq/data:/var/lib/rabbitmq
     networks:
         - main-network
-        - stack-network
+        - stackBuilder_network
 
 networks:
   database-network:
@@ -84,5 +84,6 @@ networks:
     name: database_network
   main-network:
     driver: bridge
-  stack-network:
+  stackBuilder_network:
     driver: bridge
+    external: true

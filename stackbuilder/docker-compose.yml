@@ -17,7 +17,7 @@ services:
     volumes:
       - elasticsearch-data-volume:/usr/share/elasticsearch/data
     ports:
-      - "9400:9200"
+      - "9200:9200"
     networks:
       - stackBuilder-network
 
