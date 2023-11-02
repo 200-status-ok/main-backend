@@ -1,7 +1,6 @@
 package Api
 
 import (
-	"fmt"
 	"github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
@@ -22,72 +21,69 @@ var upgrader = websocket.Upgrader{
 }
 
 type ChatWS struct {
-	Hub *RealtimeChat.Hub
+	Hub *RealtimeChat.Hub2
 }
 
-func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
+func NewChatWS(hub *RealtimeChat.Hub2) *ChatWS {
 	return &ChatWS{Hub: hub}
 }
 
 type JoinConversationReq struct {
-	ConversationID uint   `form:"conv_id" binding:"required"`
-	Token          string `form:"token" binding:"required"`
+	Token string `form:"token" binding:"required"`
 }
 
-// JoinConversation JoinChat godoc
-// @Summary JoinConversation a chat room
-// @Description JoinConversation a chat room
+// OpenWSConnection godoc
+// @Summary OpenWSConnection
+// @Description OpenWSConnection to join a chat
 // @Tags Chat
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param Message body RealtimeChat.MessageWithType true "Message"
-// @Param conv_id query uint true "Conversation ID"
+// @Param Message body RealtimeChat.TransferMessage true "Message"
 // @Param token query string true "Token"
 // @Success 200 {object} string
-// @Router /chats/join [get]
-func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
+// @Router /chats/open-ws [get]
+func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
+	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
 	var request JoinConversationReq
 	secretKey := utils.ReadFromEnvFile(".env", "JWT_SECRET")
 	tokenMaker, _ := Token.NewJWTMaker(secretKey)
-	//payload := c.MustGet("authorization_payload").(*Token.Payload)
-	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	token := request.Token
 	payload, err := tokenMaker.VerifyToken(token)
-	conversation, err := chatRepo.GetConversationById(request.ConversationID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
+	conversations, err := chatRepo.GetConversationByUserID(uint(payload.UserID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	if _, ok := wsUseCase.Hub.ChatConversation[int(conversation.ID)]; !ok {
-		wsUseCase.Hub.ChatConversation[int(conversation.ID)] = &RealtimeChat.ConversationChat{
-			ID:     int(conversation.ID),
-			Name:   fmt.Sprintf("conversation-%d", conversation.ID),
-			Owner:  &RealtimeChat.Client{},
-			Member: &RealtimeChat.Client{},
+	for _, conversation := range conversations {
+		if _, ok := wsUseCase.Hub.Clients[int(conversation.OwnerID)]; !ok {
+			var client = RealtimeChat.Client2{
+				ID:      int(conversation.OwnerID),
+				Message: make(chan *RealtimeChat.Message, 100),
+				Conn:    &websocket.Conn{},
+			}
+			wsUseCase.Hub.Clients[int(conversation.OwnerID)] = &client
 		}
-		memberClient := &RealtimeChat.Client{
-			Conn:           &websocket.Conn{},
-			Message:        make(chan *RealtimeChat.Message, 100),
-			ID:             int(conversation.MemberID),
-			Role:           RealtimeChat.Member,
-			ConversationID: int(conversation.ID),
-			IsConnected:    false,
+		if _, ok := wsUseCase.Hub.Clients[int(conversation.MemberID)]; !ok {
+			var client = RealtimeChat.Client2{
+				ID:      int(conversation.MemberID),
+				Message: make(chan *RealtimeChat.Message, 100),
+				Conn:    &websocket.Conn{},
+			}
+			wsUseCase.Hub.Clients[int(conversation.MemberID)] = &client
 		}
-		wsUseCase.Hub.ChatConversation[int(conversation.ID)].Member = memberClient
-		ownerClient := &RealtimeChat.Client{
-			Conn:           &websocket.Conn{},
-			Message:        make(chan *RealtimeChat.Message, 100),
-			ID:             int(conversation.OwnerID),
-			Role:           RealtimeChat.Owner,
-			ConversationID: int(conversation.ID),
-			IsConnected:    false,
-		}
-		wsUseCase.Hub.ChatConversation[int(conversation.ID)].Owner = ownerClient
+		wsUseCase.Hub.PairUsers[int(conversation.OwnerID)] = append(wsUseCase.Hub.PairUsers[int(conversation.OwnerID)],
+			int(conversation.MemberID))
+		wsUseCase.Hub.PairUsers[int(conversation.MemberID)] = append(wsUseCase.Hub.PairUsers[int(conversation.MemberID)],
+			int(conversation.OwnerID))
 	}
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -95,19 +91,12 @@ func (wsUseCase *ChatWS) JoinConversation(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	var client *RealtimeChat.Client
-	if uint(payload.UserID) == conversation.OwnerID {
-		client = wsUseCase.Hub.ChatConversation[int(conversation.ID)].Owner
-	} else {
-		client = wsUseCase.Hub.ChatConversation[int(conversation.ID)].Member
-	}
+	wsUseCase.Hub.Clients[int(payload.UserID)].Conn = conn
 
-	client.Conn = conn
-	client.IsConnected = true
+	wsUseCase.Hub.Register <- wsUseCase.Hub.Clients[int(payload.UserID)]
 
-	wsUseCase.Hub.Register <- client
-	go client.Write()
-	go client.Read(wsUseCase.Hub)
+	go wsUseCase.Hub.Clients[int(payload.UserID)].Write()
+	go wsUseCase.Hub.Clients[int(payload.UserID)].Read(wsUseCase.Hub)
 }
 
 type ConversationInfo struct {

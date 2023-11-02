@@ -10,25 +10,17 @@ import (
 	"time"
 )
 
-type ConvRole string
-
 const (
-	writeWait               = 10 * time.Second
-	pongWait                = 60 * time.Second
-	pingPeriod              = (pongWait * 9) / 10
-	maxMessageSize          = 512
-	Owner          ConvRole = "owner"
-	Member         ConvRole = "member"
+	writeWait      = 10 * time.Second
+	pongWait       = 60 * time.Second
+	pingPeriod     = (pongWait * 9) / 10
+	maxMessageSize = 512
 )
 
-type Client struct {
-	Conn           *websocket.Conn
-	Message        chan *Message
-	ID             int                `json:"id"`
-	Role           ConvRole           `json:"role"`
-	ConversationID int                `json:"conversation_id"`
-	RedisClient    *Utils.RedisClient `json:"redis_client"`
-	IsConnected    bool               `json:"is_connected"`
+type Client2 struct {
+	Conn    *websocket.Conn
+	Message chan *Message
+	ID      int `json:"id"`
 }
 
 type Message struct {
@@ -36,15 +28,17 @@ type Message struct {
 	ConversationID int    `json:"conversation_id"`
 	SenderID       int    `json:"sender"`
 	ReceiverId     int    `json:"receiver"`
+	Time           string `json:"time"`
 	Type           string `json:"type"`
 }
 
-type MessageWithType struct {
-	Content interface{} `json:"content"`
-	Type    string      `json:"type"`
+type TransferMessage struct {
+	Content        string `json:"content"`
+	ConversationID int    `json:"conversation_id"`
+	Type           string `json:"type"`
 }
 
-func (c *Client) Read(hub *Hub) {
+func (c *Client2) Read(hub *Hub2) {
 	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	defer func() {
 		hub.Unregister <- c
@@ -76,7 +70,7 @@ func (c *Client) Read(hub *Hub) {
 			break
 		}
 
-		var receivedMessage MessageWithType
+		var receivedMessage TransferMessage
 		err = json.Unmarshal(message, &receivedMessage)
 		if err != nil {
 			log.Println(err)
@@ -85,33 +79,43 @@ func (c *Client) Read(hub *Hub) {
 
 		var receiverId, senderId int
 		senderId = c.ID
-		if c.Role == Owner {
-			receiverId = hub.ChatConversation[c.ConversationID].Member.ID
-		} else {
-			receiverId = hub.ChatConversation[c.ConversationID].Owner.ID
+		conversation, err := chatRepository.GetConversationById(uint(receivedMessage.ConversationID))
+		if err != nil {
+			log.Println(err)
+			break
 		}
-
+		if conversation.OwnerID == uint(c.ID) {
+			receiverId = int(conversation.MemberID)
+		} else {
+			receiverId = int(conversation.OwnerID)
+		}
+		sendingTime, err := Utils.GetTime("Asia/Tehran")
+		if err != nil {
+			log.Println(err)
+			break
+		}
 		go func() {
-			_, err := chatRepository.SaveMessage(uint(c.ConversationID), uint(senderId), receivedMessage.Content.(string),
-				receivedMessage.Type, receiverId)
+			_, err = chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
+				receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime)
 			if err != nil {
 				log.Println(err)
 			}
 		}()
 
 		msg := &Message{
-			Content:        receivedMessage.Content.(string),
-			Type:           receivedMessage.Type,
-			ConversationID: c.ConversationID,
+			Content:        receivedMessage.Content,
+			ConversationID: receivedMessage.ConversationID,
 			SenderID:       senderId,
 			ReceiverId:     receiverId,
+			Time:           sendingTime,
+			Type:           receivedMessage.Type,
 		}
 
 		hub.Broadcast <- msg
 	}
 }
 
-func (c *Client) Write() {
+func (c *Client2) Write() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
