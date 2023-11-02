@@ -1,33 +1,32 @@
 package RealtimeChat
 
-import "github.com/getsentry/sentry-go"
+import (
+	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
+	"github.com/getsentry/sentry-go"
+)
 
-type ConversationChat struct {
-	ID     int
-	Name   string
-	Member *Client
-	Owner  *Client
+type Hub2 struct {
+	Clients    map[int]*Client2
+	PairUsers  map[int][]int
+	Register   chan *Client2
+	Unregister chan *Client2
+	Broadcast  chan *Message
 }
 
-type Hub struct {
-	ChatConversation map[int]*ConversationChat
-	Register         chan *Client
-	Unregister       chan *Client
-	Broadcast        chan *Message
-}
-
-func NewHub() *Hub {
-	Hub := &Hub{
-		ChatConversation: make(map[int]*ConversationChat),
-		Register:         make(chan *Client),
-		Unregister:       make(chan *Client),
-		Broadcast:        make(chan *Message, 5),
+func NewHub() *Hub2 {
+	Hub := &Hub2{
+		Clients:    make(map[int]*Client2),
+		PairUsers:  make(map[int][]int),
+		Register:   make(chan *Client2),
+		Unregister: make(chan *Client2),
+		Broadcast:  make(chan *Message, 5),
 	}
 
 	return Hub
 }
 
-func (h *Hub) Run() {
+func (h *Hub2) Run() {
 	localHub := sentry.CurrentHub().Clone()
 	localHub.ConfigureScope(func(scope *sentry.Scope) {
 		scope.SetTag("component", "realtime-chat")
@@ -35,32 +34,41 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			if conv, ok := h.ChatConversation[client.ConversationID]; ok {
-				if client.Role == Owner {
-					conv.Owner = client
-				} else {
-					conv.Member = client
+			fmt.Println("register", client.ID)
+			currentTime, err := Utils.GetTime("Asia/Tehran")
+			if err != nil {
+				localHub.CaptureException(err)
+			}
+			for _, receiver := range h.PairUsers[client.ID] {
+				h.Clients[receiver].Message <- &Message{
+					Content:        fmt.Sprintf("User %d has joined", client.ID),
+					ConversationID: 0,
+					SenderID:       client.ID,
+					ReceiverId:     receiver,
+					Time:           currentTime,
+					Type:           "text",
 				}
 			}
 		case client := <-h.Unregister:
-			if conv, ok := h.ChatConversation[client.ConversationID]; ok {
-				h.Broadcast <- &Message{
-					Content:        "user left the chat",
-					ConversationID: client.ConversationID,
+			fmt.Println("unregister", client.ID)
+			currentTime, err := Utils.GetTime("Asia/Tehran")
+			if err != nil {
+				localHub.CaptureException(err)
+			}
+			for _, receiver := range h.PairUsers[client.ID] {
+				h.Clients[receiver].Message <- &Message{
+					Content:        fmt.Sprintf("User %d has left", client.ID),
+					ConversationID: 0,
 					SenderID:       client.ID,
-				}
-				if client.Role == Owner {
-					conv.Owner.IsConnected = false
-				} else {
-					conv.Member.IsConnected = false
+					ReceiverId:     receiver,
+					Time:           currentTime,
+					Type:           "text",
 				}
 			}
 		case message := <-h.Broadcast:
-			if conv, ok := h.ChatConversation[message.ConversationID]; ok {
-				if message.SenderID == conv.Owner.ID {
-					conv.Member.Message <- message
-				} else {
-					conv.Owner.Message <- message
+			for _, client := range h.Clients {
+				if client.ID == message.ReceiverId {
+					client.Message <- message
 				}
 			}
 		}

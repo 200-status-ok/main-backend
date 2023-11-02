@@ -17,13 +17,11 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/pquerna/otp v1.4.0
 	github.com/rabbitmq/amqp091-go v1.8.0
-	github.com/spf13/viper v1.17.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.1
 	golang.org/x/crypto v0.13.0
 	golang.org/x/oauth2 v0.12.0
-	gorm.io/driver/postgres v1.5.3
 	gorm.io/gorm v1.25.5
 )
 
@@ -74,6 +72,7 @@ require (
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/viper v1.17.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
@@ -90,4 +89,5 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/postgres v1.5.3 // indirect
 )
