@@ -553,14 +553,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/join": {
+        "/chats/open-ws": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "JoinConversation a chat room",
+                "description": "OpenWSConnection to join a chat",
                 "consumes": [
                     "application/json"
                 ],
@@ -570,7 +570,7 @@ const docTemplate = `{
                 "tags": [
                     "Chat"
                 ],
-                "summary": "JoinConversation a chat room",
+                "summary": "OpenWSConnection",
                 "parameters": [
                     {
                         "description": "Message",
@@ -578,15 +578,8 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RealtimeChat.MessageWithType"
+                            "$ref": "#/definitions/RealtimeChat.TransferMessage"
                         }
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Conversation ID",
-                        "name": "conv_id",
-                        "in": "query",
-                        "required": true
                     },
                     {
                         "type": "string",
@@ -1719,6 +1712,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_read": {
+                    "type": "boolean"
+                },
                 "receiver_id": {
                     "type": "integer"
                 },
@@ -1924,10 +1920,15 @@ const docTemplate = `{
                 }
             }
         },
-        "RealtimeChat.MessageWithType": {
+        "RealtimeChat.TransferMessage": {
             "type": "object",
             "properties": {
-                "content": {},
+                "content": {
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "type": "integer"
+                },
                 "type": {
                     "type": "string"
                 }

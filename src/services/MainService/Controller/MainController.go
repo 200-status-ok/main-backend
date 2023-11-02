@@ -86,7 +86,7 @@ func (s *Server) MainController() {
 		}
 		chats := v1.Group("/chats")
 		{
-			chats.GET("/join", s.ChatWs.JoinConversation)
+			chats.GET("/open-ws", s.ChatWs.OpenWSConnection)
 			chatAuthorize := chats.Group("/authorize").Use(Middleware.AuthMiddleware(s.TokenMaker))
 			{
 				chatAuthorize.POST("/conversation", Api2.CreateConversation)
