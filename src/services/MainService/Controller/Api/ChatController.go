@@ -20,12 +20,12 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-type ChatWS struct {
+type ChatWS2 struct {
 	Hub *RealtimeChat.Hub2
 }
 
-func NewChatWS(hub *RealtimeChat.Hub2) *ChatWS {
-	return &ChatWS{Hub: hub}
+func NewChatWS(hub *RealtimeChat.Hub2) *ChatWS2 {
+	return &ChatWS2{Hub: hub}
 }
 
 type JoinConversationReq struct {
@@ -42,8 +42,8 @@ type JoinConversationReq struct {
 // @Param Message body RealtimeChat.TransferMessage true "Message"
 // @Param token query string true "Token"
 // @Success 200 {object} string
-// @Router /chats/open-ws [get]
-func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
+// @Router /chat/open-ws [get]
+func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
 	var request JoinConversationReq
 	secretKey := utils.ReadFromEnvFile(".env", "JWT_SECRET")
@@ -71,6 +71,8 @@ func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
 				Conn:    &websocket.Conn{},
 			}
 			wsUseCase.Hub.Clients[int(conversation.OwnerID)] = &client
+			wsUseCase.Hub.PairUsers[int(conversation.OwnerID)] = append(wsUseCase.Hub.PairUsers[int(conversation.OwnerID)],
+				int(conversation.MemberID))
 		}
 		if _, ok := wsUseCase.Hub.Clients[int(conversation.MemberID)]; !ok {
 			var client = RealtimeChat.Client2{
@@ -79,11 +81,9 @@ func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
 				Conn:    &websocket.Conn{},
 			}
 			wsUseCase.Hub.Clients[int(conversation.MemberID)] = &client
+			wsUseCase.Hub.PairUsers[int(conversation.MemberID)] = append(wsUseCase.Hub.PairUsers[int(conversation.MemberID)],
+				int(conversation.OwnerID))
 		}
-		wsUseCase.Hub.PairUsers[int(conversation.OwnerID)] = append(wsUseCase.Hub.PairUsers[int(conversation.OwnerID)],
-			int(conversation.MemberID))
-		wsUseCase.Hub.PairUsers[int(conversation.MemberID)] = append(wsUseCase.Hub.PairUsers[int(conversation.MemberID)],
-			int(conversation.OwnerID))
 	}
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -112,7 +112,7 @@ type ConversationInfo struct {
 // @Produce json
 // @Param conversation body ConversationInfo true "CreateConversation"
 // @Success 200 {object} string
-// @Router /chats/authorize/conversation [post]
+// @Router /chat/authorize/conversation [post]
 func CreateConversation(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request ConversationInfo
@@ -160,7 +160,7 @@ func CreateConversation(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {array} View.ConversationView
-// @Router /chats/authorize/conversations [get]
+// @Router /chat/authorize/conversation [get]
 func AllUserConversations(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
@@ -186,7 +186,7 @@ type GetConversationByIdPathRequest struct {
 // @Produce json
 // @Param conversation_id path int true "Conversation ID"
 // @Success 200 {object} string
-// @Router /chats/authorize/conversation/{conversation_id} [get]
+// @Router /chat/authorize/conversation/{conversation_id} [get]
 func GetConversationById(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var pathRequest GetConversationByIdPathRequest
@@ -224,7 +224,7 @@ type ConversationHistoryQueryRequest struct {
 // @Param page_id query int true "Page ID" minimum(1) default(1)
 // @Param page_size query int true "Page size" minimum(1) default(10)
 // @Success 200 {array} Model.Conversation
-// @Router /chats/authorize/history/{conversation_id}/ [get]
+// @Router /chat/authorize/history/{conversation_id}/ [get]
 func ConversationHistory(c *gin.Context) {
 	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
@@ -249,4 +249,47 @@ func ConversationHistory(c *gin.Context) {
 	}
 
 	View.GetConversationHistory(c, messages, uint(payload.UserID))
+}
+
+// UpdateConversation godoc
+// @Summary Update conversation
+// @Description Update conversation
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversation_id path uint true "CreateConversation ID"
+// @Param name body string true "Name"
+// @Param image body string true "Image"
+// @Success 200 {object} string
+// @Router /chat/authorize/conversation/{conversation_id} [patch]
+func UpdateConversation(c *gin.Context) {
+}
+
+// ReadConversation godoc
+// @Summary Read conversation
+// @Description Read conversation
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversation_id path uint true "CreateConversation ID"
+// @Success 200 {object} string
+// @Router /chat/authorize/read/{conversation_id} [get]
+func ReadConversation(c *gin.Context) {
+	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+
+	var pathRequest ConversationHistoryPathRequest
+	if err := c.ShouldBindUri(&pathRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := chatRepository.ReadConversation(pathRequest.ConversationID, uint(payload.UserID))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Read conversation successfully"})
 }
