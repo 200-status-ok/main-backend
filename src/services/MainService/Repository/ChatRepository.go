@@ -33,6 +33,36 @@ func (r *ChatRepository) GetUserConversationById(convId, userId uint) (Model.Con
 	return convModel, nil
 }
 
+func (r *ChatRepository) GetConversationByUserID(userID uint) ([]Model.Conversation, error) {
+	var convModels []Model.Conversation
+	result := r.db.Where("owner_id = ? OR member_id = ?", userID, userID).Find(&convModels)
+	if result.Error != nil {
+		return []Model.Conversation{}, result.Error
+	}
+
+	return convModels, nil
+}
+
+func (r *ChatRepository) GetConversationByOwner(ownerId uint) ([]Model.Conversation, error) {
+	var convModels []Model.Conversation
+	result := r.db.Where("owner_id = ?", ownerId).Find(&convModels)
+	if result.Error != nil {
+		return []Model.Conversation{}, result.Error
+	}
+
+	return convModels, nil
+}
+
+func (r *ChatRepository) GetConversationByMember(memberId uint) ([]Model.Conversation, error) {
+	var convModels []Model.Conversation
+	result := r.db.Where("member_id = ?", memberId).Find(&convModels)
+	if result.Error != nil {
+		return []Model.Conversation{}, result.Error
+	}
+
+	return convModels, nil
+}
+
 func (r *ChatRepository) GetConversationByClient(chatRoom, clientId uint) (Model.Conversation, error) {
 	var convModel Model.Conversation
 	result := r.db.Where("room_id = ? AND member_id = ?", chatRoom, clientId).First(&convModel)
@@ -94,13 +124,14 @@ func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, erro
 }
 
 func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message string,
-	mType string, receiverId int) (*Model.Message, error) {
+	mType string, receiverId int, time string) (*Model.Message, error) {
 	messageModel := &Model.Message{
 		ConversationId: conversationId,
 		Content:        message,
 		Type:           mType,
 		SenderId:       senderId,
 		ReceiverId:     uint(receiverId),
+		CreatedAt:      time,
 	}
 
 	result := r.db.Create(&messageModel)
@@ -109,6 +140,30 @@ func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message
 	}
 
 	return messageModel, nil
+}
+
+func (r *ChatRepository) SaveMessage2(senderId uint, receiverId int, message string) (*Model.Message, error) {
+	messageModel := &Model.Message{
+		Content:    message,
+		SenderId:   senderId,
+		ReceiverId: uint(receiverId),
+	}
+
+	result := r.db.Create(&messageModel)
+	if result.Error != nil {
+		return &Model.Message{}, result.Error
+	}
+
+	return messageModel, nil
+}
+
+func (r *ChatRepository) UpdateMessageStatus(messageId uint) error {
+	result := r.db.Model(&Model.Message{}).Where("id = ?", messageId).Update("status", true)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
 
 func (r *ChatRepository) GetConversationHistory(conversationID uint, pageSize int, offset int) ([]Model.Message, error) {

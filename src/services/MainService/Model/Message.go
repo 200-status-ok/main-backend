@@ -7,7 +7,7 @@ import (
 
 type Message struct {
 	ID             uint           `gorm:"primarykey" json:"id"`
-	CreatedAt      time.Time      `json:"created_at"`
+	CreatedAt      string         `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	ConversationId uint           `gorm:"not null" json:"conversation_id"`
@@ -15,6 +15,7 @@ type Message struct {
 	ReceiverId     uint           `gorm:"not null" json:"receiver_id"`
 	Content        string         `gorm:"type:text;not null" json:"content"`
 	Type           string         `gorm:"type:varchar(50);not null" json:"type"`
+	IsRead         bool           `gorm:"default:false" json:"is_read"`
 }
 
 func (m *Message) GetID() uint {
