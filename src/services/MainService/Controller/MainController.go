@@ -11,7 +11,7 @@ import (
 type Server struct {
 	Router     *gin.Engine
 	TokenMaker Token.Maker
-	ChatWs     *Api2.ChatWS
+	ChatWs     *Api2.ChatWS2
 }
 
 func (s *Server) MainController() {
@@ -84,15 +84,17 @@ func (s *Server) MainController() {
 			api.GET("/generate-poster-Info", Api2.GeneratePosterInfo)
 			api.POST("/image-upload", Api2.ImageUpload)
 		}
-		chats := v1.Group("/chats")
+		chats := v1.Group("/chat")
 		{
 			chats.GET("/open-ws", s.ChatWs.OpenWSConnection)
 			chatAuthorize := chats.Group("/authorize").Use(Middleware.AuthMiddleware(s.TokenMaker))
 			{
 				chatAuthorize.POST("/conversation", Api2.CreateConversation)
-				chatAuthorize.GET("/conversations", Api2.AllUserConversations)
+				chatAuthorize.GET("/conversation", Api2.AllUserConversations)
 				chatAuthorize.GET("/conversation/:conversation_id", Api2.GetConversationById)
 				chatAuthorize.GET("/history/:conversation_id", Api2.ConversationHistory)
+				chatAuthorize.PATCH("/conversation/:conversation_id", Api2.UpdateConversation)
+				chatAuthorize.GET("/read/:conversation_id", Api2.ReadConversation)
 			}
 		}
 	}

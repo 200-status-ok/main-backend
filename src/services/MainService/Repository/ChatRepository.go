@@ -43,36 +43,6 @@ func (r *ChatRepository) GetConversationByUserID(userID uint) ([]Model.Conversat
 	return convModels, nil
 }
 
-func (r *ChatRepository) GetConversationByOwner(ownerId uint) ([]Model.Conversation, error) {
-	var convModels []Model.Conversation
-	result := r.db.Where("owner_id = ?", ownerId).Find(&convModels)
-	if result.Error != nil {
-		return []Model.Conversation{}, result.Error
-	}
-
-	return convModels, nil
-}
-
-func (r *ChatRepository) GetConversationByMember(memberId uint) ([]Model.Conversation, error) {
-	var convModels []Model.Conversation
-	result := r.db.Where("member_id = ?", memberId).Find(&convModels)
-	if result.Error != nil {
-		return []Model.Conversation{}, result.Error
-	}
-
-	return convModels, nil
-}
-
-func (r *ChatRepository) GetConversationByClient(chatRoom, clientId uint) (Model.Conversation, error) {
-	var convModel Model.Conversation
-	result := r.db.Where("room_id = ? AND member_id = ?", chatRoom, clientId).First(&convModel)
-	if result.Error != nil {
-		return Model.Conversation{}, result.Error
-	}
-
-	return convModel, nil
-}
-
 func (r *ChatRepository) CreateConversation(name string, conversationImage string,
 	ownerId uint, memberId uint, posterId uint) (*Model.Conversation, error) {
 	convModel := &Model.Conversation{
@@ -142,23 +112,10 @@ func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message
 	return messageModel, nil
 }
 
-func (r *ChatRepository) SaveMessage2(senderId uint, receiverId int, message string) (*Model.Message, error) {
-	messageModel := &Model.Message{
-		Content:    message,
-		SenderId:   senderId,
-		ReceiverId: uint(receiverId),
-	}
-
-	result := r.db.Create(&messageModel)
-	if result.Error != nil {
-		return &Model.Message{}, result.Error
-	}
-
-	return messageModel, nil
-}
-
-func (r *ChatRepository) UpdateMessageStatus(messageId uint) error {
-	result := r.db.Model(&Model.Message{}).Where("id = ?", messageId).Update("status", true)
+func (r *ChatRepository) ReadConversation(conversationId uint, receiverId uint) error {
+	result := r.db.Model(&Model.Message{}).Where("conversation_id = ? AND receiver_id = ?",
+		conversationId, receiverId).
+		Update("is_read", true)
 	if result.Error != nil {
 		return result.Error
 	}
