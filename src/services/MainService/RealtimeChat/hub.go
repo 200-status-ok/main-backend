@@ -20,7 +20,7 @@ func NewHub() *Hub2 {
 		PairUsers:  make(map[int][]int),
 		Register:   make(chan *Client2),
 		Unregister: make(chan *Client2),
-		Broadcast:  make(chan *Message, 5),
+		Broadcast:  make(chan *Message, 100),
 	}
 
 	return Hub
@@ -40,7 +40,7 @@ func (h *Hub2) Run() {
 				localHub.CaptureException(err)
 			}
 			for _, receiver := range h.PairUsers[client.ID] {
-				h.Clients[receiver].Message <- &Message{
+				h.Broadcast <- &Message{
 					Content:        fmt.Sprintf("User %d has joined", client.ID),
 					ConversationID: 0,
 					SenderID:       client.ID,
@@ -56,7 +56,7 @@ func (h *Hub2) Run() {
 				localHub.CaptureException(err)
 			}
 			for _, receiver := range h.PairUsers[client.ID] {
-				h.Clients[receiver].Message <- &Message{
+				h.Broadcast <- &Message{
 					Content:        fmt.Sprintf("User %d has left", client.ID),
 					ConversationID: 0,
 					SenderID:       client.ID,
