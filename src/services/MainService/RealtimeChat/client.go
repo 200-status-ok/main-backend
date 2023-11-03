@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Utils"
+	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/gorilla/websocket"
 	"log"
@@ -19,23 +20,8 @@ const (
 
 type Client2 struct {
 	Conn    *websocket.Conn
-	Message chan *Message
+	Message chan *dtos.Message
 	ID      int `json:"id"`
-}
-
-type Message struct {
-	Content        string `json:"content"`
-	ConversationID int    `json:"conversation_id"`
-	SenderID       int    `json:"sender"`
-	ReceiverId     int    `json:"receiver"`
-	Time           string `json:"time"`
-	Type           string `json:"type"`
-}
-
-type TransferMessage struct {
-	Content        string `json:"content"`
-	ConversationID int    `json:"conversation_id"`
-	Type           string `json:"type"`
 }
 
 func (c *Client2) Read(hub *Hub2) {
@@ -70,7 +56,7 @@ func (c *Client2) Read(hub *Hub2) {
 			break
 		}
 
-		var receivedMessage TransferMessage
+		var receivedMessage dtos.TransferMessage
 		err = json.Unmarshal(message, &receivedMessage)
 		if err != nil {
 			log.Println(err)
@@ -102,7 +88,7 @@ func (c *Client2) Read(hub *Hub2) {
 			}
 		}()
 
-		msg := &Message{
+		msg := &dtos.Message{
 			Content:        receivedMessage.Content,
 			ConversationID: receivedMessage.ConversationID,
 			SenderID:       senderId,
