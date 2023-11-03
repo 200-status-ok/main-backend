@@ -1,10 +1,12 @@
 package Api
 
 import (
+	"fmt"
 	"github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
+	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -63,26 +65,31 @@ func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 		return
 	}
 
+	pairedUsers := make([]int, 0)
+	for _, conversation := range conversations {
+		if conversation.OwnerID == uint(payload.UserID) {
+			pairedUsers = append(pairedUsers, int(conversation.MemberID))
+		} else {
+			pairedUsers = append(pairedUsers, int(conversation.OwnerID))
+		}
+	}
+
 	for _, conversation := range conversations {
 		if _, ok := wsUseCase.Hub.Clients[int(conversation.OwnerID)]; !ok {
 			var client = RealtimeChat.Client2{
 				ID:      int(conversation.OwnerID),
-				Message: make(chan *RealtimeChat.Message, 100),
+				Message: make(chan *dtos.Message, 100),
 				Conn:    &websocket.Conn{},
 			}
 			wsUseCase.Hub.Clients[int(conversation.OwnerID)] = &client
-			wsUseCase.Hub.PairUsers[int(conversation.OwnerID)] = append(wsUseCase.Hub.PairUsers[int(conversation.OwnerID)],
-				int(conversation.MemberID))
 		}
 		if _, ok := wsUseCase.Hub.Clients[int(conversation.MemberID)]; !ok {
 			var client = RealtimeChat.Client2{
 				ID:      int(conversation.MemberID),
-				Message: make(chan *RealtimeChat.Message, 100),
+				Message: make(chan *dtos.Message, 100),
 				Conn:    &websocket.Conn{},
 			}
 			wsUseCase.Hub.Clients[int(conversation.MemberID)] = &client
-			wsUseCase.Hub.PairUsers[int(conversation.MemberID)] = append(wsUseCase.Hub.PairUsers[int(conversation.MemberID)],
-				int(conversation.OwnerID))
 		}
 	}
 
@@ -91,10 +98,11 @@ func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	wsUseCase.Hub.PairUsers[int(payload.UserID)] = pairedUsers
 	wsUseCase.Hub.Clients[int(payload.UserID)].Conn = conn
-
 	wsUseCase.Hub.Register <- wsUseCase.Hub.Clients[int(payload.UserID)]
 
+	fmt.Println(wsUseCase.Hub.PairUsers[int(payload.UserID)])
 	go wsUseCase.Hub.Clients[int(payload.UserID)].Write()
 	go wsUseCase.Hub.Clients[int(payload.UserID)].Read(wsUseCase.Hub)
 }
@@ -265,7 +273,7 @@ func ConversationHistory(c *gin.Context) {
 func UpdateConversation(c *gin.Context) {
 }
 
-// ReadConversation godoc
+// ReadMessageInConversation godoc
 // @Summary Read conversation
 // @Description Read conversation
 // @Tags Chat
@@ -274,7 +282,7 @@ func UpdateConversation(c *gin.Context) {
 // @Param conversation_id path uint true "CreateConversation ID"
 // @Success 200 {object} string
 // @Router /chat/authorize/read/{conversation_id} [get]
-func ReadConversation(c *gin.Context) {
+func ReadMessageInConversation(c *gin.Context) {
 	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
@@ -284,12 +292,12 @@ func ReadConversation(c *gin.Context) {
 		return
 	}
 
-	err := chatRepository.ReadConversation(pathRequest.ConversationID, uint(payload.UserID))
+	updatedMessage, err := chatRepository.ReadMessageInConversation(pathRequest.ConversationID, uint(payload.UserID))
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Read conversation successfully"})
+	View.ReadMessageInConversationView(c, updatedMessage)
 }

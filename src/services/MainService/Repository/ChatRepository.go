@@ -82,6 +82,16 @@ func (r *ChatRepository) ExistConversation(ownerId uint, memberId uint, posterId
 	return convModel, nil
 }
 
+func (r *ChatRepository) GetUnReadMessages(userId uint) ([]Model.Message, error) {
+	var messages []Model.Message
+	result := r.db.Where("receiver_id = ? AND is_read = ?", userId, false).Find(&messages)
+	if result.Error != nil {
+		return []Model.Message{}, result.Error
+	}
+
+	return messages, nil
+}
+
 func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, error) {
 	var userConversations *Model.User
 	result := r.db.Preload("OwnConversations").Preload("MemberConversations").
@@ -112,15 +122,22 @@ func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message
 	return messageModel, nil
 }
 
-func (r *ChatRepository) ReadConversation(conversationId uint, receiverId uint) error {
+func (r *ChatRepository) ReadMessageInConversation(conversationId uint, receiverId uint) ([]Model.Message, error) {
 	result := r.db.Model(&Model.Message{}).Where("conversation_id = ? AND receiver_id = ?",
 		conversationId, receiverId).
 		Update("is_read", true)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
 
-	return nil
+	var updatedMessages []Model.Message
+	err := r.db.Where("conversation_id = ? AND receiver_id = ? AND is_read = ?", conversationId, receiverId, true).
+		Find(&updatedMessages).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedMessages, nil
 }
 
 func (r *ChatRepository) GetConversationHistory(conversationID uint, pageSize int, offset int) ([]Model.Message, error) {

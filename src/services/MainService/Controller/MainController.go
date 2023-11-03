@@ -94,7 +94,7 @@ func (s *Server) MainController() {
 				chatAuthorize.GET("/conversation/:conversation_id", Api2.GetConversationById)
 				chatAuthorize.GET("/history/:conversation_id", Api2.ConversationHistory)
 				chatAuthorize.PATCH("/conversation/:conversation_id", Api2.UpdateConversation)
-				chatAuthorize.GET("/read/:conversation_id", Api2.ReadConversation)
+				chatAuthorize.GET("/read/:conversation_id", Api2.ReadMessageInConversation)
 			}
 		}
 	}
