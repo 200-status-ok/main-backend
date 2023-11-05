@@ -23,10 +23,10 @@ var upgrader = websocket.Upgrader{
 }
 
 type ChatWS2 struct {
-	Hub *RealtimeChat.Hub2
+	Hub *RealtimeChat.Hub
 }
 
-func NewChatWS(hub *RealtimeChat.Hub2) *ChatWS2 {
+func NewChatWS(hub *RealtimeChat.Hub) *ChatWS2 {
 	return &ChatWS2{Hub: hub}
 }
 
@@ -57,14 +57,15 @@ func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 	token := request.Token
 	payload, err := tokenMaker.VerifyToken(token)
 	if err != nil {
+		fmt.Println("Token is invalid")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	conversations, err := chatRepo.GetConversationByUserID(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	pairedUsers := make([]int, 0)
 	for _, conversation := range conversations {
 		if conversation.OwnerID == uint(payload.UserID) {
@@ -76,7 +77,7 @@ func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 
 	for _, conversation := range conversations {
 		if _, ok := wsUseCase.Hub.Clients[int(conversation.OwnerID)]; !ok {
-			var client = RealtimeChat.Client2{
+			var client = RealtimeChat.Client{
 				ID:      int(conversation.OwnerID),
 				Message: make(chan *dtos.Message, 100),
 				Conn:    &websocket.Conn{},
@@ -84,7 +85,7 @@ func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 			wsUseCase.Hub.Clients[int(conversation.OwnerID)] = &client
 		}
 		if _, ok := wsUseCase.Hub.Clients[int(conversation.MemberID)]; !ok {
-			var client = RealtimeChat.Client2{
+			var client = RealtimeChat.Client{
 				ID:      int(conversation.MemberID),
 				Message: make(chan *dtos.Message, 100),
 				Conn:    &websocket.Conn{},
