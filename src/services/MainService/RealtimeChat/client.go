@@ -18,13 +18,13 @@ const (
 	maxMessageSize = 512
 )
 
-type Client2 struct {
+type Client struct {
 	Conn    *websocket.Conn
 	Message chan *dtos.Message
 	ID      int `json:"id"`
 }
 
-func (c *Client2) Read(hub *Hub2) {
+func (c *Client) Read(hub *Hub) {
 	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	defer func() {
 		hub.Unregister <- c
@@ -101,7 +101,7 @@ func (c *Client2) Read(hub *Hub2) {
 	}
 }
 
-func (c *Client2) Write() {
+func (c *Client) Write() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
