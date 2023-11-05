@@ -7,5 +7,8 @@ import (
 func ReadFromEnvFile(path string, key string) string {
 	viper.SetConfigFile(path)
 	_ = viper.ReadInConfig()
+	if viper.Get(key) == nil {
+		return ""
+	}
 	return viper.Get(key).(string)
 }

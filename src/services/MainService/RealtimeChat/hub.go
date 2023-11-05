@@ -7,27 +7,27 @@ import (
 	"github.com/getsentry/sentry-go"
 )
 
-type Hub2 struct {
-	Clients    map[int]*Client2
+type Hub struct {
+	Clients    map[int]*Client
 	PairUsers  map[int][]int
-	Register   chan *Client2
-	Unregister chan *Client2
+	Register   chan *Client
+	Unregister chan *Client
 	Broadcast  chan *dtos.Message
 }
 
-func NewHub() *Hub2 {
-	Hub := &Hub2{
-		Clients:    make(map[int]*Client2),
+func NewHub() *Hub {
+	Hub := &Hub{
+		Clients:    make(map[int]*Client),
 		PairUsers:  make(map[int][]int),
-		Register:   make(chan *Client2),
-		Unregister: make(chan *Client2),
+		Register:   make(chan *Client),
+		Unregister: make(chan *Client),
 		Broadcast:  make(chan *dtos.Message, 100),
 	}
 
 	return Hub
 }
 
-func (h *Hub2) Run() {
+func (h *Hub) Run() {
 	redisCli := Utils.NewRedisClient("redis", "6379", "", 0)
 	userMessageChannel := make(chan dtos.Message)
 	localHub := sentry.CurrentHub().Clone()
