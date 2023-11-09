@@ -84,12 +84,23 @@ func (r *ChatRepository) ExistConversation(ownerId uint, memberId uint, posterId
 
 func (r *ChatRepository) GetUnReadMessages(userId uint) ([]Model.Message, error) {
 	var messages []Model.Message
-	result := r.db.Where("receiver_id = ? AND is_read = ?", userId, false).Find(&messages)
+	result := r.db.Where("receiver_id = ? AND is_send = ?", userId, false).Find(&messages)
 	if result.Error != nil {
 		return []Model.Message{}, result.Error
 	}
 
 	return messages, nil
+}
+
+func (r *ChatRepository) UpdateStatusMessagesInConversation(userID, conversationID uint) error {
+	result := r.db.Model(&Model.Message{}).Where("conversation_id = ? AND receiver_id = ? AND "+
+		"(status = ? OR status = ?)",
+		conversationID, userID, "unread", "get-unread").Update("status", "read")
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
 
 func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, error) {
@@ -104,7 +115,7 @@ func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, erro
 }
 
 func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message string,
-	mType string, receiverId int, time string) (*Model.Message, error) {
+	mType string, receiverId int, time string, status string) (*Model.Message, error) {
 	messageModel := &Model.Message{
 		ConversationId: conversationId,
 		Content:        message,
@@ -112,6 +123,7 @@ func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message
 		SenderId:       senderId,
 		ReceiverId:     uint(receiverId),
 		CreatedAt:      time,
+		Status:         status,
 	}
 
 	result := r.db.Create(&messageModel)
@@ -122,9 +134,9 @@ func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message
 	return messageModel, nil
 }
 
-func (r *ChatRepository) ReadMessageWithId(messageId uint) error {
-	result := r.db.Model(&Model.Message{}).Where("id = ?", messageId).
-		Update("is_read", true)
+func (r *ChatRepository) ReadMessageWithId(messageId uint, status string) error {
+	result := r.db.Model(&Model.Message{}).Where("id = ?", messageId).Update("status", status).
+		Update("is_send", true)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -134,7 +146,7 @@ func (r *ChatRepository) ReadMessageWithId(messageId uint) error {
 func (r *ChatRepository) ReadMessageInConversation(conversationId uint, receiverId uint) ([]Model.Message, error) {
 	result := r.db.Model(&Model.Message{}).Where("conversation_id = ? AND receiver_id = ?",
 		conversationId, receiverId).
-		Update("is_read", true)
+		Update("is_send", true)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -8,6 +8,7 @@ type Message struct {
 	ReceiverId     int    `json:"receiver_id"`
 	Time           string `json:"time"`
 	Type           string `json:"type"`
+	Status         string `json:"status"`
 }
 
 type TransferMessage struct {

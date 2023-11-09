@@ -631,6 +631,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/chat/authorize/user-conversation/{conversation_id}": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "UserInConversation to join a chat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "UserInConversation",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Conversation ID",
+                        "name": "conversation_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/chat/open-ws": {
             "get": {
                 "security": [
@@ -1790,7 +1827,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_read": {
+                "is_send": {
                     "type": "boolean"
                 },
                 "receiver_id": {
@@ -1798,6 +1835,9 @@ const docTemplate = `{
                 },
                 "sender_id": {
                     "type": "integer"
+                },
+                "status": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"
