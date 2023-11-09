@@ -21,7 +21,8 @@ const (
 type Client struct {
 	Conn    *websocket.Conn
 	Message chan *dtos.Message
-	ID      int `json:"id"`
+	ID      int    `json:"id"`
+	Status  string `json:"status"`
 }
 
 func (c *Client) Read(hub *Hub) {
@@ -80,15 +81,14 @@ func (c *Client) Read(hub *Hub) {
 			log.Println(err)
 			break
 		}
-		go func() {
-			_, err = chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
-				receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime)
-			if err != nil {
-				log.Println(err)
-			}
-		}()
+		savedMessage, err := chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
+			receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime)
+		if err != nil {
+			log.Println(err)
+		}
 
 		msg := &dtos.Message{
+			ID:             int(savedMessage.ID),
 			Content:        receivedMessage.Content,
 			ConversationID: receivedMessage.ConversationID,
 			SenderID:       senderId,
