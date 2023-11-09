@@ -240,15 +240,6 @@ definitions:
       wallet:
         type: number
     type: object
-  RealtimeChat.TransferMessage:
-    properties:
-      content:
-        type: string
-      conversation_id:
-        type: integer
-      type:
-        type: string
-    type: object
   UseCase.CreateMockDataRequest:
     properties:
       count:
@@ -743,6 +734,15 @@ definitions:
       lon:
         type: number
     type: object
+  dtos.TransferMessage:
+    properties:
+      content:
+        type: string
+      conversation_id:
+        type: integer
+      type:
+        type: string
+    type: object
   dtos.UpdateAddressDTO:
     properties:
       address_detail:
@@ -1089,7 +1089,23 @@ paths:
       summary: Upload image
       tags:
       - ApiCall
-  /chats/authorize/conversation:
+  /chat/authorize/conversation:
+    get:
+      consumes:
+      - application/json
+      description: Get all user conversations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/View.ConversationView'
+            type: array
+      summary: Get all user conversations
+      tags:
+      - Chat
     post:
       consumes:
       - application/json
@@ -1111,7 +1127,7 @@ paths:
       summary: Create or check to exist a chat conversation for two users
       tags:
       - Chat
-  /chats/authorize/conversation/{conversation_id}:
+  /chat/authorize/conversation/{conversation_id}:
     get:
       consumes:
       - application/json
@@ -1132,24 +1148,39 @@ paths:
       summary: Get conversation by id
       tags:
       - Chat
-  /chats/authorize/conversations:
-    get:
+    patch:
       consumes:
       - application/json
-      description: Get all user conversations
+      description: Update conversation
+      parameters:
+      - description: CreateConversation ID
+        in: path
+        name: conversation_id
+        required: true
+        type: integer
+      - description: Name
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: Image
+        in: body
+        name: image
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/View.ConversationView'
-            type: array
-      summary: Get all user conversations
+            type: string
+      summary: Update conversation
       tags:
       - Chat
-  /chats/authorize/history/{conversation_id}/:
+  /chat/authorize/history/{conversation_id}/:
     get:
       consumes:
       - application/json
@@ -1186,7 +1217,28 @@ paths:
       summary: Get conversation history
       tags:
       - Chat
-  /chats/open-ws:
+  /chat/authorize/read/{conversation_id}:
+    get:
+      consumes:
+      - application/json
+      description: Read conversation
+      parameters:
+      - description: CreateConversation ID
+        in: path
+        name: conversation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Read conversation
+      tags:
+      - Chat
+  /chat/open-ws:
     get:
       consumes:
       - application/json
@@ -1197,7 +1249,7 @@ paths:
         name: Message
         required: true
         schema:
-          $ref: '#/definitions/RealtimeChat.TransferMessage'
+          $ref: '#/definitions/dtos.TransferMessage'
       - description: Token
         in: query
         name: token
