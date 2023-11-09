@@ -15,7 +15,8 @@ type Message struct {
 	ReceiverId     uint           `gorm:"not null" json:"receiver_id"`
 	Content        string         `gorm:"type:text;not null" json:"content"`
 	Type           string         `gorm:"type:varchar(50);not null" json:"type"`
-	IsRead         bool           `gorm:"default:false" json:"is_read"`
+	IsSend         bool           `gorm:"default:false" json:"is_send"`
+	Status         string         `gorm:"type:varchar(50);default:'unread'" json:"status"`
 }
 
 func (m *Message) GetID() uint {

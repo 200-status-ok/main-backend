@@ -30,6 +30,58 @@ func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
 	return &ChatWS{Hub: hub}
 }
 
+// UserInConversation godoc
+// @Summary UserInConversation
+// @Description UserInConversation to join a chat
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param conversation_id path int true "Conversation ID"
+// @Success 200 {object} string
+// @Router /chat/authorize/user-conversation/{conversation_id} [patch]
+func (wsUseCase *ChatWS) UserInConversation(c *gin.Context) {
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+	var pathRequest ConversationIDPathRequest
+	if err := c.ShouldBindUri(&pathRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; ok {
+		wsUseCase.Hub.Clients[int(payload.UserID)].PresentInConversation = int(pathRequest.ConversationID)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You are not online"})
+		return
+	}
+	err := chatRepo.UpdateStatusMessagesInConversation(uint(payload.UserID), pathRequest.ConversationID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Update user conversation successfully"})
+}
+
+// UserLeftConversation godoc
+// @Summary UserLeftConversation
+// @Description UserLeftConversation to join a chat
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} string
+// @Router /chat/authorize/user-left-conversation [patch]
+func (wsUseCase *ChatWS) UserLeftConversation(c *gin.Context) {
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; ok {
+		wsUseCase.Hub.Clients[int(payload.UserID)].PresentInConversation = 0
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You are not online"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User left conversation successfully"})
+}
+
 type OpenWSConnection struct {
 	Token string `form:"token" binding:"required"`
 }
@@ -50,6 +102,10 @@ func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
 	var request OpenWSConnection
 	secretKey := utils.ReadFromEnvFile(".env", "JWT_SECRET")
 	tokenMaker, _ := Token.NewJWTMaker(secretKey)
+	if err := c.ShouldBindQuery(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -211,7 +267,7 @@ func GetConversationById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Get conversation successfully", "conversation": conversation})
 }
 
-type ConversationHistoryPathRequest struct {
+type ConversationIDPathRequest struct {
 	ConversationID uint `uri:"conversation_id" binding:"required"`
 }
 
@@ -235,7 +291,7 @@ func ConversationHistory(c *gin.Context) {
 	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
-	var pathRequest ConversationHistoryPathRequest
+	var pathRequest ConversationIDPathRequest
 	if err := c.ShouldBindUri(&pathRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -283,8 +339,7 @@ func UpdateConversation(c *gin.Context) {
 func ReadMessageInConversation(c *gin.Context) {
 	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-
-	var pathRequest ConversationHistoryPathRequest
+	var pathRequest ConversationIDPathRequest
 	if err := c.ShouldBindUri(&pathRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

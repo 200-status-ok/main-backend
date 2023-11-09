@@ -64,7 +64,7 @@ func (h *Hub) Run() {
 					SenderID:       client.ID,
 					ReceiverId:     receiver,
 					Time:           currentTime,
-					Type:           "text",
+					Type:           "text-notification",
 				}
 			}
 
@@ -80,16 +80,23 @@ func (h *Hub) Run() {
 					SenderID:       client.ID,
 					ReceiverId:     receiver,
 					Time:           currentTime,
-					Type:           "text",
+					Type:           "text-notification",
 				}
 			}
 			delete(h.Clients, client.ID)
 		case message := <-h.Broadcast:
 			for _, client := range h.Clients {
 				if client.ID == message.ReceiverId {
-					err := chatRepository.ReadMessageWithId(uint(message.ID))
-					if err != nil {
-						localHub.CaptureException(err)
+					if client.PresentInConversation == message.ConversationID {
+						err := chatRepository.ReadMessageWithId(uint(message.ID), "read")
+						if err != nil {
+							localHub.CaptureException(err)
+						}
+					} else {
+						err := chatRepository.ReadMessageWithId(uint(message.ID), "get-unread")
+						if err != nil {
+							localHub.CaptureException(err)
+						}
 					}
 					client.Message <- message
 				}

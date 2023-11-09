@@ -102,12 +102,14 @@ definitions:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
-      is_read:
+      is_send:
         type: boolean
       receiver_id:
         type: integer
       sender_id:
         type: integer
+      status:
+        type: string
       type:
         type: string
       updated_at:
@@ -1236,6 +1238,29 @@ paths:
           schema:
             type: string
       summary: Read conversation
+      tags:
+      - Chat
+  /chat/authorize/user-conversation/{conversation_id}:
+    patch:
+      consumes:
+      - application/json
+      description: UserInConversation to join a chat
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: conversation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: UserInConversation
       tags:
       - Chat
   /chat/open-ws:
