@@ -2,6 +2,7 @@ package RealtimeChat
 
 import (
 	"encoding/json"
+	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
@@ -19,10 +20,11 @@ const (
 )
 
 type Client struct {
-	Conn    *websocket.Conn
-	Message chan *dtos.Message
-	ID      int    `json:"id"`
-	Status  string `json:"status"`
+	Conn                  *websocket.Conn
+	Message               chan *dtos.Message
+	ID                    int    `json:"id"`
+	Status                string `json:"status"`
+	PresentInConversation int    `json:"present_in_conversation"`
 }
 
 func (c *Client) Read(hub *Hub) {
@@ -81,10 +83,25 @@ func (c *Client) Read(hub *Hub) {
 			log.Println(err)
 			break
 		}
-		savedMessage, err := chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
-			receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime)
-		if err != nil {
-			log.Println(err)
+		var savedMessage *Model.Message
+		if _, ok := hub.Clients[receiverId]; !ok {
+			savedMessage, err = chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
+				receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime, "unread")
+			if err != nil {
+				log.Println(err)
+			}
+		} else if receivedMessage.ConversationID == hub.Clients[receiverId].PresentInConversation {
+			savedMessage, err = chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
+				receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime, "read")
+			if err != nil {
+				log.Println(err)
+			}
+		} else {
+			savedMessage, err = chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
+				receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime, "get-unread")
+			if err != nil {
+				log.Println(err)
+			}
 		}
 
 		msg := &dtos.Message{
@@ -95,6 +112,7 @@ func (c *Client) Read(hub *Hub) {
 			ReceiverId:     receiverId,
 			Time:           sendingTime,
 			Type:           receivedMessage.Type,
+			Status:         savedMessage.Status,
 		}
 
 		hub.Broadcast <- msg
