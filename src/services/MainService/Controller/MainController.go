@@ -11,7 +11,7 @@ import (
 type Server struct {
 	Router     *gin.Engine
 	TokenMaker Token.Maker
-	ChatWs     *Api2.ChatWS2
+	ChatWs     *Api2.ChatWS
 }
 
 func (s *Server) MainController() {

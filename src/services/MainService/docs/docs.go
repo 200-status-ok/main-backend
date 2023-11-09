@@ -408,7 +408,31 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/authorize/conversation": {
+        "/chat/authorize/conversation": {
+            "get": {
+                "description": "Get all user conversations",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Get all user conversations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/View.ConversationView"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create or check to exist a chat conversation",
                 "consumes": [
@@ -442,7 +466,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/authorize/conversation/{conversation_id}": {
+        "/chat/authorize/conversation/{conversation_id}": {
             "get": {
                 "description": "Get conversation by id",
                 "consumes": [
@@ -472,11 +496,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/chats/authorize/conversations": {
-            "get": {
-                "description": "Get all user conversations",
+            },
+            "patch": {
+                "description": "Update conversation",
                 "consumes": [
                     "application/json"
                 ],
@@ -486,21 +508,45 @@ const docTemplate = `{
                 "tags": [
                     "Chat"
                 ],
-                "summary": "Get all user conversations",
+                "summary": "Update conversation",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "CreateConversation ID",
+                        "name": "conversation_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Name",
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Image",
+                        "name": "image",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/View.ConversationView"
-                            }
+                            "type": "string"
                         }
                     }
                 }
             }
         },
-        "/chats/authorize/history/{conversation_id}/": {
+        "/chat/authorize/history/{conversation_id}/": {
             "get": {
                 "description": "Get conversation history",
                 "consumes": [
@@ -553,7 +599,39 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/open-ws": {
+        "/chat/authorize/read/{conversation_id}": {
+            "get": {
+                "description": "Read conversation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Read conversation",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "CreateConversation ID",
+                        "name": "conversation_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/open-ws": {
             "get": {
                 "security": [
                     {
@@ -578,7 +656,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RealtimeChat.TransferMessage"
+                            "$ref": "#/definitions/dtos.TransferMessage"
                         }
                     },
                     {
@@ -1920,20 +1998,6 @@ const docTemplate = `{
                 }
             }
         },
-        "RealtimeChat.TransferMessage": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "conversation_id": {
-                    "type": "integer"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
         "UseCase.CreateMockDataRequest": {
             "type": "object",
             "required": [
@@ -2657,6 +2721,20 @@ const docTemplate = `{
                 },
                 "lon": {
                     "type": "number"
+                }
+            }
+        },
+        "dtos.TransferMessage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },

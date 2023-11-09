@@ -22,15 +22,15 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-type ChatWS2 struct {
+type ChatWS struct {
 	Hub *RealtimeChat.Hub
 }
 
-func NewChatWS(hub *RealtimeChat.Hub) *ChatWS2 {
-	return &ChatWS2{Hub: hub}
+func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
+	return &ChatWS{Hub: hub}
 }
 
-type JoinConversationReq struct {
+type OpenWSConnection struct {
 	Token string `form:"token" binding:"required"`
 }
 
@@ -41,13 +41,13 @@ type JoinConversationReq struct {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param Message body RealtimeChat.TransferMessage true "Message"
+// @Param Message body dtos.TransferMessage true "Message"
 // @Param token query string true "Token"
 // @Success 200 {object} string
 // @Router /chat/open-ws [get]
-func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
+func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
 	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
-	var request JoinConversationReq
+	var request OpenWSConnection
 	secretKey := utils.ReadFromEnvFile(".env", "JWT_SECRET")
 	tokenMaker, _ := Token.NewJWTMaker(secretKey)
 	if err := c.ShouldBindQuery(&request); err != nil {
@@ -60,6 +60,13 @@ func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 		fmt.Println("Token is invalid")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; ok {
+		if wsUseCase.Hub.Clients[int(payload.UserID)].Status == "online" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "You are already online"})
+			fmt.Println("You are already online")
+			return
+		}
 	}
 	conversations, err := chatRepo.GetConversationByUserID(uint(payload.UserID))
 	if err != nil {
@@ -74,24 +81,14 @@ func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 			pairedUsers = append(pairedUsers, int(conversation.OwnerID))
 		}
 	}
-
-	for _, conversation := range conversations {
-		if _, ok := wsUseCase.Hub.Clients[int(conversation.OwnerID)]; !ok {
-			var client = RealtimeChat.Client{
-				ID:      int(conversation.OwnerID),
-				Message: make(chan *dtos.Message, 100),
-				Conn:    &websocket.Conn{},
-			}
-			wsUseCase.Hub.Clients[int(conversation.OwnerID)] = &client
+	if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; !ok {
+		var client = RealtimeChat.Client{
+			ID:      int(payload.UserID),
+			Message: make(chan *dtos.Message, 100),
+			Conn:    &websocket.Conn{},
+			Status:  "offline",
 		}
-		if _, ok := wsUseCase.Hub.Clients[int(conversation.MemberID)]; !ok {
-			var client = RealtimeChat.Client{
-				ID:      int(conversation.MemberID),
-				Message: make(chan *dtos.Message, 100),
-				Conn:    &websocket.Conn{},
-			}
-			wsUseCase.Hub.Clients[int(conversation.MemberID)] = &client
-		}
+		wsUseCase.Hub.Clients[int(payload.UserID)] = &client
 	}
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -101,9 +98,9 @@ func (wsUseCase *ChatWS2) OpenWSConnection(c *gin.Context) {
 	}
 	wsUseCase.Hub.PairUsers[int(payload.UserID)] = pairedUsers
 	wsUseCase.Hub.Clients[int(payload.UserID)].Conn = conn
+	wsUseCase.Hub.Clients[int(payload.UserID)].Status = "online"
 	wsUseCase.Hub.Register <- wsUseCase.Hub.Clients[int(payload.UserID)]
 
-	fmt.Println(wsUseCase.Hub.PairUsers[int(payload.UserID)])
 	go wsUseCase.Hub.Clients[int(payload.UserID)].Write()
 	go wsUseCase.Hub.Clients[int(payload.UserID)].Read(wsUseCase.Hub)
 }

@@ -2,8 +2,10 @@ package RealtimeChat
 
 import (
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/getsentry/sentry-go"
 )
 
@@ -28,8 +30,7 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
-	redisCli := Utils.NewRedisClient("redis", "6379", "", 0)
-	userMessageChannel := make(chan dtos.Message)
+	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
 	localHub := sentry.CurrentHub().Clone()
 	localHub.ConfigureScope(func(scope *sentry.Scope) {
 		scope.SetTag("component", "realtime-chat")
@@ -37,18 +38,24 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			go redisCli.SubscribeToUserChannel(fmt.Sprintf("user-%d", client.ID), userMessageChannel)
-			go func() {
-				for {
-					select {
-					case message := <-userMessageChannel:
-						h.Broadcast <- &message
-					}
-				}
-			}()
 			currentTime, err := Utils.GetTime("Asia/Tehran")
 			if err != nil {
 				localHub.CaptureException(err)
+			}
+			unReadMessages, err := chatRepository.GetUnReadMessages(uint(client.ID))
+			if err != nil {
+				localHub.CaptureException(err)
+			}
+			for _, message := range unReadMessages {
+				h.Broadcast <- &dtos.Message{
+					ID:             int(message.ID),
+					Content:        message.Content,
+					ConversationID: int(message.ConversationId),
+					SenderID:       int(message.SenderId),
+					ReceiverId:     int(message.ReceiverId),
+					Time:           message.CreatedAt,
+					Type:           message.Type,
+				}
 			}
 			for _, receiver := range h.PairUsers[client.ID] {
 				h.Broadcast <- &dtos.Message{
@@ -78,17 +85,13 @@ func (h *Hub) Run() {
 			}
 			delete(h.Clients, client.ID)
 		case message := <-h.Broadcast:
-			check := false
 			for _, client := range h.Clients {
 				if client.ID == message.ReceiverId {
+					err := chatRepository.ReadMessageWithId(uint(message.ID))
+					if err != nil {
+						localHub.CaptureException(err)
+					}
 					client.Message <- message
-					check = true
-				}
-			}
-			if !check {
-				err := redisCli.PublishMessageToUserChannel(fmt.Sprintf("user-%d", message.ReceiverId), *message)
-				if err != nil {
-					return
 				}
 			}
 		}

@@ -122,6 +122,15 @@ func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message
 	return messageModel, nil
 }
 
+func (r *ChatRepository) ReadMessageWithId(messageId uint) error {
+	result := r.db.Model(&Model.Message{}).Where("id = ?", messageId).
+		Update("is_read", true)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func (r *ChatRepository) ReadMessageInConversation(conversationId uint, receiverId uint) ([]Model.Message, error) {
 	result := r.db.Model(&Model.Message{}).Where("conversation_id = ? AND receiver_id = ?",
 		conversationId, receiverId).
