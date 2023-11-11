@@ -2,7 +2,9 @@ package UseCase
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
@@ -16,6 +18,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -211,7 +215,7 @@ func OAuth2LoginResponse(c *gin.Context) {
 		return
 	}
 	RedirectURI = googleLoginReq.RedirectURI
-	url := Utils2.GetGoogleAuthURL("random-state")
+	url := GetGoogleAuthURL("random-state")
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
@@ -226,7 +230,7 @@ func GoogleCallbackResponse(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
 	fmt.Println(RedirectURI)
-	response, err := Utils2.GetGoogleUserInfo(code, state)
+	response, err := GetGoogleUserInfo(code, state)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -538,4 +542,48 @@ func GetTransactionsResponse(c *gin.Context) {
 	}
 	View.GetUserPaymentsView(payments, c)
 	return
+}
+
+var googleClientId = utils.ReadFromEnvFile(".env", "GOOGLE_CLIENT_ID")
+var googleClientSecret = utils.ReadFromEnvFile(".env", "GOOGLE_CLIENT_SECRET")
+
+func GetGoogleOauthConfig() *oauth2.Config {
+	redirectGoogleUrl := ""
+	if os.Getenv("APP_ENV2") == "production" {
+		redirectGoogleUrl = utils.ReadFromEnvFile(".env", "PRODUCTION_REDIRECT_GOOGLE_URL")
+	} else {
+		redirectGoogleUrl = utils.ReadFromEnvFile(".env", "LOCAL_REDIRECT_GOOGLE_URL")
+	}
+	var googleOauthConfig = &oauth2.Config{
+		RedirectURL:  redirectGoogleUrl,
+		ClientID:     googleClientId,
+		ClientSecret: googleClientSecret,
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint:     google.Endpoint,
+	}
+	return googleOauthConfig
+}
+
+func GetGoogleAuthURL(state string) string {
+	return GetGoogleOauthConfig().AuthCodeURL(state, oauth2.AccessTypeOffline)
+}
+
+func GetGoogleUserInfo(code string, state string) ([]byte, error) {
+	if state != "random-state" {
+		return nil, errors.New("invalid oauth state")
+	}
+	token, err := GetGoogleOauthConfig().Exchange(context.Background(), code)
+	if err != nil {
+		return nil, errors.New("code exchange wrong: " + err.Error())
+	}
+	response, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	if err != nil {
+		return nil, errors.New("failed getting user info: " + err.Error())
+	}
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, errors.New("failed reading response body: " + err.Error())
+	}
+	return contents, nil
 }

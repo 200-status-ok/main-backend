@@ -70,16 +70,3 @@ func GetTag(c *gin.Context) {
 func GetTags(c *gin.Context) {
 	UseCase.GetTagsResponse(c)
 }
-
-// GeneratePosterInfo godoc
-// @Summary Generate poster info
-// @Description Generates info for a poster
-// @Tags ApiCall
-// @Accept  json
-// @Produce  json
-// @Param image_url query string true "Image Url"
-// @Success 200 {object} View.GeneratedPosterInfoView
-// @Router /api-call/generate-poster-Info [get]
-func GeneratePosterInfo(c *gin.Context) {
-	UseCase.GeneratePosterInfoResponse(c)
-}
