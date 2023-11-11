@@ -17,3 +17,16 @@ import (
 func ImageUpload(c *gin.Context) {
 	UseCase.ImageUploadResponse(c)
 }
+
+// GeneratePosterInfo godoc
+// @Summary Generate poster info
+// @Description Generates info for a poster
+// @Tags ApiCall
+// @Accept  json
+// @Produce  json
+// @Param image_url query string true "Image Url"
+// @Success 200 {object} View.GeneratedPosterInfoView
+// @Router /api-call/generate-poster-Info [get]
+func GeneratePosterInfo(c *gin.Context) {
+	UseCase.GeneratePosterInfoResponse(c)
+}
