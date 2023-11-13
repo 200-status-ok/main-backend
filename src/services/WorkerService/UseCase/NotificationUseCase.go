@@ -59,8 +59,7 @@ func SendHeartbeat(conn *amqp.Connection, mBroker *MessageCli.MessageClient, con
 			if err != nil {
 				fmt.Println("Error connecting to RabbitMQ:", err)
 			}
-			fmt.Println("Reconnecting to RabbitMQ")
-			return
+			fmt.Println("Reconnected to RabbitMQ")
 		}
 
 		fmt.Println("Sending heartbeat")

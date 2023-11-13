@@ -89,9 +89,7 @@ func (s *Server) MainController() {
 			chats.GET("/open-ws", s.ChatWs.OpenWSConnection)
 			chatAuthorize := chats.Group("/authorize").Use(Middleware.AuthMiddleware(s.TokenMaker))
 			{
-				chatAuthorize.PATCH("user-left-conversation", s.ChatWs.UserLeftConversation)
-				chatAuthorize.PATCH("/user-conversation/:conversation_id", s.ChatWs.UserInConversation)
-				chatAuthorize.POST("/conversation", Api2.CreateConversation)
+				chatAuthorize.POST("/message", s.ChatWs.SendMessage)
 				chatAuthorize.GET("/conversation", Api2.AllUserConversations)
 				chatAuthorize.GET("/conversation/:conversation_id", Api2.GetConversationById)
 				chatAuthorize.GET("/history/:conversation_id", Api2.ConversationHistory)

@@ -71,9 +71,9 @@ func (r *ChatRepository) GetPosterOwner(posterId uint) (Model.Poster, error) {
 	return poster, nil
 }
 
-func (r *ChatRepository) ExistConversation(ownerId uint, memberId uint, posterId uint) (*Model.Conversation, error) {
+func (r *ChatRepository) ExistConversation(convID uint) (*Model.Conversation, error) {
 	var convModel *Model.Conversation
-	result := r.db.Where("owner_id = ? AND member_id = ? AND poster_id = ?", ownerId, memberId, posterId).
+	result := r.db.Where("id=?", convID).
 		First(&convModel)
 	if result.Error != nil {
 		return &Model.Conversation{}, result.Error
@@ -134,8 +134,8 @@ func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message
 	return messageModel, nil
 }
 
-func (r *ChatRepository) ReadMessageWithId(messageId uint, status string) error {
-	result := r.db.Model(&Model.Message{}).Where("id = ?", messageId).Update("status", status).
+func (r *ChatRepository) SendMessageToUser(messageId uint) error {
+	result := r.db.Model(&Model.Message{}).Where("id = ?", messageId).
 		Update("is_send", true)
 	if result.Error != nil {
 		return result.Error
