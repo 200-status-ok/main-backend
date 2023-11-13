@@ -2,11 +2,7 @@ package RealtimeChat
 
 import (
 	"encoding/json"
-	"github.com/200-status-ok/main-backend/src/MainService/Model"
-	"github.com/200-status-ok/main-backend/src/MainService/Repository"
-	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
-	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -20,37 +16,23 @@ const (
 )
 
 type Client struct {
-	Conn                  *websocket.Conn
-	Message               chan *dtos.Message
-	ID                    int    `json:"id"`
-	Status                string `json:"status"`
-	PresentInConversation int    `json:"present_in_conversation"`
+	Conn    *websocket.Conn
+	Message chan *dtos.Message
+	ID      int    `json:"id"`
+	Status  string `json:"status"`
 }
 
-func (c *Client) Read(hub *Hub) {
-	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+func (c *Client) UserTrace(hub *Hub) {
 	defer func() {
 		hub.Unregister <- c
 		err := c.Conn.Close()
-		if err != nil {
-			return
+		if err != nil && !websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+			log.Println("Error closing connection:", err)
 		}
 	}()
-	c.Conn.SetReadLimit(maxMessageSize)
-	err := c.Conn.SetReadDeadline(time.Now().Add(pongWait))
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	c.Conn.SetPongHandler(func(string) error {
-		err := c.Conn.SetReadDeadline(time.Now().Add(pongWait))
-		if err != nil {
-			return err
-		}
-		return nil
-	})
+
 	for {
-		_, message, err := c.Conn.ReadMessage()
+		_, _, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				break
@@ -58,64 +40,6 @@ func (c *Client) Read(hub *Hub) {
 			log.Printf("error: %v", err)
 			break
 		}
-
-		var receivedMessage dtos.TransferMessage
-		err = json.Unmarshal(message, &receivedMessage)
-		if err != nil {
-			log.Println(err)
-			break
-		}
-
-		var receiverId, senderId int
-		senderId = c.ID
-		conversation, err := chatRepository.GetConversationById(uint(receivedMessage.ConversationID))
-		if err != nil {
-			log.Println(err)
-			break
-		}
-		if conversation.OwnerID == uint(c.ID) {
-			receiverId = int(conversation.MemberID)
-		} else {
-			receiverId = int(conversation.OwnerID)
-		}
-		sendingTime, err := Utils.GetTime("Asia/Tehran")
-		if err != nil {
-			log.Println(err)
-			break
-		}
-		var savedMessage *Model.Message
-		if _, ok := hub.Clients[receiverId]; !ok {
-			savedMessage, err = chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
-				receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime, "unread")
-			if err != nil {
-				log.Println(err)
-			}
-		} else if receivedMessage.ConversationID == hub.Clients[receiverId].PresentInConversation {
-			savedMessage, err = chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
-				receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime, "read")
-			if err != nil {
-				log.Println(err)
-			}
-		} else {
-			savedMessage, err = chatRepository.SaveMessage(uint(receivedMessage.ConversationID), uint(senderId),
-				receivedMessage.Content, receivedMessage.Type, receiverId, sendingTime, "get-unread")
-			if err != nil {
-				log.Println(err)
-			}
-		}
-
-		msg := &dtos.Message{
-			ID:             int(savedMessage.ID),
-			Content:        receivedMessage.Content,
-			ConversationID: receivedMessage.ConversationID,
-			SenderID:       senderId,
-			ReceiverId:     receiverId,
-			Time:           sendingTime,
-			Type:           receivedMessage.Type,
-			Status:         savedMessage.Status,
-		}
-
-		hub.Broadcast <- msg
 	}
 }
 
