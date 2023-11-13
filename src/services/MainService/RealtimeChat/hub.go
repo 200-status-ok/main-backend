@@ -83,20 +83,16 @@ func (h *Hub) Run() {
 					Type:           "text-notification",
 				}
 			}
+			h.Clients[client.ID].Status = "offline"
+			h.Clients[client.ID].Conn.Close()
 			delete(h.Clients, client.ID)
 		case message := <-h.Broadcast:
 			for _, client := range h.Clients {
 				if client.ID == message.ReceiverId {
-					if client.PresentInConversation == message.ConversationID {
-						err := chatRepository.ReadMessageWithId(uint(message.ID), "read")
-						if err != nil {
-							localHub.CaptureException(err)
-						}
-					} else {
-						err := chatRepository.ReadMessageWithId(uint(message.ID), "get-unread")
-						if err != nil {
-							localHub.CaptureException(err)
-						}
+					err := chatRepository.SendMessageToUser(uint(message.ID))
+					if err != nil {
+						fmt.Println(err)
+						localHub.CaptureException(err)
 					}
 					client.Message <- message
 				}

@@ -5,6 +5,7 @@ import (
 	"github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
@@ -30,56 +31,90 @@ func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
 	return &ChatWS{Hub: hub}
 }
 
-// UserInConversation godoc
-// @Summary UserInConversation
-// @Description UserInConversation to join a chat
+type MessageBody struct {
+	ConversationID uint   `json:"conversation_id" binding:"required"`
+	PosterID       uint   `json:"poster_id" binding:"required"`
+	SenderID       uint   `json:"sender_id" binding:"required"`
+	ReceiverID     uint   `json:"receiver_id" binding:"required"`
+	Content        string `json:"content" binding:"required"`
+	Type           string `json:"type" binding:"required"`
+}
+
+// SendMessage godoc
+// @Summary SendMessage
+// @Description SendMessage to join a chat
 // @Tags Chat
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param conversation_id path int true "Conversation ID"
+// @Param Message body MessageBody true "Message"
 // @Success 200 {object} string
-// @Router /chat/authorize/user-conversation/{conversation_id} [patch]
-func (wsUseCase *ChatWS) UserInConversation(c *gin.Context) {
+// @Router /chat/authorize/message [post]
+func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
-	var pathRequest ConversationIDPathRequest
-	if err := c.ShouldBindUri(&pathRequest); err != nil {
+	var request MessageBody
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; ok {
-		wsUseCase.Hub.Clients[int(payload.UserID)].PresentInConversation = int(pathRequest.ConversationID)
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "You are not online"})
-		return
+	if request.ConversationID == 0 {
+		ownerPoster, err := chatRepo.GetPosterOwner(request.PosterID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if ownerPoster.UserID == uint(payload.UserID) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "You can't create conversation with yourself"})
+			return
+		}
+		var memberID uint
+		if request.SenderID == ownerPoster.UserID {
+			memberID = request.ReceiverID
+		} else {
+			memberID = request.SenderID
+		}
+		conversation, err := chatRepo.CreateConversation(ownerPoster.Title, ownerPoster.Images[0].Url, ownerPoster.UserID, memberID,
+			ownerPoster.ID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		request.ConversationID = conversation.ID
 	}
-	err := chatRepo.UpdateStatusMessagesInConversation(uint(payload.UserID), pathRequest.ConversationID)
+	_, err := chatRepo.ExistConversation(request.ConversationID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Update user conversation successfully"})
-}
-
-// UserLeftConversation godoc
-// @Summary UserLeftConversation
-// @Description UserLeftConversation to join a chat
-// @Tags Chat
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} string
-// @Router /chat/authorize/user-left-conversation [patch]
-func (wsUseCase *ChatWS) UserLeftConversation(c *gin.Context) {
-	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; ok {
-		wsUseCase.Hub.Clients[int(payload.UserID)].PresentInConversation = 0
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "You are not online"})
+	if request.SenderID == request.ReceiverID {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You can't send message to yourself"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User left conversation successfully"})
+	sendTime, err := Utils.GetTime("Asia/Tehran")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	message, err := chatRepo.SaveMessage(request.ConversationID, request.SenderID, request.Content, request.Type,
+		int(request.ReceiverID), sendTime, "unread")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	msg := &dtos.Message{
+		ID:             int(message.ID),
+		Content:        message.Content,
+		ConversationID: int(message.ConversationId),
+		SenderID:       int(message.SenderId),
+		ReceiverId:     int(message.ReceiverId),
+		Time:           message.CreatedAt,
+		Type:           message.Type,
+		Status:         message.Status,
+	}
+	wsUseCase.Hub.Broadcast <- msg
+	c.JSON(http.StatusOK, gin.H{"message": "Message sent successfully", "message_id": message.ID, "send_time": sendTime,
+		"status": "unread"})
 }
 
 type OpenWSConnection struct {
@@ -158,61 +193,12 @@ func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
 	wsUseCase.Hub.Register <- wsUseCase.Hub.Clients[int(payload.UserID)]
 
 	go wsUseCase.Hub.Clients[int(payload.UserID)].Write()
-	go wsUseCase.Hub.Clients[int(payload.UserID)].Read(wsUseCase.Hub)
+	go wsUseCase.Hub.Clients[int(payload.UserID)].UserTrace(wsUseCase.Hub)
 }
 
 type ConversationInfo struct {
 	Name     string `json:"name" binding:"required"`
 	PosterID int    `json:"poster_id" binding:"required"`
-}
-
-// CreateConversation CreateOrCheckExistConversation godoc
-// @Summary Create or check to exist a chat conversation for two users
-// @Description Create or check to exist a chat conversation
-// @Tags Chat
-// @Accept json
-// @Produce json
-// @Param conversation body ConversationInfo true "CreateConversation"
-// @Success 200 {object} string
-// @Router /chat/authorize/conversation [post]
-func CreateConversation(c *gin.Context) {
-	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	var request ConversationInfo
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
-	poster, err := chatRepo.GetPosterOwner(uint(request.PosterID))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if poster.UserID == uint(payload.UserID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "You can't create conversation with yourself"})
-		return
-	}
-	existConversation, err := chatRepo.ExistConversation(poster.UserID, uint(payload.UserID), poster.ID)
-	if err != nil && err.Error() != "record not found" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if existConversation.ID != 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "CreateConversation already exist", "conversation": existConversation})
-		return
-	}
-	var conversationImage = ""
-	if len(poster.Images) != 0 {
-		conversationImage = poster.Images[0].Url
-	}
-	conversation, err := chatRepo.CreateConversation(request.Name, conversationImage, poster.UserID, uint(payload.UserID),
-		uint(request.PosterID))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "CreateConversation created successfully", "conversation": conversation})
 }
 
 // AllUserConversations godoc
