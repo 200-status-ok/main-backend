@@ -299,8 +299,8 @@ func ConversationHistory(c *gin.Context) {
 }
 
 type UpdateConversationBody struct {
-	Name  string `json:"name" binding:"required"`
-	Image string `json:"image" binding:"required"`
+	Name  string `json:"name"`
+	Image string `json:"image"`
 }
 
 // UpdateConversation godoc
@@ -314,6 +314,26 @@ type UpdateConversationBody struct {
 // @Success 200 {object} string
 // @Router /chat/authorize/conversation/{conversation_id} [patch]
 func UpdateConversation(c *gin.Context) {
+	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+
+	var pathRequest ConversationIDPathRequest
+	if err := c.ShouldBindUri(&pathRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var bodyRequest UpdateConversationBody
+	if err := c.ShouldBindJSON(&bodyRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := chatRepository.UpdateConversation(pathRequest.ConversationID, bodyRequest.Name, bodyRequest.Image)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Conversation updated successfully"})
 }
 
 type MessageIDsBody struct {

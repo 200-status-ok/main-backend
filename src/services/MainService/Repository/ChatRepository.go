@@ -13,16 +13,6 @@ func NewChatRepository(db *gorm.DB) *ChatRepository {
 	return &ChatRepository{db: db}
 }
 
-func (r *ChatRepository) GetConversationById(convId uint) (Model.Conversation, error) {
-	var convModel Model.Conversation
-	result := r.db.Where("id = ?", convId).First(&convModel)
-	if result.Error != nil {
-		return Model.Conversation{}, result.Error
-	}
-
-	return convModel, nil
-}
-
 func (r *ChatRepository) GetUserConversationById(convId, userId uint) (Model.Conversation, error) {
 	var convModel Model.Conversation
 	result := r.db.Where("id = ? AND (owner_id = ? OR member_id = ?)", convId, userId, userId).First(&convModel)
@@ -92,17 +82,6 @@ func (r *ChatRepository) GetUnReadMessages(userId uint) ([]Model.Message, error)
 	return messages, nil
 }
 
-func (r *ChatRepository) UpdateStatusMessagesInConversation(userID, conversationID uint) error {
-	result := r.db.Model(&Model.Message{}).Where("conversation_id = ? AND receiver_id = ? AND "+
-		"(status = ? OR status = ?)",
-		conversationID, userID, "unread", "get-unread").Update("status", "read")
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
 func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, error) {
 	var userConversations *Model.User
 	result := r.db.Preload("OwnConversations").Preload("MemberConversations").
@@ -143,24 +122,6 @@ func (r *ChatRepository) SendMessageToUser(messageId uint) error {
 	return nil
 }
 
-func (r *ChatRepository) ReadMessageInConversation(conversationId uint, receiverId uint) ([]Model.Message, error) {
-	result := r.db.Model(&Model.Message{}).Where("conversation_id = ? AND receiver_id = ?",
-		conversationId, receiverId).
-		Update("is_send", true)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	var updatedMessages []Model.Message
-	err := r.db.Where("conversation_id = ? AND receiver_id = ? AND is_read = ?", conversationId, receiverId, true).
-		Find(&updatedMessages).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return updatedMessages, nil
-}
-
 func (r *ChatRepository) GetConversationHistory(conversationID uint, pageSize int, offset int) ([]Model.Message, error) {
 	var messages []Model.Message
 	result := r.db.Where("conversation_id = ?", conversationID).Order("created_at desc").
@@ -180,4 +141,31 @@ func (r *ChatRepository) ReadMessages(messagesID []int) error {
 	}
 
 	return nil
+}
+
+func (r *ChatRepository) UpdateConversation(conversationID uint, name string, imageURL string) error {
+	if name == "" && imageURL == "" {
+		return nil
+	} else if name == "" {
+		result := r.db.Model(&Model.Conversation{}).Where("id = ?", conversationID).
+			Update("image_url", imageURL)
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	} else if imageURL == "" {
+		result := r.db.Model(&Model.Conversation{}).Where("id = ?", conversationID).
+			Update("name", name)
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	} else {
+		result := r.db.Model(&Model.Conversation{}).Where("id = ?", conversationID).
+			Updates(map[string]interface{}{"name": name, "image_url": imageURL})
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	}
 }
