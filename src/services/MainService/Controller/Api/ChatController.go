@@ -113,8 +113,7 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		Status:         message.Status,
 	}
 	wsUseCase.Hub.Broadcast <- msg
-	c.JSON(http.StatusOK, gin.H{"message": "Message sent successfully", "message_id": message.ID, "send_time": sendTime,
-		"status": "unread"})
+	c.JSON(http.StatusOK, gin.H{"message": "Message sent successfully", "send_message": message})
 }
 
 type OpenWSConnection struct {
@@ -299,6 +298,11 @@ func ConversationHistory(c *gin.Context) {
 	View.GetConversationHistory(c, messages, uint(payload.UserID))
 }
 
+type UpdateConversationBody struct {
+	Name  string `json:"name" binding:"required"`
+	Image string `json:"image" binding:"required"`
+}
+
 // UpdateConversation godoc
 // @Summary Update conversation
 // @Description Update conversation
@@ -306,37 +310,50 @@ func ConversationHistory(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param conversation_id path uint true "CreateConversation ID"
-// @Param name body string true "Name"
-// @Param image body string true "Image"
+// @Param UpdateConversation body UpdateConversationBody true "UpdateConversationBody"
 // @Success 200 {object} string
 // @Router /chat/authorize/conversation/{conversation_id} [patch]
 func UpdateConversation(c *gin.Context) {
 }
 
-// ReadMessageInConversation godoc
-// @Summary Read conversation
-// @Description Read conversation
+type MessageIDsBody struct {
+	MessageIDs []int `json:"message_ids" binding:"required"`
+	SenderID   int   `json:"sender_id" binding:"required"`
+}
+
+// ReadMessages godoc
+// @Summary Read Multiple Messages
+// @Description Read Multiple Messages
 // @Tags Chat
 // @Accept json
 // @Produce json
-// @Param conversation_id path uint true "CreateConversation ID"
+// @Param MessageID body MessageIDsBody true "MessageIDs"
 // @Success 200 {object} string
-// @Router /chat/authorize/read/{conversation_id} [get]
-func ReadMessageInConversation(c *gin.Context) {
+// @Router /chat/authorize/read [post]
+func (wsUseCase *ChatWS) ReadMessages(c *gin.Context) {
 	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
-	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	var pathRequest ConversationIDPathRequest
-	if err := c.ShouldBindUri(&pathRequest); err != nil {
+	var request MessageIDsBody
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	updatedMessage, err := chatRepository.ReadMessageInConversation(pathRequest.ConversationID, uint(payload.UserID))
-
+	err := chatRepository.ReadMessages(request.MessageIDs)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	View.ReadMessageInConversationView(c, updatedMessage)
+	content := fmt.Sprintf("%v", request.MessageIDs)
+	messageTime, err := Utils.GetTime("Asia/Tehran")
+	msg := &dtos.Message{
+		ID:             0,
+		Content:        content,
+		ConversationID: 0,
+		SenderID:       0,
+		ReceiverId:     request.SenderID,
+		Time:           messageTime,
+		Type:           "text-notification",
+		Status:         "notification",
+	}
+	wsUseCase.Hub.Broadcast <- msg
+	c.JSON(http.StatusOK, gin.H{"message": "Messages read successfully"})
 }
