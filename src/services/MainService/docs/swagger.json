@@ -478,21 +478,12 @@
                         "required": true
                     },
                     {
-                        "description": "Name",
-                        "name": "name",
+                        "description": "UpdateConversationBody",
+                        "name": "UpdateConversation",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Image",
-                        "name": "image",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/Api.UpdateConversationBody"
                         }
                     }
                 ],
@@ -1682,6 +1673,17 @@
                 },
                 "sender_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "Api.UpdateConversationBody": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

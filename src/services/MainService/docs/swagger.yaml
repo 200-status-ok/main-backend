@@ -34,6 +34,13 @@ definitions:
     - message_ids
     - sender_id
     type: object
+  Api.UpdateConversationBody:
+    properties:
+      image:
+        type: string
+      name:
+        type: string
+    type: object
   Model.Address:
     properties:
       address_detail:
@@ -1163,18 +1170,12 @@ paths:
         name: conversation_id
         required: true
         type: integer
-      - description: Name
+      - description: UpdateConversationBody
         in: body
-        name: name
+        name: UpdateConversation
         required: true
         schema:
-          type: string
-      - description: Image
-        in: body
-        name: image
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/Api.UpdateConversationBody'
       produces:
       - application/json
       responses:
