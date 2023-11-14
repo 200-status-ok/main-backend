@@ -486,21 +486,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Name",
-                        "name": "name",
+                        "description": "UpdateConversationBody",
+                        "name": "UpdateConversation",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Image",
-                        "name": "image",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/Api.UpdateConversationBody"
                         }
                     }
                 ],
@@ -1690,6 +1681,17 @@ const docTemplate = `{
                 },
                 "sender_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "Api.UpdateConversationBody": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
