@@ -1,14 +1,38 @@
 basePath: /api/v1
 definitions:
-  Api.ConversationInfo:
+  Api.MessageBody:
     properties:
-      name:
+      content:
         type: string
+      conversation_id:
+        type: integer
       poster_id:
         type: integer
+      receiver_id:
+        type: integer
+      sender_id:
+        type: integer
+      type:
+        type: string
     required:
-    - name
+    - content
+    - conversation_id
     - poster_id
+    - receiver_id
+    - sender_id
+    - type
+    type: object
+  Api.MessageIDsBody:
+    properties:
+      message_ids:
+        items:
+          type: integer
+        type: array
+      sender_id:
+        type: integer
+    required:
+    - message_ids
+    - sender_id
     type: object
   Model.Address:
     properties:
@@ -1108,27 +1132,6 @@ paths:
       summary: Get all user conversations
       tags:
       - Chat
-    post:
-      consumes:
-      - application/json
-      description: Create or check to exist a chat conversation
-      parameters:
-      - description: CreateConversation
-        in: body
-        name: conversation
-        required: true
-        schema:
-          $ref: '#/definitions/Api.ConversationInfo'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: Create or check to exist a chat conversation for two users
-      tags:
-      - Chat
   /chat/authorize/conversation/{conversation_id}:
     get:
       consumes:
@@ -1219,38 +1222,18 @@ paths:
       summary: Get conversation history
       tags:
       - Chat
-  /chat/authorize/read/{conversation_id}:
-    get:
+  /chat/authorize/message:
+    post:
       consumes:
       - application/json
-      description: Read conversation
+      description: SendMessage to join a chat
       parameters:
-      - description: CreateConversation ID
-        in: path
-        name: conversation_id
+      - description: Message
+        in: body
+        name: Message
         required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: Read conversation
-      tags:
-      - Chat
-  /chat/authorize/user-conversation/{conversation_id}:
-    patch:
-      consumes:
-      - application/json
-      description: UserInConversation to join a chat
-      parameters:
-      - description: Conversation ID
-        in: path
-        name: conversation_id
-        required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/Api.MessageBody'
       produces:
       - application/json
       responses:
@@ -1260,7 +1243,29 @@ paths:
             type: string
       security:
       - ApiKeyAuth: []
-      summary: UserInConversation
+      summary: SendMessage
+      tags:
+      - Chat
+  /chat/authorize/read:
+    post:
+      consumes:
+      - application/json
+      description: Read Multiple Messages
+      parameters:
+      - description: MessageIDs
+        in: body
+        name: MessageID
+        required: true
+        schema:
+          $ref: '#/definitions/Api.MessageIDsBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Read Multiple Messages
       tags:
       - Chat
   /chat/open-ws:

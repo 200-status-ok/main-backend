@@ -171,3 +171,13 @@ func (r *ChatRepository) GetConversationHistory(conversationID uint, pageSize in
 
 	return messages, nil
 }
+
+func (r *ChatRepository) ReadMessages(messagesID []int) error {
+	result := r.db.Model(&Model.Message{}).Where("id IN ?", messagesID).
+		Update("status", "read")
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}

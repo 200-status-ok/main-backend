@@ -50,13 +50,3 @@ func GetConversationHistory(c *gin.Context, messages []Model.Message, userID uin
 	conversationHistoryView.UserID = userID
 	c.JSON(200, conversationHistoryView)
 }
-
-type ReadMessageView struct {
-	Messages []Model.Message `json:"messages"`
-}
-
-func ReadMessageInConversationView(c *gin.Context, messages []Model.Message) {
-	var readMessageView ReadMessageView
-	readMessageView.Messages = messages
-	c.JSON(200, readMessageView)
-}
