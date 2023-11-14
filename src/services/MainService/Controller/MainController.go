@@ -90,11 +90,11 @@ func (s *Server) MainController() {
 			chatAuthorize := chats.Group("/authorize").Use(Middleware.AuthMiddleware(s.TokenMaker))
 			{
 				chatAuthorize.POST("/message", s.ChatWs.SendMessage)
+				chatAuthorize.POST("/read", s.ChatWs.ReadMessages)
 				chatAuthorize.GET("/conversation", Api2.AllUserConversations)
 				chatAuthorize.GET("/conversation/:conversation_id", Api2.GetConversationById)
 				chatAuthorize.GET("/history/:conversation_id", Api2.ConversationHistory)
 				chatAuthorize.PATCH("/conversation/:conversation_id", Api2.UpdateConversation)
-				chatAuthorize.GET("/read/:conversation_id", Api2.ReadMessageInConversation)
 			}
 		}
 	}

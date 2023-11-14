@@ -432,38 +432,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "Create or check to exist a chat conversation",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Chat"
-                ],
-                "summary": "Create or check to exist a chat conversation for two users",
-                "parameters": [
-                    {
-                        "description": "CreateConversation",
-                        "name": "conversation",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Api.ConversationInfo"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
             }
         },
         "/chat/authorize/conversation/{conversation_id}": {
@@ -599,9 +567,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/authorize/read/{conversation_id}": {
-            "get": {
-                "description": "Read conversation",
+        "/chat/authorize/message": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "SendMessage to join a chat",
                 "consumes": [
                     "application/json"
                 ],
@@ -611,14 +584,16 @@ const docTemplate = `{
                 "tags": [
                     "Chat"
                 ],
-                "summary": "Read conversation",
+                "summary": "SendMessage",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "CreateConversation ID",
-                        "name": "conversation_id",
-                        "in": "path",
-                        "required": true
+                        "description": "Message",
+                        "name": "Message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Api.MessageBody"
+                        }
                     }
                 ],
                 "responses": {
@@ -631,14 +606,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/authorize/user-conversation/{conversation_id}": {
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "UserInConversation to join a chat",
+        "/chat/authorize/read": {
+            "post": {
+                "description": "Read Multiple Messages",
                 "consumes": [
                     "application/json"
                 ],
@@ -648,14 +618,16 @@ const docTemplate = `{
                 "tags": [
                     "Chat"
                 ],
-                "summary": "UserInConversation",
+                "summary": "Read Multiple Messages",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Conversation ID",
-                        "name": "conversation_id",
-                        "in": "path",
-                        "required": true
+                        "description": "MessageIDs",
+                        "name": "MessageID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Api.MessageIDsBody"
+                        }
                     }
                 ],
                 "responses": {
@@ -1672,17 +1644,51 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "Api.ConversationInfo": {
+        "Api.MessageBody": {
             "type": "object",
             "required": [
-                "name",
-                "poster_id"
+                "content",
+                "conversation_id",
+                "poster_id",
+                "receiver_id",
+                "sender_id",
+                "type"
             ],
             "properties": {
-                "name": {
+                "content": {
                     "type": "string"
                 },
+                "conversation_id": {
+                    "type": "integer"
+                },
                 "poster_id": {
+                    "type": "integer"
+                },
+                "receiver_id": {
+                    "type": "integer"
+                },
+                "sender_id": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "Api.MessageIDsBody": {
+            "type": "object",
+            "required": [
+                "message_ids",
+                "sender_id"
+            ],
+            "properties": {
+                "message_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "sender_id": {
                     "type": "integer"
                 }
             }
