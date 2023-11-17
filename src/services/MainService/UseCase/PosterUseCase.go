@@ -133,6 +133,7 @@ type CreatePosterRequest struct {
 
 func CreatePosterResponse(c *gin.Context) {
 	var specialAdsPrice = 100000.0
+	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
 	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
@@ -169,6 +170,47 @@ func CreatePosterResponse(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		go func() {
+			if request.Poster.Status == "found" {
+				similarPosters, err := esPosterCli.FindSimilarityPosters(poster)
+				if err != nil {
+					fmt.Println(err)
+				} else if len(similarPosters) > 0 {
+					appEnv := os.Getenv("APP_ENV2")
+					messageBroker := Utils.MessageClient{}
+					if appEnv == "development" {
+						err = messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
+						if err != nil {
+							c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+							return
+						}
+					} else if appEnv == "production" {
+						err = messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+						if err != nil {
+							c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+							return
+						}
+					}
+					user, err := userRepository.FindById(similarPosters[0].UserID)
+					if err != nil {
+						fmt.Println(err)
+					}
+					if Utils.UsernameValidation(user.Username) == 0 {
+						msg := "email/similar-poster/" + similarPosters[0].Title + "/" + user.Username
+						err = messageBroker.PublishOnQueue([]byte(msg), "email_notification")
+						if err != nil {
+							fmt.Println(err)
+						}
+					} else {
+						msg := "sms/similar-poster/" + similarPosters[0].Title + "/" + user.Username
+						err = messageBroker.PublishOnQueue([]byte(msg), "sms_notification")
+						if err != nil {
+							fmt.Println(err)
+						}
+					}
+				}
+			}
+		}()
 		SendToNSFWQueue(poster.ID, c)
 		TagValidationQueue(request.Tags, c)
 		View.CreatePosterView(poster, c)
