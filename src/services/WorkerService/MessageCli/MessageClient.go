@@ -202,23 +202,46 @@ func (client *MessageClient) Close() {
 
 func (a CustomArray) SendingNotification() {
 	if a[0] == "email" {
-		emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", a[2],
-			"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+a[1],
-			utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
-		err := emailService.SendEmailWithGoogle()
-		if err != nil {
-			fmt.Println(err)
-			return
+		if a[1] == "login" {
+			emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", a[3],
+				"Sending OTP code", "کد تایید ورود به سامانه همینجا: "+a[2],
+				utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
+			err := emailService.SendEmailWithGoogle()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else if a[1] == "similar-poster" {
+			body := fmt.Sprintf("یک آگهی مشابه با آگهی شما (%s) پیدا شد.", a[2])
+			emailService := Utils.NewEmail("mhmdrzsmip@gmail.com", a[2],
+				"آگهی مشابه", body, utils.ReadFromEnvFile(".env", "GOOGLE_SECRET"))
+			err := emailService.SendEmailWithGoogle()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
 	} else if a[0] == "sms" {
-		pattern := map[string]string{
-			"code": a[1],
-		}
-		otpSms := Utils.NewSMS(utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
-		err := otpSms.SendSMSWithPattern(a[2], utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
-		if err != nil {
-			fmt.Println(err)
-			return
+		if a[1] == "login" {
+			pattern := map[string]string{
+				"code": a[2],
+			}
+			otpSms := Utils.NewSMS(utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
+			err := otpSms.SendSMSWithPattern(a[3], utils.ReadFromEnvFile(".env", "OTP_PATTERN_CODE"))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else if a[1] == "similar-poster" {
+			pattern := map[string]string{
+				"title": a[2],
+			}
+			similarSms := Utils.NewSMS(utils.ReadFromEnvFile(".env", "API_KEY"), pattern)
+			err := similarSms.SendSMSWithPattern(a[3], utils.ReadFromEnvFile(".env", "SIMILAR_PATTERN_CODE"))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
 	}
 }
@@ -250,12 +273,12 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 			req, err := http.NewRequest("GET", apiURL+"?"+params.Encode(), nil)
 			if err != nil {
 				fmt.Println("Error creating the request:", err)
-				return
+				break
 			}
 			resp, err := client.Do(req)
 			if err != nil {
 				fmt.Println("Error sending the request:", err)
-				return
+				break
 			}
 			if resp.StatusCode != 200 {
 				wg.Done()
@@ -267,13 +290,13 @@ func PhotoTextValidation(posterID uint64, db *gorm.DB) {
 			body, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				fmt.Println("Error reading the response:", err)
-				return
+				break
 			}
 			var response Response
 			err = json.Unmarshal(body, &response)
 			if err != nil {
 				fmt.Println("Error unmarshaling response:", err)
-				return
+				break
 			}
 			if response.Nudity.None == 0.0 {
 				wg.Done()

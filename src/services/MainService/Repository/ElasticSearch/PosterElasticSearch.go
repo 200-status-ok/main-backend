@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	elastic "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
@@ -499,4 +500,82 @@ func (p *ESPoster) GetPosters(filterObject dtos.FilterObject) ([]*dtos.ESPosterD
 	}
 
 	return getPosters, result.Hits.Total.Value, nil
+}
+
+func (p *ESPoster) FindSimilarityPosters(poster Model.Poster) ([]*dtos.ESPosterDTO, error) {
+	getPostersFields := map[string]interface{}{
+		"query": map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": []map[string]interface{}{
+					{
+						"more_like_this": map[string]interface{}{
+							"fields": []string{"title", "description", "tags.name"},
+							"like": []map[string]interface{}{
+								{
+									"_index": "posters",
+									"_id":    strconv.Itoa(int(poster.ID)),
+								},
+							},
+							"min_term_freq":   1,
+							"max_query_terms": 12,
+							"min_doc_freq":    1,
+						},
+					},
+					{
+						"geo_distance": map[string]interface{}{
+							"distance": "15km",
+							"addresses.location": map[string]interface{}{
+								"lat": poster.Addresses[0].Latitude,
+								"lon": poster.Addresses[0].Longitude,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	jsonData, err := json.Marshal(getPostersFields)
+	if err != nil {
+		return []*dtos.ESPosterDTO{}, err
+	}
+
+	res, err := p.es.Search(
+		p.es.Search.WithIndex("posters"),
+		p.es.Search.WithBody(strings.NewReader(string(jsonData))),
+		p.es.Search.WithTrackScores(true),
+	)
+	if err != nil {
+		return []*dtos.ESPosterDTO{}, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+		}
+	}(res.Body)
+
+	if res.IsError() {
+		if res.StatusCode == 404 || res.StatusCode == 400 {
+			return []*dtos.ESPosterDTO{}, nil
+		}
+		return []*dtos.ESPosterDTO{}, fmt.Errorf("search request failed: %s", res.Status())
+	}
+
+	var result SearchHits
+	err = json.NewDecoder(res.Body).Decode(&result)
+	if err != nil {
+		return []*dtos.ESPosterDTO{}, err
+	}
+
+	postersHits := result.Hits.Hits
+	var getPosters []*dtos.ESPosterDTO
+
+	for _, v := range postersHits {
+		if v.Source.Status == "lost" {
+			getPosters = append(getPosters, v.Source)
+		}
+	}
+
+	return getPosters, nil
 }
