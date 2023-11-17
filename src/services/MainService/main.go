@@ -39,6 +39,7 @@ func main() {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
 	}
 	defer sentry.Flush(2 * time.Second)
+	defer sentry.Recover()
 
 	r := gin.Default()
 	r.Use(cors.New(config))
