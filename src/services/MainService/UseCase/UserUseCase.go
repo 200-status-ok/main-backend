@@ -93,14 +93,14 @@ func SendOTPResponse(c *gin.Context) {
 	}
 
 	if Utils2.UsernameValidation(user.Username) == 0 {
-		msg := "email/" + OTP + "/" + user.Username
+		msg := "email/login/" + OTP + "/" + user.Username
 		err = messageBroker.PublishOnQueue([]byte(msg), "email_notification")
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 	} else {
-		msg := "sms/" + OTP + "/" + user.Username
+		msg := "sms/login/" + OTP + "/" + user.Username
 		err = messageBroker.PublishOnQueue([]byte(msg), "sms_notification")
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
