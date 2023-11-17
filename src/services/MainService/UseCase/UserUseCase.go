@@ -44,6 +44,7 @@ func SendOTPResponse(c *gin.Context) {
 	var redisClient *Utils2.RedisClient
 	appEnv := os.Getenv("APP_ENV2")
 
+	fmt.Println(appEnv)
 	if appEnv == "development" {
 		redisClient = Utils2.NewRedisClient(utils.ReadFromEnvFile(".env", "LOCAL_REDIS_HOST"),
 			utils.ReadFromEnvFile(".env", "LOCAL_REDIS_PORT"),
@@ -52,6 +53,8 @@ func SendOTPResponse(c *gin.Context) {
 		redisClient = Utils2.NewRedisClient(utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_HOST"),
 			utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PORT"),
 			utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PASSWORD"), 0)
+	} else if appEnv == "testing" {
+		redisClient = Utils2.NewRedisClient("redis", "6379", "", 0)
 	}
 
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -86,6 +89,12 @@ func SendOTPResponse(c *gin.Context) {
 		}
 	} else if appEnv == "production" {
 		err = messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_PROD_CONNECTION"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	} else if appEnv == "testing" {
+		err = messageBroker.ConnectBroker("amqp://guest:guest@rabbitmq:5672/")
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -129,6 +138,8 @@ func VerifyOtpResponse(c *gin.Context) {
 		redisClient = Utils2.NewRedisClient(utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_HOST"),
 			utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PORT"),
 			utils.ReadFromEnvFile(".env", "PRODUCTION_REDIS_PASSWORD"), 0)
+	} else if appEnv == "testing" {
+		redisClient = Utils2.NewRedisClient("redis", "6379", "", 0)
 	}
 
 	userRepository := Repository.NewUserRepository(pgsql.GetDB())
@@ -189,7 +200,14 @@ func VerifyOtpResponse(c *gin.Context) {
 		userId = userExist.ID
 	}
 
-	jwtMaker, err := Token.NewJWTMaker(utils.ReadFromEnvFile(".env", "JWT_SECRET"))
+	var jwtSecret string
+	if appEnv == "development" || appEnv == "production" {
+		jwtSecret = utils.ReadFromEnvFile(".env", "JWT_SECRET")
+	} else if appEnv == "testing" {
+		jwtSecret = "qwertyuiopasdfghjklzxcvbnm123456"
+	}
+
+	jwtMaker, err := Token.NewJWTMaker(jwtSecret)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
