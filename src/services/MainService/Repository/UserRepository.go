@@ -7,11 +7,12 @@ import (
 )
 
 type UserRepository struct {
+	tx *gorm.DB
 	db *gorm.DB
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{db: db}
+	return &UserRepository{db: db, tx: db.Begin()}
 }
 
 func (r *UserRepository) FindByUsername(username string) (*Model.User, error) {
@@ -29,12 +30,12 @@ func (r *UserRepository) FindByUsername(username string) (*Model.User, error) {
 
 func (r *UserRepository) UserUpdate(user *Model.User, id uint) (*Model.User, error) {
 	var userModel Model.User
-	result := r.db.First(&userModel, id)
+	result := r.tx.First(&userModel, id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	userModel.SetUsername(user.GetUsername())
-	result = r.db.Save(&userModel)
+	result = r.tx.Save(&userModel)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -42,7 +43,7 @@ func (r *UserRepository) UserUpdate(user *Model.User, id uint) (*Model.User, err
 }
 
 func (r *UserRepository) UserCreate(user *Model.User) (*Model.User, error) {
-	result := r.db.Create(&user)
+	result := r.tx.Create(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -74,36 +75,36 @@ func (r *UserRepository) GetAllUsers() (*[]Model.User, error) {
 
 func (r *UserRepository) DeleteUser(id uint) error {
 	var user Model.User
-	if err := r.db.Preload("Posters").Preload("OwnConversations").Preload("MemberConversations").
+	if err := r.tx.Preload("Posters").Preload("OwnConversations").Preload("MemberConversations").
 		Preload("MarkedPosters").Preload("Payments").First(&user, id).Error; err != nil {
 		return err
 	}
 
-	if err := r.db.Delete(&user.Posters, "user_id = ?", id).Error; err != nil {
+	if err := r.tx.Delete(&user.Posters, "user_id = ?", id).Error; err != nil {
 		return err
 	}
 	// delete images and addresses
 	for _, poster := range user.Posters {
-		if err := r.db.Delete(&poster.Images, "poster_id = ?", poster.ID).Error; err != nil {
+		if err := r.tx.Delete(&poster.Images, "poster_id = ?", poster.ID).Error; err != nil {
 			return err
 		}
-		if err := r.db.Delete(&poster.Addresses, "poster_id = ?", poster.ID).Error; err != nil {
+		if err := r.tx.Delete(&poster.Addresses, "poster_id = ?", poster.ID).Error; err != nil {
 			return err
 		}
 	}
-	if err := r.db.Delete(&user.MarkedPosters, "user_id = ?", id).Error; err != nil {
+	if err := r.tx.Delete(&user.MarkedPosters, "user_id = ?", id).Error; err != nil {
 		return err
 	}
-	if err := r.db.Delete(&user.Payments, "user_id = ?", id).Error; err != nil {
+	if err := r.tx.Delete(&user.Payments, "user_id = ?", id).Error; err != nil {
 		return err
 	}
-	if err := r.db.Delete(&user.OwnConversations, "owner_id = ?", id).Error; err != nil {
+	if err := r.tx.Delete(&user.OwnConversations, "owner_id = ?", id).Error; err != nil {
 		return err
 	}
-	if err := r.db.Delete(&user.MemberConversations, "member_id = ?", id).Error; err != nil {
+	if err := r.tx.Delete(&user.MemberConversations, "member_id = ?", id).Error; err != nil {
 		return err
 	}
-	if err := r.db.Delete(&user).Error; err != nil {
+	if err := r.tx.Delete(&user).Error; err != nil {
 		return err
 	}
 	return nil
@@ -126,4 +127,12 @@ func (r *UserRepository) GetAmount(id uint) (float64, error) {
 		return 0, result.Error
 	}
 	return user.GetWallet(), nil
+}
+
+func (r *UserRepository) CommitChanges() error {
+	return r.tx.Commit().Error
+}
+
+func (r *UserRepository) RoleBackChanges() error {
+	return r.tx.Rollback().Error
 }
