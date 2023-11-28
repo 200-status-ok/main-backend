@@ -86,7 +86,6 @@ func UpdateUser(c *gin.Context) {
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Param id path int true "User ID"
 // @Success 200
 // @Router /users/authorize/ [delete]
 func DeleteUser(c *gin.Context) {

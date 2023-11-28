@@ -1,4 +1,4 @@
-package main
+package Migrate
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
 )
 
-func main() {
+func ESSetup() {
 	esClient := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	err := esClient.DeletePosterIndex()
 	if err != nil {
