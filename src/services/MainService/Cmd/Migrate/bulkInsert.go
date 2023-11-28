@@ -1,4 +1,4 @@
-package main
+package Migrate
 
 import (
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
@@ -7,7 +7,7 @@ import (
 	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 )
 
-func main() {
+func InsertAllPostersInES() {
 	repository := Repository.NewPosterRepository(pgsql.GetDB())
 	allESPosters, err := repository.GetAllESPosters()
 

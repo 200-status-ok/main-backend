@@ -1,11 +1,11 @@
-package main
+package Migrate
 
 import (
 	Model2 "github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 )
 
-func main() {
+func DropModels() {
 	var models []interface{}
 	models = append(models, &Model2.User{})
 	models = append(models, &Model2.Poster{})

@@ -6,7 +6,7 @@ ENV APP_ENV2=development
 RUN apk add --no-cache bash && apk add make
 
 RUN go install github.com/cosmtrek/air@latest \
-   && go install github.com/swaggo/swag/cmd/swag@latest
+   && go install github.com/swaggo/swag/Cmd/swag@latest
 
 COPY ../../go.mod .
 COPY ../../go.sum .

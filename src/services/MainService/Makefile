@@ -32,16 +32,16 @@ bash: ## Open a bash in the app container
 	@$(DOCKER_COMP) exec app bash
 
 migration: ## Run migration
-	@go run cmd/migrate/migration.go
+	@go run Cmd/main.go -migrate
 
 drop: ## Drop database
-	@go run MainService/cmd/migrate/drop.go
+	@go run Cmd/main.go -drop
 
 es:
-	@go run cmd/migrate/esSetup.go
+	@go run Cmd/main.go -esSetup
 
 bulk:
-	@go run cmd/migrate/bulkInsert.go
+	@go run Cmd/main.go -bulk
 
 init_swagger: ## Init swagger
 	@swag init --parseDependency --parseInternal

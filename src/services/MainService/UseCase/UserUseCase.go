@@ -117,6 +117,10 @@ func SendOTPResponse(c *gin.Context) {
 		}
 	}
 	messageBroker.Close()
+	if appEnv == "testing" {
+		c.JSON(http.StatusOK, gin.H{"OTP": OTP})
+		return
+	}
 	View.LoginMessageView("OTP sent to registered email/phone", c)
 }
 
@@ -193,6 +197,10 @@ func VerifyOtpResponse(c *gin.Context) {
 		user, err := userRepository.UserCreate(newUser)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		err = userRepository.CommitChanges()
+		if err != nil {
 			return
 		}
 		userId = user.ID
@@ -318,7 +326,7 @@ func GetUserByIdResponse(c *gin.Context) {
 }
 
 type UpdateUserRequest struct {
-	Username string `json:"username" binding:"required,min=11,max=30"`
+	Username string `json:"username" binding:"required,min=11,max=50"`
 }
 
 func UpdateUserByIdResponse(c *gin.Context) {
@@ -340,6 +348,18 @@ func UpdateUserByIdResponse(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	if os.Getenv("APP_ENV2") != "testing" {
+		err = userRepository.CommitChanges()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		err := userRepository.RoleBackChanges()
+		if err != nil {
+			return
+		}
 	}
 	View.GetUserByIdView(*updateUser, c)
 }
@@ -378,10 +398,22 @@ func DeleteUserByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err = esDeletePostersByUserId.DeletePosterByUserID(int(payload.UserID))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	if os.Getenv("APP_ENV2") != "testing" {
+		err = esDeletePostersByUserId.DeletePosterByUserID(int(payload.UserID))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		err = userRepository.CommitChanges()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		err := userRepository.RoleBackChanges()
+		if err != nil {
+			return
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{"response": "user deleted"})
 }
@@ -395,7 +427,6 @@ type data struct {
 	CallbackURL string  `json:"callbackUrl"`
 	Description string  `json:"description"`
 	Amount      float64 `json:"amount"`
-	OrderID     string  `json:"orderId"`
 }
 
 func PaymentResponse(c *gin.Context) {
@@ -428,7 +459,7 @@ func PaymentResponse(c *gin.Context) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	var structResult map[string]interface{}
-	br := bytes.NewReader([]byte(string(body)))
+	br := bytes.NewReader(body)
 	decodedJson := json.NewDecoder(br)
 	decodedJson.UseNumber()
 	err = decodedJson.Decode(&structResult)
@@ -452,7 +483,7 @@ func PaymentResponse(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		//c.Redirect(http.StatusFound, "https://gateway.zibal.ir/start/"+trackIdStringValue)
+
 		c.JSON(http.StatusOK, gin.H{"trackID": trackIdStringValue,
 			"redirect": "https://gateway.zibal.ir/start/" + trackIdStringValue})
 	} else {
@@ -484,7 +515,7 @@ func PaymentVerifyResponse(c *gin.Context) {
 	}
 	d := dataVerify{
 		Merchant: merchant,
-		TrackId:  payment.TrackID,
+		TrackId:  paymentVerifyReq.TrackId,
 	}
 	var url = "https://gateway.zibal.ir/v1/verify"
 	jsonData, err := json.Marshal(d)
@@ -502,7 +533,7 @@ func PaymentVerifyResponse(c *gin.Context) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	var structResult map[string]interface{}
-	br := bytes.NewReader([]byte(string(body)))
+	br := bytes.NewReader(body)
 	decodedJson := json.NewDecoder(br)
 	decodedJson.UseNumber()
 	err = decodedJson.Decode(&structResult)
@@ -566,14 +597,14 @@ var googleClientId = utils.ReadFromEnvFile(".env", "GOOGLE_CLIENT_ID")
 var googleClientSecret = utils.ReadFromEnvFile(".env", "GOOGLE_CLIENT_SECRET")
 
 func GetGoogleOauthConfig() *oauth2.Config {
-	redirectGoogleUrl := ""
+	redirectGoogleUri := ""
 	if os.Getenv("APP_ENV2") == "production" {
-		redirectGoogleUrl = utils.ReadFromEnvFile(".env", "PRODUCTION_REDIRECT_GOOGLE_URL")
-	} else {
-		redirectGoogleUrl = utils.ReadFromEnvFile(".env", "LOCAL_REDIRECT_GOOGLE_URL")
+		redirectGoogleUri = utils.ReadFromEnvFile(".env", "PRODUCTION_REDIRECT_GOOGLE_URL")
+	} else if os.Getenv("APP_ENV2") == "development" {
+		redirectGoogleUri = utils.ReadFromEnvFile(".env", "LOCAL_REDIRECT_GOOGLE_URL")
 	}
 	var googleOauthConfig = &oauth2.Config{
-		RedirectURL:  redirectGoogleUrl,
+		RedirectURL:  redirectGoogleUri,
 		ClientID:     googleClientId,
 		ClientSecret: googleClientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
