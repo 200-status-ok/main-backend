@@ -6,7 +6,7 @@ type Message struct {
 	ConversationID int    `json:"conversation_id"`
 	SenderID       int    `json:"sender_id"`
 	ReceiverId     int    `json:"receiver_id"`
-	Time           string `json:"time"`
+	Time           int64  `json:"time"`
 	Type           string `json:"type"`
 	Status         string `json:"status"`
 }
