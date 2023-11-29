@@ -7,7 +7,7 @@ import (
 
 type Message struct {
 	ID             uint           `gorm:"primarykey" json:"id"`
-	CreatedAt      string         `json:"created_at"`
+	CreatedAt      int64          `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	ConversationId uint           `gorm:"not null" json:"conversation_id"`

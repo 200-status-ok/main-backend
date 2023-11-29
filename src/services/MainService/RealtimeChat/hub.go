@@ -55,6 +55,7 @@ func (h *Hub) Run() {
 					ReceiverId:     int(message.ReceiverId),
 					Time:           message.CreatedAt,
 					Type:           message.Type,
+					Status:         message.Status,
 				}
 			}
 			for _, receiver := range h.PairUsers[client.ID] {
