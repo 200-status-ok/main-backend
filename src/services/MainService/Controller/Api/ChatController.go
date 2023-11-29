@@ -32,7 +32,7 @@ func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
 }
 
 type MessageBody struct {
-	ConversationID uint   `json:"conversation_id" binding:"required"`
+	ConversationID int    `json:"conversation_id" binding:"required"`
 	PosterID       uint   `json:"poster_id" binding:"required"`
 	SenderID       uint   `json:"sender_id" binding:"required"`
 	ReceiverID     uint   `json:"receiver_id" binding:"required"`
@@ -58,7 +58,7 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if request.ConversationID == 0 {
+	if request.ConversationID == -1 {
 		ownerPoster, err := chatRepo.GetPosterOwner(request.PosterID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -80,9 +80,9 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		request.ConversationID = conversation.ID
+		request.ConversationID = int(conversation.ID)
 	}
-	_, err := chatRepo.ExistConversation(request.ConversationID)
+	_, err := chatRepo.ExistConversation(uint(request.ConversationID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -96,7 +96,7 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	message, err := chatRepo.SaveMessage(request.ConversationID, request.SenderID, request.Content, request.Type,
+	message, err := chatRepo.SaveMessage(uint(request.ConversationID), request.SenderID, request.Content, request.Type,
 		int(request.ReceiverID), sendTime, "unread")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

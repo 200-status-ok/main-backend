@@ -94,7 +94,7 @@ func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, erro
 }
 
 func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message string,
-	mType string, receiverId int, time string, status string) (*Model.Message, error) {
+	mType string, receiverId int, time int64, status string) (*Model.Message, error) {
 	messageModel := &Model.Message{
 		ConversationId: conversationId,
 		Content:        message,
