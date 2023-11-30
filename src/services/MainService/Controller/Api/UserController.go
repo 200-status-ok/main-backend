@@ -31,6 +31,18 @@ func LoginUser(c *gin.Context) {
 	UseCase.VerifyOtpResponse(c)
 }
 
+// GoogleLoginAndroid godoc
+// @Summary login user with Google
+// @Description login user with Google
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param email query string true "Email"
+// @Router /users/auth/google/login/android [get]
+func GoogleLoginAndroid(c *gin.Context) {
+	UseCase.GoogleLoginAndroidResponse(c)
+}
+
 // OAuth2Login godoc
 // @Summary login user with oauth2
 // @Description login user with oauth2

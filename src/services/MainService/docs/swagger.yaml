@@ -128,7 +128,7 @@ definitions:
       conversation_id:
         type: integer
       created_at:
-        type: string
+        type: integer
       deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
@@ -412,7 +412,7 @@ definitions:
   UseCase.UpdateUserRequest:
     properties:
       username:
-        maxLength: 30
+        maxLength: 50
         minLength: 11
         type: string
     required:
@@ -1770,6 +1770,23 @@ paths:
       summary: login user with oauth2
       tags:
       - users
+  /users/auth/google/login/android:
+    get:
+      consumes:
+      - application/json
+      description: login user with Google
+      parameters:
+      - description: Email
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: login user with Google
+      tags:
+      - users
   /users/auth/otp/login:
     post:
       consumes:
@@ -1840,12 +1857,6 @@ paths:
       consumes:
       - application/json
       description: Deletes a User by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
