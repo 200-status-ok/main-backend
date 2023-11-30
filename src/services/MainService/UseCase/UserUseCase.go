@@ -349,17 +349,10 @@ func UpdateUserByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if os.Getenv("APP_ENV2") != "testing" {
-		err = userRepository.CommitChanges()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	} else {
-		err := userRepository.RoleBackChanges()
-		if err != nil {
-			return
-		}
+	err = userRepository.CommitChanges()
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 	View.GetUserByIdView(*updateUser, c)
 }

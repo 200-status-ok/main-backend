@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"github.com/200-status-ok/main-backend/src/MainService/Middleware"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
+	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 var OTP string
@@ -31,7 +33,7 @@ func TestSendOTP(t *testing.T) {
 		{
 			name: "Good Case",
 			request: map[string]interface{}{
-				"username": "alifakhary622@gmail.com",
+				"username": "alifakhari@gmail.com",
 			},
 			expected: map[string]interface{}{
 				"OTP": "",
@@ -78,7 +80,7 @@ func TestVerifyOTP(t *testing.T) {
 	router := gin.Default()
 	router.POST("/api/v1/auth/otp/login", LoginUser)
 	validRequest := map[string]interface{}{
-		"username": "alifakhary622@gmail.com",
+		"username": "alifakhari@gmail.com",
 		"otp":      OTP,
 	}
 	validRequestJSON, _ := json.Marshal(validRequest)
@@ -128,8 +130,9 @@ func TestUpdateUserByID(t *testing.T) {
 		token, _ := Token.NewJWTMaker("qwertyuiopasdfghjklzxcvbnm123456")
 		router.Use(Middleware.AuthMiddleware(token))
 		router.PATCH("/api/v1/users/authorize", UpdateUser)
+		randomEmail := Utils.EmailRandomGenerator()
 		validRequest := map[string]interface{}{
-			"username": "mohammadalifakhari2001@gmail.com",
+			"username": randomEmail,
 		}
 		validRequestJSON, _ := json.Marshal(validRequest)
 		req1, err := http.NewRequest("PATCH", "/api/v1/users/authorize", bytes.NewBuffer(validRequestJSON))
@@ -220,6 +223,8 @@ func TestPayment(t *testing.T) {
 
 	TrackerID = response["trackID"].(string)
 	assert.Equal(t, http.StatusOK, W1.Code)
+
+	time.Sleep(15 * time.Second)
 }
 
 func TestPaymentVerify(t *testing.T) {
@@ -236,7 +241,7 @@ func TestPaymentVerify(t *testing.T) {
 	router.ServeHTTP(W1, req1)
 
 	fmt.Println(W1.Body.String())
-	assert.Equal(t, http.StatusBadRequest, W1.Code)
+	assert.Equal(t, http.StatusOK, W1.Code)
 }
 
 func TestGetTransactions(t *testing.T) {
