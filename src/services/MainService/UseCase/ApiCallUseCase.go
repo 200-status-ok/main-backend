@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path"
 	"strconv"
 	"time"
@@ -61,12 +62,20 @@ func UploadImageInServer(input multipart.File, fileName string, serverName strin
 	if serverName == "arvan" {
 		secretKey = utils.ReadFromEnvFile(".env", "ARVAN_SECRET_KEY")
 		accessKey = utils.ReadFromEnvFile(".env", "ARVAN_ACCESS_KEY")
+		if os.Getenv("APP_ENV2") == "testing" {
+			secretKey = "6bdaa1ac9227179b6a0d76c560b3563b97accc89"
+			accessKey = "6c2c235b-ec0c-4f90-91cf-1c870c4cf4be"
+		}
 		region = "simin"
 		endPoint = "s3.ir-thr-at1.arvanstorage.ir"
 		resEndPoint = "https://main-bucket.s3.ir-thr-at1.arvanstorage.ir/"
 	} else if serverName == "liara" {
 		secretKey = utils.ReadFromEnvFile(".env", "LIARA_SECRET_KEY")
 		accessKey = utils.ReadFromEnvFile(".env", "LIARA_ACCESS_KEY")
+		if os.Getenv("APP_ENV2") == "testing" {
+			secretKey = "ea642489-1d82-4a7f-97ee-0a63a6721748"
+			accessKey = "fnenl8q3f2s9kk73"
+		}
 		region = "us-east-1"
 		endPoint = "storage.iran.liara.space"
 		resEndPoint = "https://main-bucket.storage.iran.liara.space/"
