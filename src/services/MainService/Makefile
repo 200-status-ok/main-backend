@@ -34,6 +34,10 @@ bash: ## Open a bash in the app container
 migration: ## Run migration
 	@go run Cmd/main.go -migrate
 
+coverage:
+	@go test -coverprofile=coverage.out ./... -v
+	@go tool cover -html=coverage.out -o coverage.html
+
 drop: ## Drop database
 	@go run Cmd/main.go -drop
 

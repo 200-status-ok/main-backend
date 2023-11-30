@@ -106,6 +106,20 @@ func TestVerifyOTP(t *testing.T) {
 	assert.Equal(t, http.StatusOK, W1.Code)
 }
 
+func TestGoogleLoginAndroid(t *testing.T) {
+	t.Setenv("APP_ENV2", "testing")
+	router := gin.Default()
+	router.GET("/api/v1/auth/google/login/android", GoogleLoginAndroid)
+	req1, err := http.NewRequest("GET", "/api/v1/auth/google/login/android?email=alifakhary622@gmail.com", nil)
+	assert.NoError(t, err)
+
+	W1 := httptest.NewRecorder()
+	router.ServeHTTP(W1, req1)
+
+	assert.Equal(t, http.StatusOK, W1.Code)
+	fmt.Println(W1.Body.String())
+}
+
 func TestGetUserByID(t *testing.T) {
 	t.Setenv("APP_ENV2", "testing")
 	router := gin.Default()

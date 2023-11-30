@@ -1,0 +1,916 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Api: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/200-status-ok/main-backend/src/MainService/Controller/Api/ApiCallController.go (100.0%)</option>
+				
+				<option value="file1">github.com/200-status-ok/main-backend/src/MainService/Controller/Api/ChatController.go (44.6%)</option>
+				
+				<option value="file2">github.com/200-status-ok/main-backend/src/MainService/Controller/Api/PosterController.go (0.0%)</option>
+				
+				<option value="file3">github.com/200-status-ok/main-backend/src/MainService/Controller/Api/TagController.go (0.0%)</option>
+				
+				<option value="file4">github.com/200-status-ok/main-backend/src/MainService/Controller/Api/UserController.go (81.8%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package Api
+
+import (
+        "github.com/200-status-ok/main-backend/src/MainService/UseCase"
+        "github.com/gin-gonic/gin"
+)
+
+// ImageUpload godoc
+// @Summary Upload image
+// @Description Upload image
+// @Tags ApiCall
+// @Accept  multipart/form-data
+// @Param files formData file true "Multiple files"
+// @Produce  json
+// @Success 200
+// @Router /api-call/image-upload [post]
+func ImageUpload(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.ImageUploadResponse(c)
+}</span>
+
+// GeneratePosterInfo godoc
+// @Summary Generate poster info
+// @Description Generates info for a poster
+// @Tags ApiCall
+// @Accept  json
+// @Produce  json
+// @Param image_url query string true "Image Url"
+// @Success 200 {object} View.GeneratedPosterInfoView
+// @Router /api-call/generate-poster-Info [get]
+func GeneratePosterInfo(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.GeneratePosterInfoResponse(c)
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package Api
+
+import (
+        "fmt"
+        "github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
+        "github.com/200-status-ok/main-backend/src/MainService/Repository"
+        "github.com/200-status-ok/main-backend/src/MainService/Token"
+        "github.com/200-status-ok/main-backend/src/MainService/Utils"
+        "github.com/200-status-ok/main-backend/src/MainService/View"
+        "github.com/200-status-ok/main-backend/src/MainService/dtos"
+        "github.com/200-status-ok/main-backend/src/pkg/pgsql"
+        "github.com/200-status-ok/main-backend/src/pkg/utils"
+        "github.com/gin-gonic/gin"
+        "github.com/gorilla/websocket"
+        "net/http"
+)
+
+var upgrader = websocket.Upgrader{
+        ReadBufferSize:  1024,
+        WriteBufferSize: 1024,
+        CheckOrigin: func(r *http.Request) bool <span class="cov0" title="0">{
+                return true
+        }</span>,
+}
+
+type ChatWS struct {
+        Hub *RealtimeChat.Hub
+}
+
+func NewChatWS(hub *RealtimeChat.Hub) *ChatWS <span class="cov8" title="1">{
+        return &amp;ChatWS{Hub: hub}
+}</span>
+
+type MessageBody struct {
+        ConversationID int    `json:"conversation_id" binding:"required"`
+        PosterID       uint   `json:"poster_id" binding:"required"`
+        SenderID       uint   `json:"sender_id" binding:"required"`
+        ReceiverID     uint   `json:"receiver_id" binding:"required"`
+        Content        string `json:"content" binding:"required"`
+        Type           string `json:"type" binding:"required"`
+}
+
+// SendMessage godoc
+// @Summary SendMessage
+// @Description SendMessage to join a chat
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param Message body MessageBody true "Message"
+// @Success 200 {object} string
+// @Router /chat/authorize/message [post]
+func (wsUseCase *ChatWS) SendMessage(c *gin.Context) <span class="cov8" title="1">{
+        payload := c.MustGet("authorization_payload").(*Token.Payload)
+        chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+        var request MessageBody
+        if err := c.ShouldBindJSON(&amp;request); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">if request.ConversationID == -1 </span><span class="cov8" title="1">{
+                ownerPoster, err := chatRepo.GetPosterOwner(request.PosterID)
+                if err != nil </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                        return
+                }</span>
+                <span class="cov8" title="1">if ownerPoster.UserID == uint(payload.UserID) </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, gin.H{"error": "You can't create conversation with yourself"})
+                        return
+                }</span>
+                <span class="cov8" title="1">var memberID uint
+                if request.SenderID == ownerPoster.UserID </span><span class="cov0" title="0">{
+                        memberID = request.ReceiverID
+                }</span> else<span class="cov8" title="1"> {
+                        memberID = request.SenderID
+                }</span>
+                <span class="cov8" title="1">conversation, err := chatRepo.CreateConversation(ownerPoster.Title, ownerPoster.Images[0].Url, ownerPoster.UserID, memberID,
+                        ownerPoster.ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                        return
+                }</span>
+                <span class="cov0" title="0">request.ConversationID = int(conversation.ID)</span>
+        }
+        <span class="cov8" title="1">_, err := chatRepo.ExistConversation(uint(request.ConversationID))
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">if request.SenderID == request.ReceiverID </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": "You can't send message to yourself"})
+                return
+        }</span>
+        <span class="cov8" title="1">sendTime, err := Utils.GetTime("Asia/Tehran")
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">message, err := chatRepo.SaveMessage(uint(request.ConversationID), request.SenderID, request.Content, request.Type,
+                int(request.ReceiverID), sendTime, "unread")
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">msg := &amp;dtos.Message{
+                ID:             int(message.ID),
+                Content:        message.Content,
+                ConversationID: int(message.ConversationId),
+                SenderID:       int(message.SenderId),
+                ReceiverId:     int(message.ReceiverId),
+                Time:           message.CreatedAt,
+                Type:           message.Type,
+                Status:         message.Status,
+        }
+        wsUseCase.Hub.Broadcast &lt;- msg
+        c.JSON(http.StatusOK, gin.H{"message": "Message sent successfully", "send_message": message})</span>
+}
+
+type OpenWSConnection struct {
+        Token string `form:"token" binding:"required"`
+}
+
+// OpenWSConnection godoc
+// @Summary OpenWSConnection
+// @Description OpenWSConnection to join a chat
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param Message body dtos.TransferMessage true "Message"
+// @Param token query string true "Token"
+// @Success 200 {object} string
+// @Router /chat/open-ws [get]
+func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) <span class="cov0" title="0">{
+        chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+        var request OpenWSConnection
+        secretKey := utils.ReadFromEnvFile(".env", "JWT_SECRET")
+        tokenMaker, _ := Token.NewJWTMaker(secretKey)
+        if err := c.ShouldBindQuery(&amp;request); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov0" title="0">if err := c.ShouldBindQuery(&amp;request); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov0" title="0">token := request.Token
+        payload, err := tokenMaker.VerifyToken(token)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Token is invalid")
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov0" title="0">if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; ok </span><span class="cov0" title="0">{
+                if wsUseCase.Hub.Clients[int(payload.UserID)].Status == "online" </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, gin.H{"error": "You are already online"})
+                        fmt.Println("You are already online")
+                        return
+                }</span>
+        }
+        <span class="cov0" title="0">conversations, err := chatRepo.GetConversationByUserID(uint(payload.UserID))
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov0" title="0">pairedUsers := make([]int, 0)
+        for _, conversation := range conversations </span><span class="cov0" title="0">{
+                if conversation.OwnerID == uint(payload.UserID) </span><span class="cov0" title="0">{
+                        pairedUsers = append(pairedUsers, int(conversation.MemberID))
+                }</span> else<span class="cov0" title="0"> {
+                        pairedUsers = append(pairedUsers, int(conversation.OwnerID))
+                }</span>
+        }
+        <span class="cov0" title="0">if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; !ok </span><span class="cov0" title="0">{
+                var client = RealtimeChat.Client{
+                        ID:      int(payload.UserID),
+                        Message: make(chan *dtos.Message, 100),
+                        Conn:    &amp;websocket.Conn{},
+                        Status:  "offline",
+                }
+                wsUseCase.Hub.Clients[int(payload.UserID)] = &amp;client
+        }</span>
+
+        <span class="cov0" title="0">conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov0" title="0">wsUseCase.Hub.PairUsers[int(payload.UserID)] = pairedUsers
+        wsUseCase.Hub.Clients[int(payload.UserID)].Conn = conn
+        wsUseCase.Hub.Clients[int(payload.UserID)].Status = "online"
+        wsUseCase.Hub.Register &lt;- wsUseCase.Hub.Clients[int(payload.UserID)]
+
+        go wsUseCase.Hub.Clients[int(payload.UserID)].Write()
+        go wsUseCase.Hub.Clients[int(payload.UserID)].UserTrace(wsUseCase.Hub)</span>
+}
+
+type ConversationInfo struct {
+        Name     string `json:"name" binding:"required"`
+        PosterID int    `json:"poster_id" binding:"required"`
+}
+
+// AllUserConversations godoc
+// @Summary Get all user conversations
+// @Description Get all user conversations
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Success 200 {array} View.ConversationView
+// @Router /chat/authorize/conversation [get]
+func AllUserConversations(c *gin.Context) <span class="cov8" title="1">{
+        payload := c.MustGet("authorization_payload").(*Token.Payload)
+        chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+
+        user, err := chatRepo.GetAllUserConversations(uint(payload.UserID))
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">View.GetAllUserConversation(c, user)</span>
+}
+
+type GetConversationByIdPathRequest struct {
+        ConversationID uint `uri:"conversation_id" binding:"required"`
+}
+
+// GetConversationById godoc
+// @Summary Get conversation by id
+// @Description Get conversation by id
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversation_id path int true "Conversation ID"
+// @Success 200 {object} string
+// @Router /chat/authorize/conversation/{conversation_id} [get]
+func GetConversationById(c *gin.Context) <span class="cov8" title="1">{
+        payload := c.MustGet("authorization_payload").(*Token.Payload)
+        var pathRequest GetConversationByIdPathRequest
+        if err := c.ShouldBindUri(&amp;pathRequest); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+        conversation, err := chatRepo.GetUserConversationById(pathRequest.ConversationID, uint(payload.UserID))
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">c.JSON(http.StatusOK, gin.H{"message": "Get conversation successfully", "conversation": conversation})</span>
+}
+
+type ConversationIDPathRequest struct {
+        ConversationID uint `uri:"conversation_id" binding:"required"`
+}
+
+type ConversationHistoryQueryRequest struct {
+        PageID   int `form:"page_id" binding:"required"`
+        PageSize int `form:"page_size" binding:"required,min=5"`
+}
+
+// ConversationHistory godoc
+// @Summary Get conversation history
+// @Description Get conversation history
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversation_id path uint true "CreateConversation ID"
+// @Param page_id query int true "Page ID" minimum(1) default(1)
+// @Param page_size query int true "Page size" minimum(1) default(10)
+// @Success 200 {array} Model.Conversation
+// @Router /chat/authorize/history/{conversation_id}/ [get]
+func ConversationHistory(c *gin.Context) <span class="cov8" title="1">{
+        chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+        payload := c.MustGet("authorization_payload").(*Token.Payload)
+
+        var pathRequest ConversationIDPathRequest
+        if err := c.ShouldBindUri(&amp;pathRequest); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">var queryRequest ConversationHistoryQueryRequest
+        if err := c.ShouldBindQuery(&amp;queryRequest); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">offset := (queryRequest.PageID - 1) * queryRequest.PageSize
+        messages, err := chatRepository.GetConversationHistory(pathRequest.ConversationID, queryRequest.PageSize, offset)
+
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">View.GetConversationHistory(c, messages, uint(payload.UserID))</span>
+}
+
+type UpdateConversationBody struct {
+        Name  string `json:"name"`
+        Image string `json:"image"`
+}
+
+// UpdateConversation godoc
+// @Summary Update conversation
+// @Description Update conversation
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param conversation_id path uint true "CreateConversation ID"
+// @Param UpdateConversation body UpdateConversationBody true "UpdateConversationBody"
+// @Success 200 {object} string
+// @Router /chat/authorize/conversation/{conversation_id} [patch]
+func UpdateConversation(c *gin.Context) <span class="cov8" title="1">{
+        chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+
+        var pathRequest ConversationIDPathRequest
+        if err := c.ShouldBindUri(&amp;pathRequest); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">var bodyRequest UpdateConversationBody
+        if err := c.ShouldBindJSON(&amp;bodyRequest); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">err := chatRepository.UpdateConversation(pathRequest.ConversationID, bodyRequest.Name, bodyRequest.Image)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">c.JSON(http.StatusOK, gin.H{"message": "Conversation updated successfully"})</span>
+}
+
+type MessageIDsBody struct {
+        MessageIDs []int `json:"message_ids" binding:"required"`
+        SenderID   int   `json:"sender_id" binding:"required"`
+}
+
+// ReadMessages godoc
+// @Summary Read Multiple Messages
+// @Description Read Multiple Messages
+// @Tags Chat
+// @Accept json
+// @Produce json
+// @Param MessageID body MessageIDsBody true "MessageIDs"
+// @Success 200 {object} string
+// @Router /chat/authorize/read [post]
+func (wsUseCase *ChatWS) ReadMessages(c *gin.Context) <span class="cov8" title="1">{
+        chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+        var request MessageIDsBody
+        if err := c.ShouldBindJSON(&amp;request); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">err := chatRepository.ReadMessages(request.MessageIDs)
+        if err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">content := fmt.Sprintf("%v", request.MessageIDs)
+        messageTime, err := Utils.GetTime("Asia/Tehran")
+        msg := &amp;dtos.Message{
+                ID:             0,
+                Content:        content,
+                ConversationID: 0,
+                SenderID:       0,
+                ReceiverId:     request.SenderID,
+                Time:           messageTime,
+                Type:           "text-notification",
+                Status:         "notification",
+        }
+        wsUseCase.Hub.Broadcast &lt;- msg
+        c.JSON(http.StatusOK, gin.H{"message": "Messages read successfully"})</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package Api
+
+import (
+        "github.com/200-status-ok/main-backend/src/MainService/UseCase"
+        "github.com/gin-gonic/gin"
+)
+
+// GetPosters godoc
+// @Summary Get a list of all posters
+// @Description Retrieves a list of all posters, sorted and paginated according to the given parameters
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param page_id query int true "Page ID" minimum(1) default(1)
+// @Param page_size query int true "Page size" minimum(1) default(10)
+// @Param sort query string false "Sort direction" enum(asc, desc) default(desc)
+// @Param sort_by query string false "Sort by" enum(id, updated_at, created_at) default(created_at)
+// @Param search_phrase query string false "Search phrase"
+// @Param status query string false "Status" enum(lost, found, both) default(both)
+// @Param time_start query int false "Time start"
+// @Param time_end query int false "Time end"
+// @Param only_awards query bool false "Only Awards"
+// @Param lat query float64 false "Latitude"
+// @Param lon query float64 false "Longitude"
+// @Param tag_ids query []int false "TagIds" collectionFormat(multi) example(1,2,3)
+// @Param state query string false "State" enum(all, accepted, rejected, pending) default(all)
+// @Param special_type query string false "Special_type" enum(all, normal, premium) default(all)
+// @Success 200 {array} View.AllPostersView
+// @Router /posters [get]
+func GetPosters(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.GetPostersResponse(c)
+}</span>
+
+// GetPoster godoc
+// @Summary Get a poster by ID
+// @Description Retrieves a poster by ID
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Poster ID"
+// @Success 200 {object} View.PosterView
+// @Router /posters/{id} [get]
+func GetPoster(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.GetPosterByIdResponse(c)
+}</span>
+
+// CreatePoster godoc
+// @Summary Create a poster
+// @Description Creates a poster
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param poster body UseCase.CreatePosterRequest true "Poster"
+// @Success 200 {object} View.PosterView
+// @Router /posters/authorize [post]
+func CreatePoster(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.CreatePosterResponse(c)
+}</span>
+
+// UpdatePoster godoc
+// @Summary Update a poster by ID
+// @Description Updates a poster by ID
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Poster ID"
+// @Param poster body UseCase.UpdatePosterRequest true "Poster"
+// @Success 200 {object} View.PosterView
+// @Router /posters/authorize/{id} [patch]
+func UpdatePoster(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.UpdatePosterResponse(c)
+}</span>
+
+// DeletePoster godoc
+// @Summary Delete a poster by ID
+// @Description Deletes a poster by ID
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Poster ID"
+// @Success 200
+// @Router /posters/authorize/{id} [delete]
+func DeletePoster(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.DeletePosterByIdResponse(c)
+}</span>
+
+// CreatePosterReport godoc
+// @Summary Report a poster
+// @Description Reports a poster
+// @Tags reports
+// @Accept  json
+// @Produce  json
+// @Param poster_id query int true "Poster ID"
+// @Param issuer_id query int true "Issuer ID"
+// @Param report_type query string true "Report Type" enum(spam, inappropriate, other) default(other)
+// @Param description query string false "Description"
+// @Success 200
+// @Router /reports/report-poster [post]
+func CreatePosterReport(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.CreatePosterReportResponse(c)
+}</span>
+
+// GetPosterReports godoc
+// @Summary Get a list of all poster reports
+// @Description Retrieves a list of all poster reports, sorted and paginated according to the given parameters
+// @Tags reports
+// @Accept  json
+// @Produce  json
+// @Param page_id query int true "Page ID" minimum(1) default(1)
+// @Param page_size query int true "Page size" minimum(1) default(10)
+// @Param status query string true "Status" enum(open, resolved, both) default(both)
+// @Success 200 {array} View.PosterReportView
+// @Router /reports [get]
+func GetPosterReports(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.GetPosterReportsResponse(c)
+}</span>
+
+// GetPosterReport godoc
+// @Summary Get a poster report by ID
+// @Description Retrieves a poster report by ID
+// @Tags reports
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Report ID"
+// @Success 200 {object} View.PosterReportView
+// @Router /reports/{id} [get]
+func GetPosterReport(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.GetPosterReportByIdResponse(c)
+}</span>
+
+// UpdatePosterReport godoc
+// @Summary Update a poster report by ID
+// @Description Updates a poster report by ID
+// @Tags reports
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Report ID"
+// @Param report body UseCase.UpdatePosterReportRequest true "Poster Report"
+// @Success 200 {object} View.PosterView
+// @Router /reports/{id} [patch]
+func UpdatePosterReport(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.UpdatePosterReportResponse(c)
+}</span>
+
+// UpdatePosterState godoc
+// @Summary Update a poster state by ID
+// @Description Updates a poster report by ID
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param id query int true "ID"
+// @Param state query string false "State" enum(pending, accepted, rejected) default(accepted)
+// @Success 200
+// @Router /posters/state [patch]
+func UpdatePosterState(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.UpdatePosterStateResponse(c)
+}</span>
+
+// CreateMockData godoc
+// @Summary Create mock data
+// @Description Create mock data
+// @Tags posters
+// @Accept  json
+// @Produce  json
+// @Param mock body UseCase.CreateMockDataRequest true "Mock Data"
+// @Success 200
+// @Router /posters/mock-data [post]
+func CreateMockData(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.CreateMockDataResponse(c)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package Api
+
+import (
+        "github.com/200-status-ok/main-backend/src/MainService/UseCase"
+        "github.com/gin-gonic/gin"
+)
+
+// CreateTag godoc
+// @Summary Create a Tag by ID
+// @Description Creates a Tag by ID
+// @Tags Tags
+// @Accept  json
+// @Produce  json
+// @Param tag body UseCase.CreateTagRequest true "Tag"
+// @Success 200 {object} View.TagView
+// @Router /tags [post]
+func CreateTag(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.CreateTagResponse(c)
+}</span>
+
+// UpdateTag godoc
+// @Summary Update a Tag by ID
+// @Description Updates a Tag by ID
+// @Tags Tags
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Tag ID"
+// @Param tag body UseCase.UpdateTagRequest true "Tag"
+// @Success 200 {object} View.TagView
+// @Router /tags/{id} [patch]
+func UpdateTag(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.UpdateTagByIdResponse(c)
+}</span>
+
+// DeleteTag godoc
+// @Summary Delete a Tag by ID
+// @Description Deletes a Tag by ID
+// @Tags Tags
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Tag ID"
+// @Success 200
+// @Router /tags/{id} [delete]
+func DeleteTag(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.DeleteTagByIdResponse(c)
+}</span>
+
+// GetTag godoc
+// @Summary Get a Tag by ID
+// @Description Retrieves a Tag by ID
+// @Tags Tags
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Tag ID"
+// @Success 200 {object} View.TagView
+// @Router /tags/{id} [get]
+func GetTag(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.GetTagByIdResponse(c)
+}</span>
+
+// GetTags godoc
+// @Summary Get all Tags
+// @Description Retrieves Tags
+// @Tags Tags
+// @Accept  json
+// @Produce  json
+// @Param state query string false "State" enum(all, accepted, rejected, pending) default(all)
+// @Success 200 {array} View.TagView
+// @Router /tags [get]
+func GetTags(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.GetTagsResponse(c)
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package Api
+
+import (
+        "github.com/200-status-ok/main-backend/src/MainService/UseCase"
+        "github.com/gin-gonic/gin"
+)
+
+// SendOTP LoginUser godoc
+// @Summary send otp to user
+// @Description send otp to user
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param user body UseCase.SendOTPRequest true "Send OTP"
+// @Success 200 {object} View.MessageView
+// @Router /users/auth/otp/send [post]
+func SendOTP(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.SendOTPResponse(c)
+}</span>
+
+// LoginUser godoc
+// @Summary login user
+// @Description login user
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param user body UseCase.VerifyOTPRequest true "Verify OTP"
+// @Success 200 {object} View.UserView
+// @Router /users/auth/otp/login [post]
+func LoginUser(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.VerifyOtpResponse(c)
+}</span>
+
+// GoogleLoginAndroid godoc
+// @Summary login user with Google
+// @Description login user with Google
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param email query string true "Email"
+// @Router /users/auth/google/login/android [get]
+func GoogleLoginAndroid(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.GoogleLoginAndroidResponse(c)
+}</span>
+
+// OAuth2Login godoc
+// @Summary login user with oauth2
+// @Description login user with oauth2
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Router /users/auth/google/login [get]
+func OAuth2Login(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.OAuth2LoginResponse(c)
+}</span>
+
+// GoogleCallback godoc
+// @Summary google callback
+// @Description google callback
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Router /users/auth/google/callback [get]
+func GoogleCallback(c *gin.Context) <span class="cov0" title="0">{
+        UseCase.GoogleCallbackResponse(c)
+}</span>
+
+// GetUser godoc
+// @Summary Get a User by ID
+// @Description Retrieves a User by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200 {object} View.UserViewID
+// @Router /users/authorize [get]
+func GetUser(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.GetUserByIdResponse(c)
+}</span>
+
+// UpdateUser godoc
+// @Summary Update a User by ID
+// @Description Updates a User by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Param user body UseCase.UpdateUserRequest true "User"
+// @Success 200 {object} View.UserViewIDs
+// @Router /users/authorize/ [patch]
+func UpdateUser(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.UpdateUserByIdResponse(c)
+}</span>
+
+// DeleteUser godoc
+// @Summary Delete a User by ID
+// @Description Deletes a User by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Router /users/authorize/ [delete]
+func DeleteUser(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.DeleteUserByIdResponse(c)
+}</span>
+
+// Payment godoc
+// @Summary Payment
+// @Description Payment
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param url query string true "URL"
+// @Param amount query float64 true "Amount"
+// @Success 200
+// @Router /users/authorize/payment/user_wallet [get]
+func Payment(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.PaymentResponse(c)
+}</span>
+
+// PaymentVerify godoc
+// @Summary Payment Verify
+// @Description Payment Verify
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param track_id query string true "Track ID"
+// @Success 200
+// @Router /users/authorize/payment/user_wallet/verify [get]
+func PaymentVerify(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.PaymentVerifyResponse(c)
+}</span>
+
+// GetTransactions godoc
+// @Summary Get Transactions
+// @Description Get Transactions
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} View.UserViewPayments
+// @Router /users/authorize/payment/user_wallet/transactions [get]
+func GetTransactions(c *gin.Context) <span class="cov8" title="1">{
+        UseCase.GetTransactionsResponse(c)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
