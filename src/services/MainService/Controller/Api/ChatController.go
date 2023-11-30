@@ -33,7 +33,6 @@ func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
 
 type MessageBody struct {
 	ConversationID int    `json:"conversation_id" binding:"required"`
-	PosterID       uint   `json:"poster_id" binding:"required"`
 	SenderID       uint   `json:"sender_id" binding:"required"`
 	ReceiverID     uint   `json:"receiver_id" binding:"required"`
 	Content        string `json:"content" binding:"required"`
@@ -53,29 +52,24 @@ type MessageBody struct {
 func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+	posterRepo := Repository.NewPosterRepository(pgsql.GetDB())
 	var request MessageBody
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if request.ConversationID == -1 {
-		ownerPoster, err := chatRepo.GetPosterOwner(request.PosterID)
+		poster, err := posterRepo.GetPosterByOwnerID(request.ReceiverID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		if ownerPoster.UserID == uint(payload.UserID) {
+		if poster.UserID == uint(payload.UserID) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "You can't create conversation with yourself"})
 			return
 		}
-		var memberID uint
-		if request.SenderID == ownerPoster.UserID {
-			memberID = request.ReceiverID
-		} else {
-			memberID = request.SenderID
-		}
-		conversation, err := chatRepo.CreateConversation(ownerPoster.Title, ownerPoster.Images[0].Url, ownerPoster.UserID, memberID,
-			ownerPoster.ID)
+		conversation, err := chatRepo.CreateConversation(poster.Title, poster.Images[0].Url, poster.UserID, request.SenderID,
+			poster.ID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

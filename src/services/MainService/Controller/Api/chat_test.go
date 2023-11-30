@@ -35,7 +35,6 @@ func TestChatWS_SendMessage(t *testing.T) {
 		validReq := map[string]interface{}{
 			"content":         "Hello",
 			"conversation_id": 3,
-			"poster_id":       1,
 			"receiver_id":     37,
 			"sender_id":       38,
 			"type":            "text",
@@ -60,7 +59,6 @@ func TestChatWS_SendMessage(t *testing.T) {
 		validReq := map[string]interface{}{
 			"content":         "Hello, how are you?",
 			"conversation_id": -1,
-			"poster_id":       1,
 			"receiver_id":     37,
 			"sender_id":       50,
 			"type":            "text",
