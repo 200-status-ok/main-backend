@@ -496,6 +496,17 @@ func (r *PosterRepository) UpdatePoster(id int, role string, poster DTO2.UpdateP
 	return nil
 }
 
+func (r *PosterRepository) GetPosterByOwnerID(userID uint) (Model2.Poster, error) {
+	var poster Model2.Poster
+	r.db.First(&poster, "user_id = ?", userID)
+
+	if poster.ID == 0 {
+		return Model2.Poster{}, errors.New("poster not found")
+	}
+
+	return poster, nil
+}
+
 func (r *PosterRepository) CreatePosterReport(posterID uint, issuerID uint, reportType string, description string) error {
 
 	var reportModel = Model2.PosterReport{
