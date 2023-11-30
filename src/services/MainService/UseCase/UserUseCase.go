@@ -228,6 +228,47 @@ func VerifyOtpResponse(c *gin.Context) {
 	View.LoginUserView(token, c)
 }
 
+type GoogleLoginAndroidRequest struct {
+	Email string `form:"email" binding:"required"`
+}
+
+func GoogleLoginAndroidResponse(c *gin.Context) {
+	var googleLoginReq GoogleLoginAndroidRequest
+	if err := c.ShouldBindQuery(&googleLoginReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	userExist, err := userRepository.FindByUsername(googleLoginReq.Email)
+	if err != nil && err.Error() != "user not found" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if userExist == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
+		return
+	}
+	var jwtSecret string
+	appEnv := os.Getenv("APP_ENV2")
+	if appEnv == "development" || appEnv == "production" {
+		jwtSecret = utils.ReadFromEnvFile(".env", "JWT_SECRET")
+	} else if appEnv == "testing" {
+		jwtSecret = "qwertyuiopasdfghjklzxcvbnm123456"
+	}
+
+	jwtMaker, err := Token.NewJWTMaker(jwtSecret)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	token, _, err := jwtMaker.MakeToken(googleLoginReq.Email, uint64(userExist.ID), "User", time.Hour*24*7)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	View.LoginUserView(token, c)
+}
+
 type GoogleLoginRequest struct {
 	RedirectURI string `form:"redirect_uri" binding:"required"`
 }

@@ -1377,6 +1377,31 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/users/auth/google/login/android": {
+            "get": {
+                "description": "login user with Google",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "login user with Google",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/users/auth/otp/login": {
             "post": {
                 "description": "login user",
@@ -1490,15 +1515,6 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Delete a User by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -1827,7 +1843,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
@@ -2249,7 +2265,7 @@ const docTemplate = `{
             "properties": {
                 "username": {
                     "type": "string",
-                    "maxLength": 30,
+                    "maxLength": 50,
                     "minLength": 11
                 }
             }

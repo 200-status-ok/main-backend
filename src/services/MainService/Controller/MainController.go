@@ -48,6 +48,7 @@ func (s *Server) MainController() {
 			}
 			user.POST("/auth/otp/send", Api2.SendOTP)
 			user.POST("/auth/otp/login", Api2.LoginUser)
+			user.GET("auth/google/login/android", Api2.GoogleLoginAndroid)
 			user.GET("/auth/google/login", Api2.OAuth2Login)
 			user.GET("/auth/google/callback", Api2.GoogleCallback)
 		}
