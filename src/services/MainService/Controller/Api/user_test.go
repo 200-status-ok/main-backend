@@ -224,7 +224,7 @@ func TestPayment(t *testing.T) {
 	TrackerID = response["trackID"].(string)
 	assert.Equal(t, http.StatusOK, W1.Code)
 
-	time.Sleep(15 * time.Second)
+	time.Sleep(10 * time.Second)
 }
 
 func TestPaymentVerify(t *testing.T) {
