@@ -132,7 +132,6 @@ type GeneratePosterInfoRequest struct {
 }
 
 func GeneratePosterInfoResponse(c *gin.Context) {
-
 	var request GeneratePosterInfoRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
