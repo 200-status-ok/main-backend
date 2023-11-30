@@ -70,3 +70,23 @@ func TestGetTime(t *testing.T) {
 		})
 	}
 }
+
+func TestEmailRandomGenerator(t *testing.T) {
+	tests := []struct {
+		name     string
+		expected int
+	}{
+		{
+			name:     "valid email",
+			expected: 0,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual := EmailRandomGenerator()
+			if actual == "" {
+				t.Errorf("Expected %v, got %v", test.expected, actual)
+			}
+		})
+	}
+}
