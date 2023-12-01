@@ -245,8 +245,30 @@ func GoogleLoginAndroidResponse(c *gin.Context) {
 		return
 	}
 	if userExist == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user not found"})
-		return
+		user := &Model.User{
+			Username:            googleLoginReq.Email,
+			Posters:             nil,
+			MarkedPosters:       nil,
+			OwnConversations:    nil,
+			MemberConversations: nil,
+			Wallet:              0.0,
+			Payments:            nil,
+		}
+		_, err := userRepository.UserCreate(user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		err = userRepository.CommitChanges()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		userExist, err = userRepository.FindByUsername(googleLoginReq.Email)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 	}
 	var jwtSecret string
 	appEnv := os.Getenv("APP_ENV2")
