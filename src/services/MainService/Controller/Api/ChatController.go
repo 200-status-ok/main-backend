@@ -33,6 +33,7 @@ func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
 
 type MessageBody struct {
 	ConversationID int    `json:"conversation_id" binding:"required"`
+	PosterID       uint   `json:"poster_id" binding:"required"`
 	SenderID       uint   `json:"sender_id" binding:"required"`
 	ReceiverID     uint   `json:"receiver_id" binding:"required"`
 	Content        string `json:"content" binding:"required"`
@@ -59,7 +60,7 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		return
 	}
 	if request.ConversationID == -1 {
-		poster, err := posterRepo.GetPosterByOwnerID(request.ReceiverID)
+		poster, err := posterRepo.GetPosterById(int(request.PosterID))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
