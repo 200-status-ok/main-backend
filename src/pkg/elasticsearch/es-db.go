@@ -2,7 +2,6 @@ package elasticsearch
 
 import (
 	"fmt"
-	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	elastic "github.com/elastic/go-elasticsearch/v8"
 	"os"
 )
@@ -23,11 +22,11 @@ func connectElastic(connection string) (*elastic.Client, error) {
 }
 
 func setupDatabase(appEnv string) {
-	esKey := "LOCAL_ELASTIC_URL"
+	var esConnection string
+	esConnection = "http://elasticsearch:9200/"
 	if appEnv == "production" {
-		esKey = "PRODUCTION_ELASTIC_URL"
+		esConnection = "http://elastic:jnL5TU7gFHucjbclKKd2AQnH@main-es:9200/"
 	}
-	esConnection := utils.ReadFromEnvFile(".env", esKey)
 	fmt.Print("Connecting to Elasticsearch at ", esConnection, "\n")
 	elasticClient, _ = connectElastic(esConnection)
 }
