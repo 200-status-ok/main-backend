@@ -11,7 +11,7 @@ COPY go.sum .
 RUN go mod tidy && go mod download
 COPY . .
 
-RUN go build -o main .
+RUN go build -o main . && go build -o cmd ./Cmd
 
 EXPOSE 8080
 
