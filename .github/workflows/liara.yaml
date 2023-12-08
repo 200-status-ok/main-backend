@@ -1,7 +1,7 @@
 name: CD-Liara
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -10,10 +10,11 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
       - name: update-liara
         env:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
         run: |
-          npm i -g @liara/cli@3
-          liara deploy --path ./src/MainService --app="main-backend" --api-token="$LIARA_TOKEN" --port=8080 --detach
+          npm i -g @liara/cli@5
+          liara deploy --path ./src/services/MainService --app="main-app" --api-token="$LIARA_TOKEN" --port=8080 --detach
+          liara deploy --path ./src/services/WorkerService --app="main-workerapp" --api-token="$LIARA_TOKEN" --port=8081 --detach

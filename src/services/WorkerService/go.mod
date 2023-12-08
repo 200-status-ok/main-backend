@@ -3,18 +3,16 @@ module github.com/200-status-ok/main-backend/src/WorkerService
 go 1.20
 
 require (
+	github.com/200-status-ok/main-backend/src/pkg v0.0.0-20231208094621-baa333c5b6f7
 	github.com/elastic/go-elasticsearch/v8 v8.10.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/medianasms/go-rest-sdk v1.1.0
 	github.com/rabbitmq/amqp091-go v1.8.0
-	github.com/spf13/viper v1.17.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
-	gorm.io/driver/postgres v1.5.3
 	gorm.io/gorm v1.25.5
 )
 
 require (
-	github.com/200-status-ok/main-backend/src/pkg v0.0.0-20231204213322-4a2e9e1b17d9 // indirect
 	github.com/bytedance/sonic v1.8.7 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/elastic/elastic-transport-go/v8 v8.3.0 // indirect
@@ -45,6 +43,7 @@ require (
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/viper v1.17.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
@@ -60,4 +59,5 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/postgres v1.5.3 // indirect
 )
