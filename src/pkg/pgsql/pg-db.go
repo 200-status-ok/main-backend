@@ -1,8 +1,6 @@
 package pgsql
 
 import (
-	"fmt"
-	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"os"
@@ -17,16 +15,10 @@ func connectDB(connection string) (*gorm.DB, error) {
 }
 
 func setupDatabase(appEnv string) {
-	pgKey := "LOCAL_DATABASE_URL"
-	if appEnv == "production" {
-		pgKey = "PRODUCTION_DATABASE_URL"
-	}
 	var pgConnection string
-	pgConnection = utils.ReadFromEnvFile(".env", pgKey)
-	if pgConnection == "" {
-		fmt.Println("No database connection string provided")
-		pgConnection = "postgresql://root:root@database:5432/main?sslmode=disable"
-		fmt.Println("Using default connection string")
+	pgConnection = "postgresql://root:root@database:5432/main?sslmode=disable"
+	if appEnv == "production" {
+		pgConnection = "postgresql://root:jiitpBHrqOIjtHYqjbMh2hGO@main-db:5432/postgres"
 	}
 	dB, _ = connectDB(pgConnection)
 	dbSQL, _ := dB.DB()
