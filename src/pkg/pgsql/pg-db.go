@@ -18,7 +18,7 @@ func setupDatabase(appEnv string) {
 	var pgConnection string
 	pgConnection = "postgresql://root:root@database:5432/main?sslmode=disable"
 	if appEnv == "production" {
-		pgConnection = "postgresql://root:jiitpBHrqOIjtHYqjbMh2hGO@main-db:5432/postgres"
+		pgConnection = "postgresql://root:a4bdJh8NnWY8AFCbKkfwnUu0@main-db:5432/postgres"
 	}
 	dB, _ = connectDB(pgConnection)
 	dbSQL, _ := dB.DB()
