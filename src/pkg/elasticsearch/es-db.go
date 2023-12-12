@@ -25,7 +25,7 @@ func setupDatabase(appEnv string) {
 	var esConnection string
 	esConnection = "http://elasticsearch:9200/"
 	if appEnv == "production" {
-		esConnection = "http://elastic:jnL5TU7gFHucjbclKKd2AQnH@main-es:9200/"
+		esConnection = "http://elastic:GyY7G99VyZBohkVoA5wQ7omm@main-es:9200/"
 	}
 	fmt.Print("Connecting to Elasticsearch at ", esConnection, "\n")
 	elasticClient, _ = connectElastic(esConnection)
