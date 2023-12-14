@@ -6,20 +6,17 @@ definitions:
         type: string
       conversation_id:
         type: integer
+      id:
+        type: integer
       poster_id:
-        type: integer
-      receiver_id:
-        type: integer
-      sender_id:
         type: integer
       type:
         type: string
     required:
     - content
     - conversation_id
+    - id
     - poster_id
-    - receiver_id
-    - sender_id
     - type
     type: object
   Api.MessageIDsBody:
@@ -128,7 +125,7 @@ definitions:
       conversation_id:
         type: integer
       created_at:
-        type: integer
+        type: string
       deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
@@ -478,6 +475,8 @@ definitions:
         type: string
       is_owner:
         type: boolean
+      last_message:
+        $ref: '#/definitions/Model.Message'
       name:
         type: string
       poster_id:
@@ -1835,13 +1834,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieves a User by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
+      description: Retrieves a User by Authorization Token
       produces:
       - application/json
       responses:
@@ -1849,7 +1842,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/View.UserViewID'
-      summary: Get a User by ID
+      summary: Get a User by Authorization Token
       tags:
       - users
   /users/authorize/:

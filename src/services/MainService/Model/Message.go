@@ -6,8 +6,8 @@ import (
 )
 
 type Message struct {
-	ID             uint           `gorm:"primarykey" json:"id"`
-	CreatedAt      int64          `json:"created_at"`
+	ID             int64          `gorm:"primarykey" json:"id"`
+	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	ConversationId uint           `gorm:"not null" json:"conversation_id"`
@@ -19,7 +19,7 @@ type Message struct {
 	Status         string         `gorm:"type:varchar(50);default:'unread'" json:"status"`
 }
 
-func (m *Message) GetID() uint {
+func (m *Message) GetID() int64 {
 	return m.ID
 }
 
