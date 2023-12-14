@@ -5,7 +5,6 @@ import (
 	"github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
-	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
@@ -13,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{
@@ -32,10 +32,9 @@ func NewChatWS(hub *RealtimeChat.Hub) *ChatWS {
 }
 
 type MessageBody struct {
+	ID             int64  `json:"id" binding:"required"`
 	ConversationID int    `json:"conversation_id" binding:"required"`
 	PosterID       uint   `json:"poster_id" binding:"required"`
-	SenderID       uint   `json:"sender_id" binding:"required"`
-	ReceiverID     uint   `json:"receiver_id" binding:"required"`
 	Content        string `json:"content" binding:"required"`
 	Type           string `json:"type" binding:"required"`
 }
@@ -59,17 +58,26 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	poster, err := posterRepo.GetPosterById(int(request.PosterID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	senderID := uint(payload.UserID)
+	var receiverID uint
 	if request.ConversationID == -1 {
-		poster, err := posterRepo.GetPosterById(int(request.PosterID))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		if poster.UserID == uint(payload.UserID) {
+		var conversationImage string
+		receiverID = poster.UserID
+		if receiverID == senderID {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "You can't create conversation with yourself"})
 			return
 		}
-		conversation, err := chatRepo.CreateConversation(poster.Title, poster.Images[0].Url, poster.UserID, request.SenderID,
+		if len(poster.Images) == 0 {
+			conversationImage = ""
+		} else {
+			conversationImage = poster.Images[0].Url
+		}
+		conversation, err := chatRepo.CreateConversation(poster.Title, conversationImage, receiverID, senderID,
 			poster.ID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -77,28 +85,33 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		}
 		request.ConversationID = int(conversation.ID)
 	}
-	_, err := chatRepo.ExistConversation(uint(request.ConversationID))
+	existConv, err := chatRepo.ExistConversation(uint(request.ConversationID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if request.SenderID == request.ReceiverID {
+	if senderID == existConv.OwnerID {
+		receiverID = existConv.MemberID
+	} else {
+		receiverID = existConv.OwnerID
+	}
+	if senderID == receiverID {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "You can't send message to yourself"})
 		return
 	}
-	sendTime, err := Utils.GetTime("Asia/Tehran")
+	sendTime := time.Now()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	message, err := chatRepo.SaveMessage(uint(request.ConversationID), request.SenderID, request.Content, request.Type,
-		int(request.ReceiverID), sendTime, "unread")
+	message, err := chatRepo.SaveMessage(request.ID, uint(request.ConversationID), senderID, request.Content, request.Type,
+		int(receiverID), sendTime, "unread")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	msg := &dtos.Message{
-		ID:             int(message.ID),
+		ID:             message.ID,
 		Content:        message.Content,
 		ConversationID: int(message.ConversationId),
 		SenderID:       int(message.SenderId),
@@ -358,7 +371,7 @@ func (wsUseCase *ChatWS) ReadMessages(c *gin.Context) {
 		return
 	}
 	content := fmt.Sprintf("%v", request.MessageIDs)
-	messageTime, err := Utils.GetTime("Asia/Tehran")
+	messageTime := time.Now()
 	msg := &dtos.Message{
 		ID:             0,
 		Content:        content,

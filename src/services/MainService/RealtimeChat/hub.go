@@ -3,10 +3,10 @@ package RealtimeChat
 import (
 	"fmt"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
-	"github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/getsentry/sentry-go"
+	"time"
 )
 
 type Hub struct {
@@ -38,17 +38,14 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			currentTime, err := Utils.GetTime("Asia/Tehran")
-			if err != nil {
-				localHub.CaptureException(err)
-			}
+			currentTime := time.Now()
 			unReadMessages, err := chatRepository.GetUnReadMessages(uint(client.ID))
 			if err != nil {
 				localHub.CaptureException(err)
 			}
 			for _, message := range unReadMessages {
 				h.Broadcast <- &dtos.Message{
-					ID:             int(message.ID),
+					ID:             message.ID,
 					Content:        message.Content,
 					ConversationID: int(message.ConversationId),
 					SenderID:       int(message.SenderId),
@@ -70,10 +67,7 @@ func (h *Hub) Run() {
 			}
 
 		case client := <-h.Unregister:
-			currentTime, err := Utils.GetTime("Asia/Tehran")
-			if err != nil {
-				localHub.CaptureException(err)
-			}
+			currentTime := time.Now()
 			for _, receiver := range h.PairUsers[client.ID] {
 				h.Broadcast <- &dtos.Message{
 					Content:        fmt.Sprintf("User %d has left", client.ID),

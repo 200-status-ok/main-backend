@@ -225,7 +225,7 @@ func VerifyOtpResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	View.LoginUserView(token, c)
+	View.LoginUserView(userId, token, c)
 }
 
 type GoogleLoginAndroidRequest struct {
@@ -288,7 +288,7 @@ func GoogleLoginAndroidResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	View.LoginUserView(token, c)
+	View.LoginUserView(userExist.ID, token, c)
 }
 
 type GoogleLoginRequest struct {
