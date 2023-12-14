@@ -1472,7 +1472,7 @@ const docTemplate = `{
         },
         "/users/authorize": {
             "get": {
-                "description": "Retrieves a User by ID",
+                "description": "Retrieves a User by Authorization Token",
                 "consumes": [
                     "application/json"
                 ],
@@ -1482,16 +1482,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Get a User by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get a User by Authorization Token",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1656,9 +1647,8 @@ const docTemplate = `{
             "required": [
                 "content",
                 "conversation_id",
+                "id",
                 "poster_id",
-                "receiver_id",
-                "sender_id",
                 "type"
             ],
             "properties": {
@@ -1668,13 +1658,10 @@ const docTemplate = `{
                 "conversation_id": {
                     "type": "integer"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "poster_id": {
-                    "type": "integer"
-                },
-                "receiver_id": {
-                    "type": "integer"
-                },
-                "sender_id": {
                     "type": "integer"
                 },
                 "type": {
@@ -1843,7 +1830,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
@@ -2359,6 +2346,9 @@ const docTemplate = `{
                 },
                 "is_owner": {
                     "type": "boolean"
+                },
+                "last_message": {
+                    "$ref": "#/definitions/Model.Message"
                 },
                 "name": {
                     "type": "string"

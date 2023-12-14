@@ -66,12 +66,11 @@ func GoogleCallback(c *gin.Context) {
 }
 
 // GetUser godoc
-// @Summary Get a User by ID
-// @Description Retrieves a User by ID
+// @Summary Get a User by Authorization Token
+// @Description Retrieves a User by Authorization Token
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Param id path int true "User ID"
 // @Success 200 {object} View.UserViewID
 // @Router /users/authorize [get]
 func GetUser(c *gin.Context) {

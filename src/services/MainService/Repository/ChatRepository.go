@@ -3,6 +3,7 @@ package Repository
 import (
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"gorm.io/gorm"
+	"time"
 )
 
 type ChatRepository struct {
@@ -74,18 +75,23 @@ func (r *ChatRepository) GetUnReadMessages(userId uint) ([]Model.Message, error)
 
 func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, error) {
 	var userConversations *Model.User
-	result := r.db.Preload("OwnConversations").Preload("MemberConversations").
-		Where("id = ?", userId).First(&userConversations)
+	result := r.db.
+		Preload("OwnConversations").
+		Preload("MemberConversations").
+		Preload("OwnConversations.Messages").
+		Preload("MemberConversations.Messages").
+		Where("id = ?", userId).
+		First(&userConversations)
 	if result.Error != nil {
 		return &Model.User{}, result.Error
 	}
-
 	return userConversations, nil
 }
 
-func (r *ChatRepository) SaveMessage(conversationId uint, senderId uint, message string,
-	mType string, receiverId int, time int64, status string) (*Model.Message, error) {
+func (r *ChatRepository) SaveMessage(messageID int64, conversationId uint, senderId uint, message string,
+	mType string, receiverId int, time time.Time, status string) (*Model.Message, error) {
 	messageModel := &Model.Message{
+		ID:             messageID,
 		ConversationId: conversationId,
 		Content:        message,
 		Type:           mType,

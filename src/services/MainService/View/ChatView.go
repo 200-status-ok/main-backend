@@ -6,11 +6,12 @@ import (
 )
 
 type ConversationView struct {
-	ID       uint   `json:"id"`
-	Name     string `json:"name"`
-	ImageURL string `json:"image_url"`
-	IsOwner  bool   `json:"is_owner"`
-	PosterID uint   `json:"poster_id"`
+	ID          uint          `json:"id"`
+	Name        string        `json:"name"`
+	ImageURL    string        `json:"image_url"`
+	IsOwner     bool          `json:"is_owner"`
+	PosterID    uint          `json:"poster_id"`
+	LastMessage Model.Message `json:"last_message"`
 }
 
 func GetAllUserConversation(c *gin.Context, user *Model.User) {
@@ -18,21 +19,23 @@ func GetAllUserConversation(c *gin.Context, user *Model.User) {
 
 	for _, conversation := range user.OwnConversations {
 		conversationView = append(conversationView, ConversationView{
-			ID:       conversation.ID,
-			Name:     conversation.Name,
-			ImageURL: conversation.ImageURL,
-			IsOwner:  true,
-			PosterID: conversation.PosterID,
+			ID:          conversation.ID,
+			Name:        conversation.Name,
+			ImageURL:    conversation.ImageURL,
+			IsOwner:     true,
+			LastMessage: conversation.Messages[len(conversation.Messages)-1],
+			PosterID:    conversation.PosterID,
 		})
 	}
 
 	for _, conversation := range user.MemberConversations {
 		conversationView = append(conversationView, ConversationView{
-			ID:       conversation.ID,
-			Name:     conversation.Name,
-			ImageURL: conversation.ImageURL,
-			IsOwner:  false,
-			PosterID: conversation.PosterID,
+			ID:          conversation.ID,
+			Name:        conversation.Name,
+			ImageURL:    conversation.ImageURL,
+			IsOwner:     false,
+			LastMessage: conversation.Messages[len(conversation.Messages)-1],
+			PosterID:    conversation.PosterID,
 		})
 	}
 
