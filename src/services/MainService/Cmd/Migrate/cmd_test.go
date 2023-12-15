@@ -2,6 +2,7 @@ package Migrate
 
 import (
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
+	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
 	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
@@ -44,5 +45,14 @@ func TestESSetup(t *testing.T) {
 	err := esClient.DeletePosterIndex()
 	assert.NoError(t, err)
 	err = esClient.CreatePosterIndex()
+	assert.NoError(t, err)
+}
+
+func TestInsertAllPostersInES(t *testing.T) {
+	repository := Repository.NewPosterRepository(pgsql.GetDB())
+	allESPosters, err := repository.GetAllESPosters()
+	assert.NoError(t, err)
+	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
+	err = esPosterCli.InsertAllPosters(allESPosters)
 	assert.NoError(t, err)
 }
