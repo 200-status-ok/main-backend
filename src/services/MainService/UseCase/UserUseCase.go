@@ -26,7 +26,7 @@ import (
 	"time"
 )
 
-func generateSecretKeyForNewUser(user string) (string, error) {
+func GenerateSecretKeyForNewUser(user string) (string, error) {
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "main-backend",
 		AccountName: user,
@@ -67,7 +67,7 @@ func SendOTPResponse(c *gin.Context) {
 		return
 	}
 
-	secretKey, _ := generateSecretKeyForNewUser(user.Username)
+	secretKey, _ := GenerateSecretKeyForNewUser(user.Username)
 	err := redisClient.Set(user.Username, secretKey)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

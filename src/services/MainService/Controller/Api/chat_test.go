@@ -23,7 +23,7 @@ var wsUseCase = NewChatWS(hub)
 var chat = chatServer{
 	chatWS: wsUseCase,
 }
-var jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcmVkIjoiMjAyMy0xMi0wN1QwODo0OTo0MC43NzQ3NzExNzZaIiwiaWQiOiJkNjA5MmE2My0zYzZjLTQ2YWYtYmY3MS1mMjI3NjMxYjBmNjQiLCJpc3N1ZWRBdCI6IjIwMjMtMTEtMzBUMDg6NDk6NDAuNzc0NzcwMzU4WiIsInJvbGUiOiJVc2VyIiwidXNlcklkIjo1MCwidXNlcm5hbWUiOiJhbGlmYWtoYXJpQGdtYWlsLmNvbSJ9.PKG9Sn6iC3sXya5Q-9_uoCMb20NhMf4KVkBKbvdBDkg"
+var jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcmVkIjoiMjAyMy0xMi0yMlQxODo1ODoyNy4xMTM1ODU3OTVaIiwiaWQiOiI1ZGE1MTQ4Zi03ZjgyLTRmZTEtYWM2OS0zNzZhZGYyMGMxOWQiLCJpc3N1ZWRBdCI6IjIwMjMtMTItMTVUMTg6NTg6MjcuMTEzNTg1NjE0WiIsInJvbGUiOiJVc2VyIiwidXNlcklkIjoxLCJ1c2VybmFtZSI6IjA5MTAwNTcwODc3In0.T24rE80v36JLAw2qxHIPGIA8bQoF0BrVyn-xj8MNLqk"
 
 func TestChatWS_SendMessage(t *testing.T) {
 	t.Run("Exist Conversation", func(t *testing.T) {
@@ -33,11 +33,10 @@ func TestChatWS_SendMessage(t *testing.T) {
 		router.Use(Middleware.AuthMiddleware(token))
 		router.POST("/api/v1/chat/authorize/message", chat.chatWS.SendMessage)
 		validReq := map[string]interface{}{
+			"id":              1702666228,
 			"content":         "Hello",
 			"conversation_id": 3,
 			"post_id":         1,
-			"receiver_id":     37,
-			"sender_id":       38,
 			"type":            "text",
 		}
 		requestJSON, _ := json.Marshal(validReq)
@@ -58,11 +57,10 @@ func TestChatWS_SendMessage(t *testing.T) {
 		router.Use(Middleware.AuthMiddleware(token))
 		router.POST("/api/v1/chat/authorize/message", chat.chatWS.SendMessage)
 		validReq := map[string]interface{}{
+			"id":              1702666228,
 			"content":         "Hello, how are you?",
 			"conversation_id": -1,
 			"post_id":         1,
-			"receiver_id":     37,
-			"sender_id":       50,
 			"type":            "text",
 		}
 		requestJSON, _ := json.Marshal(validReq)
