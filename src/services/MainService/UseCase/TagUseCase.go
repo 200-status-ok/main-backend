@@ -82,7 +82,6 @@ func DeleteTagByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
 	c.JSON(http.StatusOK, gin.H{"message": "Tag deleted successfully"})
 }
 
@@ -102,7 +101,6 @@ func GetTagByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
 	View.CreateTagView(tags, c)
 }
 

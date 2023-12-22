@@ -71,7 +71,7 @@ func GoogleCallback(c *gin.Context) {
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} View.UserViewID
+// @Success 200 {object} View.UserViewInfo
 // @Router /users/authorize [get]
 func GetUser(c *gin.Context) {
 	UseCase.GetUserByIdResponse(c)
@@ -85,7 +85,7 @@ func GetUser(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID"
 // @Param user body UseCase.UpdateUserRequest true "User"
-// @Success 200 {object} View.UserViewIDs
+// @Success 200 {object} View.UserViewInfo
 // @Router /users/authorize/ [patch]
 func UpdateUser(c *gin.Context) {
 	UseCase.UpdateUserByIdResponse(c)
@@ -136,7 +136,7 @@ func PaymentVerify(c *gin.Context) {
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} View.UserViewPayments
+// @Success 200 {object} View.UserViewPayment
 // @Router /users/authorize/payment/user_wallet/transactions [get]
 func GetTransactions(c *gin.Context) {
 	UseCase.GetTransactionsResponse(c)

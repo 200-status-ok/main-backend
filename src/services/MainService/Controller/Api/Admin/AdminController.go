@@ -38,7 +38,7 @@ func LoginAdmin(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param userid path int true "User ID"
-// @Success 200 {object} View.UserViewID
+// @Success 200 {object} View.UserViewInfo
 // @Router /admin/user/{userid} [get]
 func GetUser(c *gin.Context) {
 	UseCase.GetUserByIdAdminResponse(c)
@@ -50,7 +50,7 @@ func GetUser(c *gin.Context) {
 // @Tags admin
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} View.UserViewIDs
+// @Success 200 {array} View.UserViewInfo
 // @Router /admin/users [get]
 func GetUsers(c *gin.Context) {
 	UseCase.GetUsersResponse(c)
@@ -64,7 +64,7 @@ func GetUsers(c *gin.Context) {
 // @Produce  json
 // @Param userid path int true "User ID"
 // @Param user body UseCase.UserInfo true "User"
-// @Success 200 {object} View.UserViewIDs
+// @Success 200 {object} View.UserViewInfo
 // @Router /admin/user/{userid} [patch]
 func UpdateUser(c *gin.Context) {
 	UseCase.UpdateUserByIdAdminResponse(c)
@@ -77,7 +77,7 @@ func UpdateUser(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param user body UseCase.CreateUserRequest true "User"
-// @Success 200 {object} View.UserViewID
+// @Success 200 {object} View.UserViewInfo
 // @Router /admin/user [post]
 func CreateUser(c *gin.Context) {
 	UseCase.CreateUserResponse(c)

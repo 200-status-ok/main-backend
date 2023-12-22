@@ -217,7 +217,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.UserViewID"
+                            "$ref": "#/definitions/View.UserViewInfo"
                         }
                     }
                 }
@@ -249,7 +249,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.UserViewID"
+                            "$ref": "#/definitions/View.UserViewInfo"
                         }
                     }
                 }
@@ -315,7 +315,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.UserViewIDs"
+                            "$ref": "#/definitions/View.UserViewInfo"
                         }
                     }
                 }
@@ -340,7 +340,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/View.UserViewIDs"
+                                "$ref": "#/definitions/View.UserViewInfo"
                             }
                         }
                     }
@@ -1487,7 +1487,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.UserViewID"
+                            "$ref": "#/definitions/View.UserViewInfo"
                         }
                     }
                 }
@@ -1546,7 +1546,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.UserViewIDs"
+                            "$ref": "#/definitions/View.UserViewInfo"
                         }
                     }
                 }
@@ -1605,7 +1605,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/View.UserViewPayments"
+                            "$ref": "#/definitions/View.UserViewPayment"
                         }
                     }
                 }
@@ -1698,41 +1698,6 @@ const docTemplate = `{
                 }
             }
         },
-        "Model.Address": {
-            "type": "object",
-            "properties": {
-                "address_detail": {
-                    "type": "string"
-                },
-                "address_id": {
-                    "type": "integer"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "latitude": {
-                    "type": "number"
-                },
-                "longitude": {
-                    "type": "number"
-                },
-                "province": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
         "Model.Conversation": {
             "type": "object",
             "properties": {
@@ -1771,55 +1736,6 @@ const docTemplate = `{
                 }
             }
         },
-        "Model.Image": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "poster_id": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "Model.MarkedPoster": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "poster": {
-                    "$ref": "#/definitions/Model.Poster"
-                },
-                "poster_id": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "Model.Message": {
             "type": "object",
             "properties": {
@@ -1855,197 +1771,6 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
-                }
-            }
-        },
-        "Model.Payment": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "track_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "Model.Poster": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Address"
-                    }
-                },
-                "award": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "description;": {
-                    "type": "string"
-                },
-                "has_alert": {
-                    "type": "boolean"
-                },
-                "has_chat": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "image": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Image"
-                    }
-                },
-                "special_type": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/Model.PosterStatus"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Tag"
-                    }
-                },
-                "telegram_id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "user_phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "Model.PosterStatus": {
-            "type": "string",
-            "enum": [
-                "lost",
-                "found"
-            ],
-            "x-enum-varnames": [
-                "Lost",
-                "Found"
-            ]
-        },
-        "Model.Tag": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "posters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Poster"
-                    }
-                },
-                "state": {
-                    "description": "one of [rejected, accepted, pending]",
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "Model.User": {
-            "type": "object",
-            "properties": {
-                "Payments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Payment"
-                    }
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "marked_posters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.MarkedPoster"
-                    }
-                },
-                "member_conversations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Conversation"
-                    }
-                },
-                "own_conversations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Conversation"
-                    }
-                },
-                "posters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Poster"
-                    }
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                },
-                "wallet": {
-                    "type": "number"
                 }
             }
         },
@@ -2287,6 +2012,38 @@ const docTemplate = `{
                 }
             }
         },
+        "View.AddressView": {
+            "type": "object",
+            "properties": {
+                "address_detail": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "poster_id": {
+                    "type": "integer"
+                },
+                "province": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
         "View.AdminLoginView": {
             "type": "object",
             "properties": {
@@ -2335,6 +2092,38 @@ const docTemplate = `{
                 }
             }
         },
+        "View.ChatMessageView": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "receiver_id": {
+                    "type": "integer"
+                },
+                "sender_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
         "View.ConversationView": {
             "type": "object",
             "properties": {
@@ -2348,7 +2137,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "last_message": {
-                    "$ref": "#/definitions/Model.Message"
+                    "$ref": "#/definitions/View.ChatMessageView"
                 },
                 "name": {
                     "type": "string"
@@ -2384,6 +2173,46 @@ const docTemplate = `{
                 }
             }
         },
+        "View.ImageView": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "View.MarkedPosterView": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "poster": {
+                    "$ref": "#/definitions/View.PosterView"
+                },
+                "poster_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "View.MessageView": {
             "type": "object",
             "properties": {
@@ -2402,10 +2231,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "issuer": {
-                    "$ref": "#/definitions/Model.User"
+                    "$ref": "#/definitions/View.UserViewInfo"
                 },
                 "poster": {
-                    "$ref": "#/definitions/Model.Poster"
+                    "$ref": "#/definitions/View.PosterView"
                 },
                 "report_type": {
                     "type": "string"
@@ -2421,14 +2250,14 @@ const docTemplate = `{
                 "addresses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Model.Address"
+                        "$ref": "#/definitions/View.AddressView"
                     }
                 },
                 "award": {
                     "type": "number"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string"
@@ -2439,7 +2268,7 @@ const docTemplate = `{
                 "images": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Model.Image"
+                        "$ref": "#/definitions/View.ImageView"
                     }
                 },
                 "special_type": {
@@ -2449,12 +2278,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/Model.PosterStatus"
+                    "type": "string"
                 },
                 "tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Model.Tag"
+                        "$ref": "#/definitions/View.TagView"
                     }
                 },
                 "telegram_id": {
@@ -2464,7 +2293,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "user_id": {
                     "type": "integer"
@@ -2477,17 +2306,26 @@ const docTemplate = `{
         "View.TagView": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
                 }
             }
         },
         "View.UserView": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "message": {
                     "type": "string"
                 },
@@ -2496,7 +2334,7 @@ const docTemplate = `{
                 }
             }
         },
-        "View.UserViewID": {
+        "View.UserViewInfo": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2505,13 +2343,13 @@ const docTemplate = `{
                 "marked_posters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Model.MarkedPoster"
+                        "$ref": "#/definitions/View.MarkedPosterView"
                     }
                 },
                 "posters": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Model.Poster"
+                        "$ref": "#/definitions/View.PosterView"
                     }
                 },
                 "username": {
@@ -2522,40 +2360,14 @@ const docTemplate = `{
                 }
             }
         },
-        "View.UserViewIDs": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "marked_posters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.MarkedPoster"
-                    }
-                },
-                "posters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Model.Poster"
-                    }
-                },
-                "username": {
-                    "type": "string"
-                },
-                "wallet": {
-                    "type": "number"
-                }
-            }
-        },
-        "View.UserViewPayments": {
+        "View.UserViewPayment": {
             "type": "object",
             "properties": {
                 "amount": {
                     "type": "number"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -2629,9 +2441,6 @@ const docTemplate = `{
                         "premium"
                     ]
                 },
-                "state": {
-                    "type": "string"
-                },
                 "status": {
                     "type": "string",
                     "enum": [
@@ -2694,7 +2503,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "description": {
                     "type": "string"
@@ -2735,7 +2544,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "user_id": {
                     "type": "integer",

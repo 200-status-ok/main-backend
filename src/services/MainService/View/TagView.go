@@ -10,14 +10,18 @@ import (
 )
 
 type TagView struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	ID        uint   `json:"id"`
+	Name      string `json:"name"`
+	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"updated_at"`
 }
 
 func CreateTagView(tag Model2.Tag, c *gin.Context) {
 	result := TagView{
-		ID:   tag.ID,
-		Name: tag.Name,
+		ID:        tag.ID,
+		Name:      tag.Name,
+		CreatedAt: tag.CreatedAt.Unix(),
+		UpdatedAt: tag.UpdatedAt.Unix(),
 	}
 	c.JSON(http.StatusOK, result)
 }
@@ -26,8 +30,10 @@ func GetAllTagView(tags []Model2.Tag, c *gin.Context) {
 	var result []TagView
 	for _, tag := range tags {
 		result = append(result, TagView{
-			ID:   tag.ID,
-			Name: tag.Name,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt.Unix(),
+			UpdatedAt: tag.UpdatedAt.Unix(),
 		})
 	}
 	c.JSON(http.StatusOK, result)
@@ -41,7 +47,6 @@ type GeneratedPosterInfoView struct {
 }
 
 func GeneratePosterInfoView(generatedTags dtos.GeneratedPosterTags, generatedColors dtos.GeneratedPosterColors, c *gin.Context) {
-
 	var titlesResult []string
 	for i := 0; i < int(math.Min(float64(len(generatedTags.Result.Tags)), 4)); i++ {
 		titlesResult = append(titlesResult, generatedTags.Result.Tags[i].Tag.Fa)
