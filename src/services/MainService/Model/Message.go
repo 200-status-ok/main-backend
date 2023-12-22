@@ -17,6 +17,7 @@ type Message struct {
 	Type           string         `gorm:"type:varchar(50);not null" json:"type"`
 	IsSend         bool           `gorm:"default:false" json:"is_send"`
 	Status         string         `gorm:"type:varchar(50);default:'unread'" json:"status"`
+	SequenceNumber int            `gorm:"default:0" json:"sequence_number"`
 }
 
 func (m *Message) GetID() int64 {

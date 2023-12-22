@@ -116,6 +116,7 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		ConversationID: int(message.ConversationId),
 		SenderID:       int(message.SenderId),
 		ReceiverId:     int(message.ReceiverId),
+		SequenceNo:     message.SequenceNumber,
 		Time:           message.CreatedAt.Unix(),
 		Type:           message.Type,
 		Status:         message.Status,

@@ -90,6 +90,12 @@ func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, erro
 
 func (r *ChatRepository) SaveMessage(messageID int64, conversationId uint, senderId uint, message string,
 	mType string, receiverId int, time time.Time, status string) (*Model.Message, error) {
+	lastSeqNo := 0
+	var conversation Model.Conversation
+	r.db.Where("id = ?", conversationId).First(&conversation)
+	if conversation.LastSeqNo != 0 {
+		lastSeqNo = conversation.LastSeqNo
+	}
 	messageModel := &Model.Message{
 		ID:             messageID,
 		ConversationId: conversationId,
@@ -99,8 +105,10 @@ func (r *ChatRepository) SaveMessage(messageID int64, conversationId uint, sende
 		ReceiverId:     uint(receiverId),
 		CreatedAt:      time,
 		Status:         status,
+		SequenceNumber: lastSeqNo + 1,
 	}
-
+	conversation.LastSeqNo = lastSeqNo + 1
+	r.db.Save(&conversation)
 	result := r.db.Create(&messageModel)
 	if result.Error != nil {
 		return &Model.Message{}, result.Error
