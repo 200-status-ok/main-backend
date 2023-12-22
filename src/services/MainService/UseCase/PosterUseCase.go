@@ -97,7 +97,6 @@ func GetPosterByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
 	View.GetPosterByIdView(poster, c)
 }
 
@@ -330,7 +329,6 @@ func CreatePosterReportResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
 	c.JSON(http.StatusOK, gin.H{"message": "Report created"})
 }
 
@@ -359,7 +357,6 @@ func GetPosterReportsResponse(c *gin.Context) {
 		return
 	}
 
-	//DBConfiguration.CloseDB()
 	View.GetPosterReportsView(posterReports, c)
 }
 
@@ -419,8 +416,6 @@ func UpdatePosterReportResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//DBConfiguration.CloseDB()
-
 	c.JSON(http.StatusOK, gin.H{"message": "Report resolved"})
 }
 
@@ -521,7 +516,6 @@ func MockPoster(count int, userID int, tagNames []string) error {
 					Status:      "lost",
 					Alert:       true,
 					Chat:        true,
-					State:       "pending",
 				},
 				Addresses: []DTO2.CreateAddressDTO{
 					{
@@ -553,7 +547,6 @@ func MockPoster(count int, userID int, tagNames []string) error {
 					Status:      "found",
 					Alert:       true,
 					Chat:        true,
-					State:       "pending",
 				},
 				Addresses: []DTO2.CreateAddressDTO{
 					{

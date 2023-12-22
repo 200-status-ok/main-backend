@@ -7,11 +7,6 @@ import (
 
 type PosterStatus string
 
-const (
-	Lost  PosterStatus = "lost"
-	Found PosterStatus = "found"
-)
-
 type Poster struct {
 	ID          uint           `gorm:"primarykey" json:"id"`
 	CreatedAt   time.Time      `json:"created_at"`

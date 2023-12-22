@@ -16,7 +16,7 @@ func LoginUserView(userID uint, token string, c *gin.Context) {
 	result := UserView{
 		ID:      userID,
 		Token:   token,
-		Message: "Login successful",
+		Message: "login successful",
 	}
 	c.JSON(200, result)
 }

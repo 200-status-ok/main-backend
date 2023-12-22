@@ -19,9 +19,9 @@ type AdminLoginView struct {
 }
 
 func LoginAdminView(token string, c *gin.Context) {
-	result := UserView{
+	result := AdminLoginView{
 		Token:   token,
-		Message: "Login successful",
+		Message: "login successful",
 	}
 	c.JSON(200, result)
 }
