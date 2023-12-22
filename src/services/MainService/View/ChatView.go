@@ -33,6 +33,7 @@ type ChatMessageView struct {
 	ConversationID uint   `json:"conversation_id"`
 	SenderID       uint   `json:"sender_id"`
 	ReceiverID     uint   `json:"receiver_id"`
+	SequenceNo     int    `json:"sequence_no"`
 	Status         string `json:"status"`
 	CreatedAt      int64  `json:"created_at"`
 	UpdatedAt      int64  `json:"updated_at"`
@@ -48,6 +49,7 @@ func GetAllUserConversation(c *gin.Context, user *Model.User) {
 			ConversationID: conversation.Messages[len(conversation.Messages)-1].ConversationId,
 			SenderID:       conversation.Messages[len(conversation.Messages)-1].SenderId,
 			ReceiverID:     conversation.Messages[len(conversation.Messages)-1].ReceiverId,
+			SequenceNo:     conversation.Messages[len(conversation.Messages)-1].SequenceNumber,
 			Status:         conversation.Messages[len(conversation.Messages)-1].Status,
 			CreatedAt:      conversation.Messages[len(conversation.Messages)-1].CreatedAt.Unix(),
 			UpdatedAt:      conversation.Messages[len(conversation.Messages)-1].UpdatedAt.Unix(),
@@ -70,6 +72,7 @@ func GetAllUserConversation(c *gin.Context, user *Model.User) {
 			ConversationID: conversation.Messages[len(conversation.Messages)-1].ConversationId,
 			SenderID:       conversation.Messages[len(conversation.Messages)-1].SenderId,
 			ReceiverID:     conversation.Messages[len(conversation.Messages)-1].ReceiverId,
+			SequenceNo:     conversation.Messages[len(conversation.Messages)-1].SequenceNumber,
 			Status:         conversation.Messages[len(conversation.Messages)-1].Status,
 			CreatedAt:      conversation.Messages[len(conversation.Messages)-1].CreatedAt.Unix(),
 			UpdatedAt:      conversation.Messages[len(conversation.Messages)-1].UpdatedAt.Unix(),
@@ -103,6 +106,7 @@ func GetConversationHistory(c *gin.Context, messages []Model.Message, userID uin
 			ConversationID: message.ConversationId,
 			SenderID:       message.SenderId,
 			ReceiverID:     message.ReceiverId,
+			SequenceNo:     message.SequenceNumber,
 			Status:         message.Status,
 			CreatedAt:      message.CreatedAt.Unix(),
 			UpdatedAt:      message.UpdatedAt.Unix(),
