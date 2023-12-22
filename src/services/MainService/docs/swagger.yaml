@@ -38,29 +38,6 @@ definitions:
       name:
         type: string
     type: object
-  Model.Address:
-    properties:
-      address_detail:
-        type: string
-      address_id:
-        type: integer
-      city:
-        type: string
-      created_at:
-        type: string
-      deleted_at:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      latitude:
-        type: number
-      longitude:
-        type: number
-      province:
-        type: string
-      updated_at:
-        type: string
-    type: object
   Model.Conversation:
     properties:
       created_at:
@@ -86,38 +63,6 @@ definitions:
       updated_at:
         type: string
     type: object
-  Model.Image:
-    properties:
-      created_at:
-        type: string
-      deleted_at:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      poster_id:
-        type: integer
-      updated_at:
-        type: string
-      url:
-        type: string
-    type: object
-  Model.MarkedPoster:
-    properties:
-      created_at:
-        type: string
-      deleted_at:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      poster:
-        $ref: '#/definitions/Model.Poster'
-      poster_id:
-        type: integer
-      updated_at:
-        type: string
-      user_id:
-        type: integer
-    type: object
   Model.Message:
     properties:
       content:
@@ -142,133 +87,6 @@ definitions:
         type: string
       updated_at:
         type: string
-    type: object
-  Model.Payment:
-    properties:
-      amount:
-        type: number
-      created_at:
-        type: string
-      deleted_at:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      status:
-        type: string
-      track_id:
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        type: integer
-    type: object
-  Model.Poster:
-    properties:
-      address:
-        items:
-          $ref: '#/definitions/Model.Address'
-        type: array
-      award:
-        type: number
-      created_at:
-        type: string
-      deleted_at:
-        $ref: '#/definitions/gorm.DeletedAt'
-      description;:
-        type: string
-      has_alert:
-        type: boolean
-      has_chat:
-        type: boolean
-      id:
-        type: integer
-      image:
-        items:
-          $ref: '#/definitions/Model.Image'
-        type: array
-      special_type:
-        type: string
-      state:
-        type: string
-      status:
-        $ref: '#/definitions/Model.PosterStatus'
-      tags:
-        items:
-          $ref: '#/definitions/Model.Tag'
-        type: array
-      telegram_id:
-        type: string
-      title:
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        type: integer
-      user_phone:
-        type: string
-    type: object
-  Model.PosterStatus:
-    enum:
-    - lost
-    - found
-    type: string
-    x-enum-varnames:
-    - Lost
-    - Found
-  Model.Tag:
-    properties:
-      created_at:
-        type: string
-      deleted_at:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      name:
-        type: string
-      posters:
-        items:
-          $ref: '#/definitions/Model.Poster'
-        type: array
-      state:
-        description: one of [rejected, accepted, pending]
-        type: string
-      updated_at:
-        type: string
-    type: object
-  Model.User:
-    properties:
-      Payments:
-        items:
-          $ref: '#/definitions/Model.Payment'
-        type: array
-      created_at:
-        type: string
-      deleted_at:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      marked_posters:
-        items:
-          $ref: '#/definitions/Model.MarkedPoster'
-        type: array
-      member_conversations:
-        items:
-          $ref: '#/definitions/Model.Conversation'
-        type: array
-      own_conversations:
-        items:
-          $ref: '#/definitions/Model.Conversation'
-        type: array
-      posters:
-        items:
-          $ref: '#/definitions/Model.Poster'
-        type: array
-      updated_at:
-        type: string
-      username:
-        type: string
-      wallet:
-        type: number
     type: object
   UseCase.CreateMockDataRequest:
     properties:
@@ -436,6 +254,27 @@ definitions:
     - otp
     - username
     type: object
+  View.AddressView:
+    properties:
+      address_detail:
+        type: string
+      city:
+        type: string
+      created_at:
+        type: integer
+      id:
+        type: integer
+      latitude:
+        type: number
+      longitude:
+        type: number
+      poster_id:
+        type: integer
+      province:
+        type: string
+      updated_at:
+        type: integer
+    type: object
   View.AdminLoginView:
     properties:
       message:
@@ -467,6 +306,27 @@ definitions:
       total:
         type: integer
     type: object
+  View.ChatMessageView:
+    properties:
+      content:
+        type: string
+      conversation_id:
+        type: integer
+      created_at:
+        type: integer
+      id:
+        type: integer
+      receiver_id:
+        type: integer
+      sender_id:
+        type: integer
+      status:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: integer
+    type: object
   View.ConversationView:
     properties:
       id:
@@ -476,7 +336,7 @@ definitions:
       is_owner:
         type: boolean
       last_message:
-        $ref: '#/definitions/Model.Message'
+        $ref: '#/definitions/View.ChatMessageView'
       name:
         type: string
       poster_id:
@@ -499,6 +359,32 @@ definitions:
           type: string
         type: array
     type: object
+  View.ImageView:
+    properties:
+      created_at:
+        type: integer
+      id:
+        type: integer
+      updated_at:
+        type: integer
+      url:
+        type: string
+    type: object
+  View.MarkedPosterView:
+    properties:
+      created_at:
+        type: integer
+      id:
+        type: integer
+      poster:
+        $ref: '#/definitions/View.PosterView'
+      poster_id:
+        type: integer
+      updated_at:
+        type: integer
+      user_id:
+        type: integer
+    type: object
   View.MessageView:
     properties:
       message:
@@ -511,9 +397,9 @@ definitions:
       id:
         type: integer
       issuer:
-        $ref: '#/definitions/Model.User'
+        $ref: '#/definitions/View.UserViewInfo'
       poster:
-        $ref: '#/definitions/Model.Poster'
+        $ref: '#/definitions/View.PosterView'
       report_type:
         type: string
       status:
@@ -523,36 +409,36 @@ definitions:
     properties:
       addresses:
         items:
-          $ref: '#/definitions/Model.Address'
+          $ref: '#/definitions/View.AddressView'
         type: array
       award:
         type: number
       created_at:
-        type: string
+        type: integer
       description:
         type: string
       id:
         type: integer
       images:
         items:
-          $ref: '#/definitions/Model.Image'
+          $ref: '#/definitions/View.ImageView'
         type: array
       special_type:
         type: string
       state:
         type: string
       status:
-        $ref: '#/definitions/Model.PosterStatus'
+        type: string
       tags:
         items:
-          $ref: '#/definitions/Model.Tag'
+          $ref: '#/definitions/View.TagView'
         type: array
       telegram_id:
         type: string
       title:
         type: string
       updated_at:
-        type: string
+        type: integer
       user_id:
         type: integer
       user_phone:
@@ -560,58 +446,47 @@ definitions:
     type: object
   View.TagView:
     properties:
+      created_at:
+        type: integer
       id:
         type: integer
       name:
         type: string
+      updated_at:
+        type: integer
     type: object
   View.UserView:
     properties:
+      id:
+        type: integer
       message:
         type: string
       token:
         type: string
     type: object
-  View.UserViewID:
+  View.UserViewInfo:
     properties:
       id:
         type: integer
       marked_posters:
         items:
-          $ref: '#/definitions/Model.MarkedPoster'
+          $ref: '#/definitions/View.MarkedPosterView'
         type: array
       posters:
         items:
-          $ref: '#/definitions/Model.Poster'
+          $ref: '#/definitions/View.PosterView'
         type: array
       username:
         type: string
       wallet:
         type: number
     type: object
-  View.UserViewIDs:
-    properties:
-      id:
-        type: integer
-      marked_posters:
-        items:
-          $ref: '#/definitions/Model.MarkedPoster'
-        type: array
-      posters:
-        items:
-          $ref: '#/definitions/Model.Poster'
-        type: array
-      username:
-        type: string
-      wallet:
-        type: number
-    type: object
-  View.UserViewPayments:
+  View.UserViewPayment:
     properties:
       amount:
         type: number
       created_at:
-        type: string
+        type: integer
       id:
         type: integer
       status:
@@ -659,8 +534,6 @@ definitions:
         - normal
         - premium
         type: string
-      state:
-        type: string
       status:
         enum:
         - lost
@@ -705,7 +578,7 @@ definitions:
       chat:
         type: boolean
       created_at:
-        type: string
+        type: integer
       description:
         type: string
       id:
@@ -733,7 +606,7 @@ definitions:
       title:
         type: string
       updated_at:
-        type: string
+        type: integer
       user_id:
         minimum: 1
         type: integer
@@ -995,7 +868,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.UserViewID'
+            $ref: '#/definitions/View.UserViewInfo'
       summary: Create a User
       tags:
       - admin
@@ -1034,7 +907,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.UserViewID'
+            $ref: '#/definitions/View.UserViewInfo'
       summary: Get a User by ID
       tags:
       - admin
@@ -1060,7 +933,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.UserViewIDs'
+            $ref: '#/definitions/View.UserViewInfo'
       summary: Update a User by ID
       tags:
       - admin
@@ -1076,7 +949,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/View.UserViewIDs'
+              $ref: '#/definitions/View.UserViewInfo'
             type: array
       summary: Get all Users
       tags:
@@ -1841,7 +1714,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.UserViewID'
+            $ref: '#/definitions/View.UserViewInfo'
       summary: Get a User by Authorization Token
       tags:
       - users
@@ -1880,7 +1753,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.UserViewIDs'
+            $ref: '#/definitions/View.UserViewInfo'
       summary: Update a User by ID
       tags:
       - users
@@ -1919,7 +1792,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/View.UserViewPayments'
+            $ref: '#/definitions/View.UserViewPayment'
       summary: Get Transactions
       tags:
       - users

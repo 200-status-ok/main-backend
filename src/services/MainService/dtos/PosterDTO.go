@@ -1,7 +1,5 @@
 package dtos
 
-import "time"
-
 type CreatePosterDTO struct {
 	Title       string  `json:"title" binding:"required,max=255"`
 	Description string  `json:"description" binding:"max=1000"`
@@ -11,7 +9,6 @@ type CreatePosterDTO struct {
 	Alert       bool    `json:"alert" binding:"required"`
 	Chat        bool    `json:"chat" binding:"required"`
 	Award       float64 `json:"award"`
-	State       string  `json:"state"`
 	SpecialType string  `json:"special_type" binding:"oneof=normal premium"`
 }
 
@@ -28,8 +25,8 @@ type ESPosterDTO struct {
 	UserID      uint           `json:"user_id" binding:"required,min=1"`
 	State       string         `json:"state"`
 	SpecialType string         `json:"special_type" binding:"oneof=normal premium"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	CreatedAt   int64          `json:"created_at"`
+	UpdatedAt   int64          `json:"updated_at"`
 	Addresses   []ESAddressDTO `json:"addresses"`
 	Images      []string       `json:"images"`
 	Tags        []ESTagDTO     `json:"tags"`

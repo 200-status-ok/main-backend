@@ -116,12 +116,12 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		ConversationID: int(message.ConversationId),
 		SenderID:       int(message.SenderId),
 		ReceiverId:     int(message.ReceiverId),
-		Time:           message.CreatedAt,
+		Time:           message.CreatedAt.Unix(),
 		Type:           message.Type,
 		Status:         message.Status,
 	}
 	wsUseCase.Hub.Broadcast <- msg
-	c.JSON(http.StatusOK, gin.H{"message": "Message sent successfully", "send_message": message})
+	c.JSON(http.StatusOK, gin.H{"message": "Message sent successfully", "send_message": msg})
 }
 
 type OpenWSConnection struct {
@@ -257,7 +257,7 @@ func GetConversationById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Get conversation successfully", "conversation": conversation})
+	View.GetConversationByID(conversation, c)
 }
 
 type ConversationIDPathRequest struct {
@@ -378,7 +378,7 @@ func (wsUseCase *ChatWS) ReadMessages(c *gin.Context) {
 		ConversationID: 0,
 		SenderID:       0,
 		ReceiverId:     request.SenderID,
-		Time:           messageTime,
+		Time:           messageTime.Unix(),
 		Type:           "text-notification",
 		Status:         "notification",
 	}
