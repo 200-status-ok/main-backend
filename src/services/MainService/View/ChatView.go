@@ -51,8 +51,8 @@ func GetAllUserConversation(c *gin.Context, user *Model.User) {
 			ReceiverID:     conversation.Messages[len(conversation.Messages)-1].ReceiverId,
 			SequenceNo:     conversation.Messages[len(conversation.Messages)-1].SequenceNumber,
 			Status:         conversation.Messages[len(conversation.Messages)-1].Status,
-			CreatedAt:      conversation.Messages[len(conversation.Messages)-1].CreatedAt.Unix(),
-			UpdatedAt:      conversation.Messages[len(conversation.Messages)-1].UpdatedAt.Unix(),
+			CreatedAt:      conversation.Messages[len(conversation.Messages)-1].CreatedAt.UnixMilli(),
+			UpdatedAt:      conversation.Messages[len(conversation.Messages)-1].UpdatedAt.UnixMilli(),
 		}
 		conversationView = append(conversationView, ConversationView{
 			ID:          conversation.ID,
@@ -74,8 +74,8 @@ func GetAllUserConversation(c *gin.Context, user *Model.User) {
 			ReceiverID:     conversation.Messages[len(conversation.Messages)-1].ReceiverId,
 			SequenceNo:     conversation.Messages[len(conversation.Messages)-1].SequenceNumber,
 			Status:         conversation.Messages[len(conversation.Messages)-1].Status,
-			CreatedAt:      conversation.Messages[len(conversation.Messages)-1].CreatedAt.Unix(),
-			UpdatedAt:      conversation.Messages[len(conversation.Messages)-1].UpdatedAt.Unix(),
+			CreatedAt:      conversation.Messages[len(conversation.Messages)-1].CreatedAt.UnixMilli(),
+			UpdatedAt:      conversation.Messages[len(conversation.Messages)-1].UpdatedAt.UnixMilli(),
 		}
 		conversationView = append(conversationView, ConversationView{
 			ID:          conversation.ID,
@@ -108,8 +108,8 @@ func GetConversationHistory(c *gin.Context, messages []Model.Message, userID uin
 			ReceiverID:     message.ReceiverId,
 			SequenceNo:     message.SequenceNumber,
 			Status:         message.Status,
-			CreatedAt:      message.CreatedAt.Unix(),
-			UpdatedAt:      message.UpdatedAt.Unix(),
+			CreatedAt:      message.CreatedAt.UnixMilli(),
+			UpdatedAt:      message.UpdatedAt.UnixMilli(),
 		})
 	}
 	conversationHistoryView.Messages = messagesView
@@ -125,8 +125,8 @@ func GetConversationByID(conversation Model.Conversation, c *gin.Context) {
 		OwnerID:   conversation.OwnerID,
 		MemberID:  conversation.MemberID,
 		PosterID:  conversation.PosterID,
-		CreatedAt: conversation.CreatedAt.Unix(),
-		UpdatedAt: conversation.UpdatedAt.Unix(),
+		CreatedAt: conversation.CreatedAt.UnixMilli(),
+		UpdatedAt: conversation.UpdatedAt.UnixMilli(),
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Get conversation successfully", "conversation": conversationByID})
 }

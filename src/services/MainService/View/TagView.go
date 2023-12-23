@@ -20,8 +20,8 @@ func CreateTagView(tag Model2.Tag, c *gin.Context) {
 	result := TagView{
 		ID:        tag.ID,
 		Name:      tag.Name,
-		CreatedAt: tag.CreatedAt.Unix(),
-		UpdatedAt: tag.UpdatedAt.Unix(),
+		CreatedAt: tag.CreatedAt.UnixMilli(),
+		UpdatedAt: tag.UpdatedAt.UnixMilli(),
 	}
 	c.JSON(http.StatusOK, result)
 }
@@ -32,8 +32,8 @@ func GetAllTagView(tags []Model2.Tag, c *gin.Context) {
 		result = append(result, TagView{
 			ID:        tag.ID,
 			Name:      tag.Name,
-			CreatedAt: tag.CreatedAt.Unix(),
-			UpdatedAt: tag.UpdatedAt.Unix(),
+			CreatedAt: tag.CreatedAt.UnixMilli(),
+			UpdatedAt: tag.UpdatedAt.UnixMilli(),
 		})
 	}
 	c.JSON(http.StatusOK, result)

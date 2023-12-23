@@ -69,8 +69,8 @@ func GetPosterByIdView(poster Model2.Poster, c *gin.Context) {
 			PosterID:      address.PosterId,
 			Latitude:      address.Latitude,
 			Longitude:     address.Longitude,
-			CreatedAt:     address.CreatedAt.Unix(),
-			UpdatedAt:     address.UpdatedAt.Unix(),
+			CreatedAt:     address.CreatedAt.UnixMilli(),
+			UpdatedAt:     address.UpdatedAt.UnixMilli(),
 		})
 	}
 	imagesView := make([]ImageView, 0)
@@ -78,8 +78,8 @@ func GetPosterByIdView(poster Model2.Poster, c *gin.Context) {
 		imagesView = append(imagesView, ImageView{
 			ID:        image.ID,
 			Url:       image.Url,
-			CreatedAt: image.CreatedAt.Unix(),
-			UpdatedAt: image.UpdatedAt.Unix(),
+			CreatedAt: image.CreatedAt.UnixMilli(),
+			UpdatedAt: image.UpdatedAt.UnixMilli(),
 		})
 	}
 	tagsView := make([]TagView, 0)
@@ -87,8 +87,8 @@ func GetPosterByIdView(poster Model2.Poster, c *gin.Context) {
 		tagsView = append(tagsView, TagView{
 			ID:        tag.ID,
 			Name:      tag.Name,
-			CreatedAt: tag.CreatedAt.Unix(),
-			UpdatedAt: tag.UpdatedAt.Unix(),
+			CreatedAt: tag.CreatedAt.UnixMilli(),
+			UpdatedAt: tag.UpdatedAt.UnixMilli(),
 		})
 	}
 	result := PosterView{
@@ -103,8 +103,8 @@ func GetPosterByIdView(poster Model2.Poster, c *gin.Context) {
 		Tags:        tagsView,
 		User:        poster.UserID,
 		Award:       poster.Award,
-		CreatedAt:   poster.CreatedAt.Unix(),
-		UpdatedAt:   poster.UpdatedAt.Unix(),
+		CreatedAt:   poster.CreatedAt.UnixMilli(),
+		UpdatedAt:   poster.UpdatedAt.UnixMilli(),
 		State:       poster.State,
 		SpecialType: poster.SpecialType,
 	}
@@ -122,8 +122,8 @@ func CreatePosterView(poster Model2.Poster, c *gin.Context) {
 			PosterID:      address.PosterId,
 			Latitude:      address.Latitude,
 			Longitude:     address.Longitude,
-			CreatedAt:     address.CreatedAt.Unix(),
-			UpdatedAt:     address.UpdatedAt.Unix(),
+			CreatedAt:     address.CreatedAt.UnixMilli(),
+			UpdatedAt:     address.UpdatedAt.UnixMilli(),
 		})
 	}
 	imagesView := make([]ImageView, 0)
@@ -131,8 +131,8 @@ func CreatePosterView(poster Model2.Poster, c *gin.Context) {
 		imagesView = append(imagesView, ImageView{
 			ID:        image.ID,
 			Url:       image.Url,
-			CreatedAt: image.CreatedAt.Unix(),
-			UpdatedAt: image.UpdatedAt.Unix(),
+			CreatedAt: image.CreatedAt.UnixMilli(),
+			UpdatedAt: image.UpdatedAt.UnixMilli(),
 		})
 	}
 	tagsView := make([]TagView, 0)
@@ -140,8 +140,8 @@ func CreatePosterView(poster Model2.Poster, c *gin.Context) {
 		tagsView = append(tagsView, TagView{
 			ID:        tag.ID,
 			Name:      tag.Name,
-			CreatedAt: tag.CreatedAt.Unix(),
-			UpdatedAt: tag.UpdatedAt.Unix(),
+			CreatedAt: tag.CreatedAt.UnixMilli(),
+			UpdatedAt: tag.UpdatedAt.UnixMilli(),
 		})
 	}
 	result := PosterView{
@@ -153,8 +153,8 @@ func CreatePosterView(poster Model2.Poster, c *gin.Context) {
 		Status:      poster.Status,
 		Tags:        tagsView,
 		User:        poster.UserID,
-		CreatedAt:   poster.CreatedAt.Unix(),
-		UpdatedAt:   poster.UpdatedAt.Unix(),
+		CreatedAt:   poster.CreatedAt.UnixMilli(),
+		UpdatedAt:   poster.UpdatedAt.UnixMilli(),
 		State:       poster.State,
 		SpecialType: poster.SpecialType,
 	}
@@ -183,8 +183,8 @@ func GetPosterReportsView(posterReports []Model2.PosterReport, c *gin.Context) {
 				PosterID:      address.PosterId,
 				Latitude:      address.Latitude,
 				Longitude:     address.Longitude,
-				CreatedAt:     address.CreatedAt.Unix(),
-				UpdatedAt:     address.UpdatedAt.Unix(),
+				CreatedAt:     address.CreatedAt.UnixMilli(),
+				UpdatedAt:     address.UpdatedAt.UnixMilli(),
 			})
 		}
 		imagesView := make([]ImageView, 0)
@@ -192,8 +192,8 @@ func GetPosterReportsView(posterReports []Model2.PosterReport, c *gin.Context) {
 			imagesView = append(imagesView, ImageView{
 				ID:        image.ID,
 				Url:       image.Url,
-				CreatedAt: image.CreatedAt.Unix(),
-				UpdatedAt: image.UpdatedAt.Unix(),
+				CreatedAt: image.CreatedAt.UnixMilli(),
+				UpdatedAt: image.UpdatedAt.UnixMilli(),
 			})
 		}
 		tagsView := make([]TagView, 0)
@@ -201,8 +201,8 @@ func GetPosterReportsView(posterReports []Model2.PosterReport, c *gin.Context) {
 			tagsView = append(tagsView, TagView{
 				ID:        tag.ID,
 				Name:      tag.Name,
-				CreatedAt: tag.CreatedAt.Unix(),
-				UpdatedAt: tag.UpdatedAt.Unix(),
+				CreatedAt: tag.CreatedAt.UnixMilli(),
+				UpdatedAt: tag.UpdatedAt.UnixMilli(),
 			})
 		}
 		reportPoster := PosterView{
@@ -217,8 +217,8 @@ func GetPosterReportsView(posterReports []Model2.PosterReport, c *gin.Context) {
 			Tags:        tagsView,
 			User:        posterReport.Poster.UserID,
 			Award:       posterReport.Poster.Award,
-			CreatedAt:   posterReport.Poster.CreatedAt.Unix(),
-			UpdatedAt:   posterReport.Poster.UpdatedAt.Unix(),
+			CreatedAt:   posterReport.Poster.CreatedAt.UnixMilli(),
+			UpdatedAt:   posterReport.Poster.UpdatedAt.UnixMilli(),
 			State:       posterReport.Poster.State,
 			SpecialType: posterReport.Poster.SpecialType,
 		}
@@ -252,8 +252,8 @@ func GetPosterReportByIdView(posterReport Model2.PosterReport, c *gin.Context) {
 			PosterID:      address.PosterId,
 			Latitude:      address.Latitude,
 			Longitude:     address.Longitude,
-			CreatedAt:     address.CreatedAt.Unix(),
-			UpdatedAt:     address.UpdatedAt.Unix(),
+			CreatedAt:     address.CreatedAt.UnixMilli(),
+			UpdatedAt:     address.UpdatedAt.UnixMilli(),
 		})
 	}
 	imagesView := make([]ImageView, 0)
@@ -261,8 +261,8 @@ func GetPosterReportByIdView(posterReport Model2.PosterReport, c *gin.Context) {
 		imagesView = append(imagesView, ImageView{
 			ID:        image.ID,
 			Url:       image.Url,
-			CreatedAt: image.CreatedAt.Unix(),
-			UpdatedAt: image.UpdatedAt.Unix(),
+			CreatedAt: image.CreatedAt.UnixMilli(),
+			UpdatedAt: image.UpdatedAt.UnixMilli(),
 		})
 	}
 	tagsView := make([]TagView, 0)
@@ -270,8 +270,8 @@ func GetPosterReportByIdView(posterReport Model2.PosterReport, c *gin.Context) {
 		tagsView = append(tagsView, TagView{
 			ID:        tag.ID,
 			Name:      tag.Name,
-			CreatedAt: tag.CreatedAt.Unix(),
-			UpdatedAt: tag.UpdatedAt.Unix(),
+			CreatedAt: tag.CreatedAt.UnixMilli(),
+			UpdatedAt: tag.UpdatedAt.UnixMilli(),
 		})
 	}
 	reportPoster := PosterView{
@@ -286,8 +286,8 @@ func GetPosterReportByIdView(posterReport Model2.PosterReport, c *gin.Context) {
 		Tags:        tagsView,
 		User:        posterReport.Poster.UserID,
 		Award:       posterReport.Poster.Award,
-		CreatedAt:   posterReport.Poster.CreatedAt.Unix(),
-		UpdatedAt:   posterReport.Poster.UpdatedAt.Unix(),
+		CreatedAt:   posterReport.Poster.CreatedAt.UnixMilli(),
+		UpdatedAt:   posterReport.Poster.UpdatedAt.UnixMilli(),
 		State:       posterReport.Poster.State,
 	}
 	userInfo := UserViewInfo{

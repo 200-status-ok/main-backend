@@ -117,7 +117,7 @@ func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 		SenderID:       int(message.SenderId),
 		ReceiverId:     int(message.ReceiverId),
 		SequenceNo:     message.SequenceNumber,
-		Time:           message.CreatedAt.Unix(),
+		Time:           message.CreatedAt.UnixMilli(),
 		Type:           message.Type,
 		Status:         message.Status,
 	}
@@ -379,7 +379,7 @@ func (wsUseCase *ChatWS) ReadMessages(c *gin.Context) {
 		ConversationID: 0,
 		SenderID:       0,
 		ReceiverId:     request.SenderID,
-		Time:           messageTime.Unix(),
+		Time:           messageTime.UnixMilli(),
 		Type:           "text-notification",
 		Status:         "notification",
 	}

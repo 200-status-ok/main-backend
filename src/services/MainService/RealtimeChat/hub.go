@@ -50,7 +50,7 @@ func (h *Hub) Run() {
 					ConversationID: int(message.ConversationId),
 					SenderID:       int(message.SenderId),
 					ReceiverId:     int(message.ReceiverId),
-					Time:           message.CreatedAt.Unix(),
+					Time:           message.CreatedAt.UnixMilli(),
 					Type:           message.Type,
 					Status:         message.Status,
 				}
@@ -61,7 +61,7 @@ func (h *Hub) Run() {
 					ConversationID: 0,
 					SenderID:       client.ID,
 					ReceiverId:     receiver,
-					Time:           currentTime.Unix(),
+					Time:           currentTime.UnixMilli(),
 					Type:           "text-notification",
 				}
 			}
@@ -74,7 +74,7 @@ func (h *Hub) Run() {
 					ConversationID: 0,
 					SenderID:       client.ID,
 					ReceiverId:     receiver,
-					Time:           currentTime.Unix(),
+					Time:           currentTime.UnixMilli(),
 					Type:           "text-notification",
 				}
 			}
