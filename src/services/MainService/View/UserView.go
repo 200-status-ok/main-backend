@@ -35,8 +35,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 				Latitude:      address.Latitude,
 				Longitude:     address.Longitude,
 				PosterID:      address.PosterId,
-				CreatedAt:     address.CreatedAt.Unix(),
-				UpdatedAt:     address.UpdatedAt.Unix(),
+				CreatedAt:     address.CreatedAt.UnixMilli(),
+				UpdatedAt:     address.UpdatedAt.UnixMilli(),
 			})
 		}
 		imagesView := make([]ImageView, 0)
@@ -44,8 +44,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 			imagesView = append(imagesView, ImageView{
 				ID:        image.ID,
 				Url:       image.Url,
-				CreatedAt: image.CreatedAt.Unix(),
-				UpdatedAt: image.UpdatedAt.Unix(),
+				CreatedAt: image.CreatedAt.UnixMilli(),
+				UpdatedAt: image.UpdatedAt.UnixMilli(),
 			})
 		}
 		tagsView := make([]TagView, 0)
@@ -53,8 +53,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 			tagsView = append(tagsView, TagView{
 				ID:        tag.ID,
 				Name:      tag.Name,
-				CreatedAt: tag.CreatedAt.Unix(),
-				UpdatedAt: tag.UpdatedAt.Unix(),
+				CreatedAt: tag.CreatedAt.UnixMilli(),
+				UpdatedAt: tag.UpdatedAt.UnixMilli(),
 			})
 		}
 		userPosters = append(userPosters, PosterView{
@@ -69,8 +69,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 			Tags:        tagsView,
 			User:        poster.UserID,
 			Award:       poster.Award,
-			CreatedAt:   poster.CreatedAt.Unix(),
-			UpdatedAt:   poster.UpdatedAt.Unix(),
+			CreatedAt:   poster.CreatedAt.UnixMilli(),
+			UpdatedAt:   poster.UpdatedAt.UnixMilli(),
 			State:       poster.State,
 		})
 	}
@@ -86,8 +86,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 				Latitude:      address.Latitude,
 				Longitude:     address.Longitude,
 				PosterID:      address.PosterId,
-				CreatedAt:     address.CreatedAt.Unix(),
-				UpdatedAt:     address.UpdatedAt.Unix(),
+				CreatedAt:     address.CreatedAt.UnixMilli(),
+				UpdatedAt:     address.UpdatedAt.UnixMilli(),
 			})
 		}
 		imagesView := make([]ImageView, 0)
@@ -95,8 +95,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 			imagesView = append(imagesView, ImageView{
 				ID:        image.ID,
 				Url:       image.Url,
-				CreatedAt: image.CreatedAt.Unix(),
-				UpdatedAt: image.UpdatedAt.Unix(),
+				CreatedAt: image.CreatedAt.UnixMilli(),
+				UpdatedAt: image.UpdatedAt.UnixMilli(),
 			})
 		}
 		tagsView := make([]TagView, 0)
@@ -104,8 +104,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 			tagsView = append(tagsView, TagView{
 				ID:        tag.ID,
 				Name:      tag.Name,
-				CreatedAt: tag.CreatedAt.Unix(),
-				UpdatedAt: tag.UpdatedAt.Unix(),
+				CreatedAt: tag.CreatedAt.UnixMilli(),
+				UpdatedAt: tag.UpdatedAt.UnixMilli(),
 			})
 		}
 		poster := PosterView{
@@ -120,8 +120,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 			Tags:        tagsView,
 			User:        markedPoster.Poster.UserID,
 			Award:       markedPoster.Poster.Award,
-			CreatedAt:   markedPoster.Poster.CreatedAt.Unix(),
-			UpdatedAt:   markedPoster.Poster.UpdatedAt.Unix(),
+			CreatedAt:   markedPoster.Poster.CreatedAt.UnixMilli(),
+			UpdatedAt:   markedPoster.Poster.UpdatedAt.UnixMilli(),
 			State:       markedPoster.Poster.State,
 		}
 		markedPosters = append(markedPosters, MarkedPosterView{
@@ -129,8 +129,8 @@ func GetUserByIdView(user Model2.User, c *gin.Context) {
 			PosterID:  markedPoster.PosterID,
 			UserID:    markedPoster.UserID,
 			Poster:    poster,
-			CreatedAt: markedPoster.CreatedAt.Unix(),
-			UpdatedAt: markedPoster.UpdatedAt.Unix(),
+			CreatedAt: markedPoster.CreatedAt.UnixMilli(),
+			UpdatedAt: markedPoster.UpdatedAt.UnixMilli(),
 		})
 	}
 	result := UserViewInfo{
@@ -159,8 +159,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 					Latitude:      address.Latitude,
 					Longitude:     address.Longitude,
 					PosterID:      address.PosterId,
-					CreatedAt:     address.CreatedAt.Unix(),
-					UpdatedAt:     address.UpdatedAt.Unix(),
+					CreatedAt:     address.CreatedAt.UnixMilli(),
+					UpdatedAt:     address.UpdatedAt.UnixMilli(),
 				})
 			}
 			imagesView := make([]ImageView, 0)
@@ -168,8 +168,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 				imagesView = append(imagesView, ImageView{
 					ID:        image.ID,
 					Url:       image.Url,
-					CreatedAt: image.CreatedAt.Unix(),
-					UpdatedAt: image.UpdatedAt.Unix(),
+					CreatedAt: image.CreatedAt.UnixMilli(),
+					UpdatedAt: image.UpdatedAt.UnixMilli(),
 				})
 			}
 			tagsView := make([]TagView, 0)
@@ -177,8 +177,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 				tagsView = append(tagsView, TagView{
 					ID:        tag.ID,
 					Name:      tag.Name,
-					CreatedAt: tag.CreatedAt.Unix(),
-					UpdatedAt: tag.UpdatedAt.Unix(),
+					CreatedAt: tag.CreatedAt.UnixMilli(),
+					UpdatedAt: tag.UpdatedAt.UnixMilli(),
 				})
 			}
 			poster := PosterView{
@@ -193,8 +193,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 				Tags:        tagsView,
 				User:        markedPoster.Poster.UserID,
 				Award:       markedPoster.Poster.Award,
-				CreatedAt:   markedPoster.Poster.CreatedAt.Unix(),
-				UpdatedAt:   markedPoster.Poster.UpdatedAt.Unix(),
+				CreatedAt:   markedPoster.Poster.CreatedAt.UnixMilli(),
+				UpdatedAt:   markedPoster.Poster.UpdatedAt.UnixMilli(),
 				State:       markedPoster.Poster.State,
 			}
 			markedPosters = append(markedPosters, MarkedPosterView{
@@ -202,8 +202,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 				PosterID:  markedPoster.PosterID,
 				UserID:    markedPoster.UserID,
 				Poster:    poster,
-				CreatedAt: markedPoster.CreatedAt.Unix(),
-				UpdatedAt: markedPoster.UpdatedAt.Unix(),
+				CreatedAt: markedPoster.CreatedAt.UnixMilli(),
+				UpdatedAt: markedPoster.UpdatedAt.UnixMilli(),
 			})
 		}
 		for _, poster := range user.Posters {
@@ -217,8 +217,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 					Latitude:      address.Latitude,
 					Longitude:     address.Longitude,
 					PosterID:      address.PosterId,
-					CreatedAt:     address.CreatedAt.Unix(),
-					UpdatedAt:     address.UpdatedAt.Unix(),
+					CreatedAt:     address.CreatedAt.UnixMilli(),
+					UpdatedAt:     address.UpdatedAt.UnixMilli(),
 				})
 			}
 			imagesView := make([]ImageView, 0)
@@ -226,8 +226,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 				imagesView = append(imagesView, ImageView{
 					ID:        image.ID,
 					Url:       image.Url,
-					CreatedAt: image.CreatedAt.Unix(),
-					UpdatedAt: image.UpdatedAt.Unix(),
+					CreatedAt: image.CreatedAt.UnixMilli(),
+					UpdatedAt: image.UpdatedAt.UnixMilli(),
 				})
 			}
 			tagsView := make([]TagView, 0)
@@ -235,8 +235,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 				tagsView = append(tagsView, TagView{
 					ID:        tag.ID,
 					Name:      tag.Name,
-					CreatedAt: tag.CreatedAt.Unix(),
-					UpdatedAt: tag.UpdatedAt.Unix(),
+					CreatedAt: tag.CreatedAt.UnixMilli(),
+					UpdatedAt: tag.UpdatedAt.UnixMilli(),
 				})
 			}
 			userPosters = append(userPosters, PosterView{
@@ -251,8 +251,8 @@ func GetUsersView(users []Model2.User, c *gin.Context) {
 				Tags:        tagsView,
 				User:        poster.UserID,
 				Award:       poster.Award,
-				CreatedAt:   poster.CreatedAt.Unix(),
-				UpdatedAt:   poster.UpdatedAt.Unix(),
+				CreatedAt:   poster.CreatedAt.UnixMilli(),
+				UpdatedAt:   poster.UpdatedAt.UnixMilli(),
 				State:       poster.State,
 			})
 		}
@@ -273,7 +273,7 @@ func GetUserPaymentsView(payments []Model2.Payment, c *gin.Context) {
 		result = append(result, UserViewPayment{
 			Id:        payment.ID,
 			Amount:    payment.Amount,
-			CreatedAt: payment.CreatedAt.Unix(),
+			CreatedAt: payment.CreatedAt.UnixMilli(),
 			Status:    payment.Status,
 			UserID:    payment.UserID,
 		})

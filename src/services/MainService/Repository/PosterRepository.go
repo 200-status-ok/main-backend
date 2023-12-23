@@ -74,8 +74,8 @@ func (r *PosterRepository) GetAllESPosters() ([]*DTO2.ESPosterDTO, error) {
 			UserID:      poster.UserID,
 			State:       poster.State,
 			SpecialType: poster.SpecialType,
-			CreatedAt:   poster.CreatedAt.Unix(),
-			UpdatedAt:   poster.UpdatedAt.Unix(),
+			CreatedAt:   poster.CreatedAt.UnixMilli(),
+			UpdatedAt:   poster.UpdatedAt.UnixMilli(),
 			Addresses:   esAddress,
 			Images:      imageUrls,
 			Tags:        esTag,
@@ -329,8 +329,8 @@ func (r *PosterRepository) CreatePoster(userID uint64, poster DTO2.CreatePosterD
 	}
 
 	esPoster.Addresses = esAddresses
-	esPoster.CreatedAt = posterModel.CreatedAt.Unix()
-	esPoster.UpdatedAt = posterModel.UpdatedAt.Unix()
+	esPoster.CreatedAt = posterModel.CreatedAt.UnixMilli()
+	esPoster.UpdatedAt = posterModel.UpdatedAt.UnixMilli()
 	esPoster.Images = imageUrls
 
 	err := esPosterCli.InsertPoster(&esPoster)

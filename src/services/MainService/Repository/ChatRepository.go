@@ -3,15 +3,17 @@ package Repository
 import (
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"time"
 )
 
 type ChatRepository struct {
+	tx *gorm.DB
 	db *gorm.DB
 }
 
 func NewChatRepository(db *gorm.DB) *ChatRepository {
-	return &ChatRepository{db: db}
+	return &ChatRepository{db: db, tx: db.Begin()}
 }
 
 func (r *ChatRepository) GetUserConversationById(convId, userId uint) (Model.Conversation, error) {
@@ -90,9 +92,17 @@ func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, erro
 
 func (r *ChatRepository) SaveMessage(messageID int64, conversationId uint, senderId uint, message string,
 	mType string, receiverId int, time time.Time, status string) (*Model.Message, error) {
+	if r.tx.Error != nil {
+		return nil, r.tx.Error
+	}
+	defer func() {
+		if re := recover(); re != nil {
+			r.tx.Rollback()
+		}
+	}()
 	lastSeqNo := 0
 	var conversation Model.Conversation
-	r.db.Where("id = ?", conversationId).First(&conversation)
+	r.tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ?", conversationId).First(&conversation)
 	if conversation.LastSeqNo != 0 {
 		lastSeqNo = conversation.LastSeqNo
 	}
@@ -108,8 +118,16 @@ func (r *ChatRepository) SaveMessage(messageID int64, conversationId uint, sende
 		SequenceNumber: lastSeqNo + 1,
 	}
 	conversation.LastSeqNo = lastSeqNo + 1
-	r.db.Save(&conversation)
-	result := r.db.Create(&messageModel)
+	if err := r.tx.Save(&conversation).Error; err != nil {
+		r.tx.Rollback()
+		return &Model.Message{}, err
+	}
+	result := r.tx.Create(&messageModel)
+	if result.Error != nil {
+		r.tx.Rollback()
+		return &Model.Message{}, result.Error
+	}
+	r.tx.Commit()
 	if result.Error != nil {
 		return &Model.Message{}, result.Error
 	}
