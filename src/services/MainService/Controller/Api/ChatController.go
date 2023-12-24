@@ -380,7 +380,7 @@ func (wsUseCase *ChatWS) ReadMessages(c *gin.Context) {
 		SenderID:       0,
 		ReceiverId:     request.SenderID,
 		Time:           messageTime.UnixMilli(),
-		Type:           "text-notification",
+		Type:           "text-read-message",
 		Status:         "notification",
 	}
 	wsUseCase.Hub.Broadcast <- msg
