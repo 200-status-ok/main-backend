@@ -8,7 +8,6 @@ import (
 )
 
 var db *gorm.DB
-var tx *gorm.DB
 
 // Connects to the PostgresSQL database using the provided connection string.
 func connectDB(connection string) (*gorm.DB, error) {
@@ -64,10 +63,4 @@ func DropModel(models []interface{}) error {
 // GetDB returns the GORM database instance.
 func GetDB() *gorm.DB {
 	return db
-}
-
-// GetTx returns the GORM database transaction instance.
-func GetTx() *gorm.DB {
-	tx = db.Begin()
-	return tx
 }
