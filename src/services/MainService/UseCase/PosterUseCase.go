@@ -134,7 +134,7 @@ func CreatePosterResponse(c *gin.Context) {
 	var specialAdsPrice = 100000.0
 	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB(), pgsql.GetTx())
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request CreatePosterRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
