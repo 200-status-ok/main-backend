@@ -172,12 +172,19 @@ func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	uniqueMap := make(map[int]struct{})
 	pairedUsers := make([]int, 0)
 	for _, conversation := range conversations {
 		if conversation.OwnerID == uint(payload.UserID) {
-			pairedUsers = append(pairedUsers, int(conversation.MemberID))
+			if _, ok := uniqueMap[int(conversation.MemberID)]; !ok {
+				uniqueMap[int(conversation.MemberID)] = struct{}{}
+				pairedUsers = append(pairedUsers, int(conversation.MemberID))
+			}
 		} else {
-			pairedUsers = append(pairedUsers, int(conversation.OwnerID))
+			if _, ok := uniqueMap[int(conversation.OwnerID)]; !ok {
+				uniqueMap[int(conversation.OwnerID)] = struct{}{}
+				pairedUsers = append(pairedUsers, int(conversation.OwnerID))
+			}
 		}
 	}
 	if _, ok := wsUseCase.Hub.Clients[int(payload.UserID)]; !ok {

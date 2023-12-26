@@ -91,6 +91,32 @@ func UpdateUser(c *gin.Context) {
 	UseCase.UpdateUserByIdResponse(c)
 }
 
+// MarkPoster godoc
+// @Summary Mark a Poster by ID
+// @Description Marks a Poster by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Poster ID"
+// @Success 200
+// @Router /users/authorize/mark-poster/{poster_id} [patch]
+func MarkPoster(c *gin.Context) {
+	UseCase.MarkPosterResponse(c)
+}
+
+// UnmarkPoster godoc
+// @Summary Unmark a Poster by ID
+// @Description Unmarks a Poster by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Poster ID"
+// @Success 200
+// @Router /users/authorize/unmark-poster/{poster_id} [delete]
+func UnmarkPoster(c *gin.Context) {
+	UseCase.UnmarkPosterResponse(c)
+}
+
 // DeleteUser godoc
 // @Summary Delete a User by ID
 // @Description Deletes a User by ID

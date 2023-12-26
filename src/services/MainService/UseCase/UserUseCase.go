@@ -388,6 +388,62 @@ func GetUserByIdResponse(c *gin.Context) {
 	View.GetUserByIdView(*user, c)
 }
 
+type MarkPosterRequest struct {
+	PosterID uint `uri:"poster_id" binding:"required"`
+}
+
+func MarkPosterResponse(c *gin.Context) {
+	var markPosterReq MarkPosterRequest
+	if err := c.ShouldBindUri(&markPosterReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	user, err := userRepository.FindById(uint(payload.UserID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	poster, err := posterRepository.GetPosterById(int(markPosterReq.PosterID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	_, err = userRepository.AddMarkedPoster(user.ID, poster.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "poster marked"})
+}
+
+type UnmarkPosterRequest struct {
+	PosterID uint `uri:"poster_id" binding:"required"`
+}
+
+func UnmarkPosterResponse(c *gin.Context) {
+	var unmarkPosterReq UnmarkPosterRequest
+	if err := c.ShouldBindUri(&unmarkPosterReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	payload := c.MustGet("authorization_payload").(*Token.Payload)
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	user, err := userRepository.FindById(uint(payload.UserID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err = userRepository.DeleteMarkedPoster(user.ID, unmarkPosterReq.PosterID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "poster unmarked"})
+}
+
 type UpdateUserRequest struct {
 	Username string `json:"username" binding:"required,min=11,max=50"`
 }

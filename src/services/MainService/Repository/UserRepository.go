@@ -73,6 +73,26 @@ func (r *UserRepository) GetAllUsers() (*[]Model.User, error) {
 	return &users, nil
 }
 
+func (r *UserRepository) AddMarkedPoster(userId uint, posterId uint) (*Model.MarkedPoster, error) {
+	var markedPoster Model.MarkedPoster
+	markedPoster.SetPosterID(posterId)
+	markedPoster.SetUserID(userId)
+	result := r.db.Create(&markedPoster)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &markedPoster, nil
+}
+
+func (r *UserRepository) DeleteMarkedPoster(userId uint, posterId uint) error {
+	var markedPoster Model.MarkedPoster
+	result := r.db.Where("user_id = ? AND poster_id = ?", userId, posterId).Delete(&markedPoster)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func (r *UserRepository) DeleteUser(id uint) error {
 	var user Model.User
 	if err := r.tx.Preload("Posters").Preload("OwnConversations").Preload("MemberConversations").

@@ -41,6 +41,8 @@ func (s *Server) MainController() {
 			{
 				userAuthRoutes.GET("/", Api2.GetUser)
 				userAuthRoutes.PATCH("/", Api2.UpdateUser)
+				userAuthRoutes.PATCH("/mark-poster/:poster_id", Api2.MarkPoster)
+				userAuthRoutes.DELETE("/mark-poster/:poster_id", Api2.UnmarkPoster)
 				userAuthRoutes.DELETE("/", Api2.DeleteUser)
 				userAuthRoutes.GET("/payment/user_wallet", Api2.Payment)
 				userAuthRoutes.GET("/payment/user_wallet/verify", Api2.PaymentVerify)

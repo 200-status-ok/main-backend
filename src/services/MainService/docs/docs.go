@@ -1552,6 +1552,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/authorize/mark-poster/{id}": {
+            "patch": {
+                "description": "Marks a Poster by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Mark a Poster by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Poster ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/users/authorize/payment/user_wallet": {
             "get": {
                 "description": "Payment",
@@ -1639,6 +1668,35 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/authorize/unmark-poster/{id}": {
+            "delete": {
+                "description": "Unmarks a Poster by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Unmark a Poster by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Poster ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1713,6 +1771,9 @@ const docTemplate = `{
                 "image_url": {
                     "type": "string"
                 },
+                "last_seq_no": {
+                    "type": "integer"
+                },
                 "member_id": {
                     "type": "integer"
                 },
@@ -1761,6 +1822,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "sender_id": {
+                    "type": "integer"
+                },
+                "sequence_number": {
                     "type": "integer"
                 },
                 "status": {
@@ -2111,6 +2175,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "sender_id": {
+                    "type": "integer"
+                },
+                "sequence_no": {
                     "type": "integer"
                 },
                 "status": {

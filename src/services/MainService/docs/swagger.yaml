@@ -48,6 +48,8 @@ definitions:
         type: integer
       image_url:
         type: string
+      last_seq_no:
+        type: integer
       member_id:
         type: integer
       messages:
@@ -80,6 +82,8 @@ definitions:
       receiver_id:
         type: integer
       sender_id:
+        type: integer
+      sequence_number:
         type: integer
       status:
         type: string
@@ -319,6 +323,8 @@ definitions:
       receiver_id:
         type: integer
       sender_id:
+        type: integer
+      sequence_no:
         type: integer
       status:
         type: string
@@ -1757,6 +1763,25 @@ paths:
       summary: Update a User by ID
       tags:
       - users
+  /users/authorize/mark-poster/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Marks a Poster by ID
+      parameters:
+      - description: Poster ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Mark a Poster by ID
+      tags:
+      - users
   /users/authorize/payment/user_wallet:
     get:
       consumes:
@@ -1813,6 +1838,25 @@ paths:
         "200":
           description: OK
       summary: Payment Verify
+      tags:
+      - users
+  /users/authorize/unmark-poster/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Unmarks a Poster by ID
+      parameters:
+      - description: Poster ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Unmark a Poster by ID
       tags:
       - users
 swagger: "2.0"
