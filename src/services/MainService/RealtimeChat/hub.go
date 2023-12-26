@@ -30,7 +30,7 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
-	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+	chatRepository := Repository.NewChatRepository(pgsql.GetDB(), pgsql.GetTx())
 	localHub := sentry.CurrentHub().Clone()
 	localHub.ConfigureScope(func(scope *sentry.Scope) {
 		scope.SetTag("component", "realtime-chat")

@@ -7,7 +7,8 @@ import (
 	"time"
 )
 
-var dB *gorm.DB
+var db *gorm.DB
+var tx *gorm.DB
 
 // Connects to the PostgresSQL database using the provided connection string.
 func connectDB(connection string) (*gorm.DB, error) {
@@ -20,8 +21,8 @@ func setupDatabase(appEnv string) {
 	if appEnv == "production" {
 		pgConnection = "postgresql://root:a4bdJh8NnWY8AFCbKkfwnUu0@main-db:5432/postgres"
 	}
-	dB, _ = connectDB(pgConnection)
-	dbSQL, _ := dB.DB()
+	db, _ = connectDB(pgConnection)
+	dbSQL, _ := db.DB()
 	dbSQL.SetMaxIdleConns(10)
 	dbSQL.SetMaxOpenConns(100)
 	dbSQL.SetConnMaxLifetime(time.Hour)
@@ -34,14 +35,14 @@ func init() {
 
 // MigrateModel migrates the specified models to the database.
 func MigrateModel(models []interface{}) error {
-	dB.Exec(`DO $$
+	db.Exec(`DO $$
 	             BEGIN
 					IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'status') THEN
 						CREATE TYPE status AS ENUM ('found', 'lost');
 					END IF;
 				END$$;`)
 	for _, model := range models {
-		err := dB.AutoMigrate(model)
+		err := db.AutoMigrate(model)
 		if err != nil {
 			return err
 		}
@@ -52,7 +53,7 @@ func MigrateModel(models []interface{}) error {
 // DropModel drops the tables associated with the specified models.
 func DropModel(models []interface{}) error {
 	for _, model := range models {
-		err := dB.Migrator().DropTable(model)
+		err := db.Migrator().DropTable(model)
 		if err != nil {
 			return err
 		}
@@ -62,5 +63,10 @@ func DropModel(models []interface{}) error {
 
 // GetDB returns the GORM database instance.
 func GetDB() *gorm.DB {
-	return dB
+	return db
+}
+
+// GetTx returns the GORM database transaction instance.
+func GetTx() *gorm.DB {
+	return tx
 }

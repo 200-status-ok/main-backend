@@ -1,6 +1,7 @@
 package Repository
 
 import (
+	"fmt"
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -12,8 +13,8 @@ type ChatRepository struct {
 	db *gorm.DB
 }
 
-func NewChatRepository(db *gorm.DB) *ChatRepository {
-	return &ChatRepository{db: db, tx: db.Begin()}
+func NewChatRepository(db *gorm.DB, tx *gorm.DB) *ChatRepository {
+	return &ChatRepository{db: db, tx: tx}
 }
 
 func (r *ChatRepository) GetUserConversationById(convId, userId uint) (Model.Conversation, error) {
@@ -119,16 +120,19 @@ func (r *ChatRepository) SaveMessage(messageID int64, conversationId uint, sende
 	}
 	conversation.LastSeqNo = lastSeqNo + 1
 	if err := r.tx.Save(&conversation).Error; err != nil {
+		fmt.Println(err)
 		r.tx.Rollback()
 		return &Model.Message{}, err
 	}
 	result := r.tx.Create(&messageModel)
 	if result.Error != nil {
+		fmt.Println(result.Error)
 		r.tx.Rollback()
 		return &Model.Message{}, result.Error
 	}
-	r.tx.Commit()
-	if result.Error != nil {
+	err := r.tx.Commit().Error
+	if err != nil {
+		r.tx.Rollback()
 		return &Model.Message{}, result.Error
 	}
 
