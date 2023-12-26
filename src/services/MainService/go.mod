@@ -3,7 +3,7 @@ module github.com/200-status-ok/main-backend/src/MainService
 go 1.20
 
 require (
-	github.com/200-status-ok/main-backend/src/pkg v0.0.0-20231212134153-1fac81c8c051
+	github.com/200-status-ok/main-backend/src/pkg v0.0.0-20231226115113-9c6c240ece61
 	github.com/aws/aws-sdk-go v1.44.258
 	github.com/elastic/go-elasticsearch/v8 v8.10.1
 	github.com/getsentry/sentry-go v0.21.0

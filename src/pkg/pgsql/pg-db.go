@@ -22,6 +22,7 @@ func setupDatabase(appEnv string) {
 		pgConnection = "postgresql://root:a4bdJh8NnWY8AFCbKkfwnUu0@main-db:5432/postgres"
 	}
 	db, _ = connectDB(pgConnection)
+	tx = db.Begin()
 	dbSQL, _ := db.DB()
 	dbSQL.SetMaxIdleConns(10)
 	dbSQL.SetMaxOpenConns(100)
