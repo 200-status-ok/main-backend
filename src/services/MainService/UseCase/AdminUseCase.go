@@ -98,7 +98,7 @@ func GetUserByIdAdminResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	userRepository := Repository.NewUserRepository(pgsql.GetDB(), pgsql.GetTx())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	user, err := userRepository.FindById(request.UserID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -108,7 +108,7 @@ func GetUserByIdAdminResponse(c *gin.Context) {
 }
 
 func GetUsersResponse(c *gin.Context) {
-	userRepository := Repository.NewUserRepository(pgsql.GetDB(), pgsql.GetTx())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	users, err := userRepository.GetAllUsers()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -128,7 +128,7 @@ type UserInfo struct {
 func UpdateUserByIdAdminResponse(c *gin.Context) {
 	var request UpdateUserByAdminRequest
 	var userInfo UserInfo
-	userRepository := Repository.NewUserRepository(pgsql.GetDB(), pgsql.GetTx())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -160,7 +160,7 @@ type DeleteUserRequest struct {
 
 func DeleteUserByIdAdminResponse(c *gin.Context) {
 	var request DeleteUserRequest
-	userRepository := Repository.NewUserRepository(pgsql.GetDB(), pgsql.GetTx())
+	userRepository := Repository.NewUserRepository(pgsql.GetDB())
 	esDeletePostersByUserId := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
