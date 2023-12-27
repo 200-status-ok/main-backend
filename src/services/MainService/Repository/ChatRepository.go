@@ -80,8 +80,12 @@ func (r *ChatRepository) GetAllUserConversations(userId uint) (*Model.User, erro
 	result := r.db.
 		Preload("OwnConversations").
 		Preload("MemberConversations").
-		Preload("OwnConversations.Messages").
-		Preload("MemberConversations.Messages").
+		Preload("OwnConversations.Messages", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at ASC")
+		}).
+		Preload("MemberConversations.Messages", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at ASC")
+		}).
 		Where("id = ?", userId).
 		First(&userConversations)
 	if result.Error != nil {
