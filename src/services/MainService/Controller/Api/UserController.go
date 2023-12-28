@@ -112,7 +112,7 @@ func MarkPoster(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "Poster ID"
 // @Success 200
-// @Router /users/authorize/unmark-poster/{poster_id} [delete]
+// @Router /users/authorize/mark-poster/{poster_id} [delete]
 func UnmarkPoster(c *gin.Context) {
 	UseCase.UnmarkPosterResponse(c)
 }

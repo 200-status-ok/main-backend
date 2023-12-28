@@ -1552,7 +1552,34 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/authorize/mark-poster/{id}": {
+        "/users/authorize/mark-poster/{poster_id}": {
+            "delete": {
+                "description": "Unmarks a Poster by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Unmark a Poster by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Poster ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
             "patch": {
                 "description": "Marks a Poster by ID",
                 "consumes": [
@@ -1659,35 +1686,6 @@ const docTemplate = `{
                         "description": "Track ID",
                         "name": "track_id",
                         "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/users/authorize/unmark-poster/{id}": {
-            "delete": {
-                "description": "Unmarks a Poster by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Unmark a Poster by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Poster ID",
-                        "name": "id",
-                        "in": "path",
                         "required": true
                     }
                 ],

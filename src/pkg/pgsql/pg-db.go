@@ -24,7 +24,7 @@ func setupDatabase(appEnv string) {
 	dbSQL, _ := db.DB()
 	dbSQL.SetMaxIdleConns(10)
 	dbSQL.SetMaxOpenConns(100)
-	dbSQL.SetConnMaxLifetime(5 * time.Minute)
+	dbSQL.SetConnMaxLifetime(30 * time.Second)
 }
 
 func init() {
