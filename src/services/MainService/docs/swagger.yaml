@@ -1763,7 +1763,25 @@ paths:
       summary: Update a User by ID
       tags:
       - users
-  /users/authorize/mark-poster/{id}:
+  /users/authorize/mark-poster/{poster_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Unmarks a Poster by ID
+      parameters:
+      - description: Poster ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Unmark a Poster by ID
+      tags:
+      - users
     patch:
       consumes:
       - application/json
@@ -1838,25 +1856,6 @@ paths:
         "200":
           description: OK
       summary: Payment Verify
-      tags:
-      - users
-  /users/authorize/unmark-poster/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Unmarks a Poster by ID
-      parameters:
-      - description: Poster ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      summary: Unmark a Poster by ID
       tags:
       - users
 swagger: "2.0"
