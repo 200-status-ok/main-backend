@@ -3,7 +3,7 @@ module github.com/200-status-ok/main-backend/src/WorkerService
 go 1.20
 
 require (
-	github.com/200-status-ok/main-backend/src/pkg v0.0.0-20231212134153-1fac81c8c051
+	github.com/200-status-ok/main-backend/src/pkg v0.0.0-20240129121527-3f24869f29d5
 	github.com/elastic/go-elasticsearch/v8 v8.10.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/medianasms/go-rest-sdk v1.1.0
@@ -57,6 +57,7 @@ require (
 	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/postgres v1.5.3 // indirect

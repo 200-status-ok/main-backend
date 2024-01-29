@@ -2,8 +2,8 @@ package UseCase
 
 import (
 	"fmt"
-	"github.com/200-status-ok/main-backend/src/MainService/Cmd/DB"
 	"github.com/200-status-ok/main-backend/src/WorkerService/MessageCli"
+	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
@@ -31,7 +31,7 @@ func CheckPhotoNSFW() {
 	messageBroker.Connection.NotifyClose(closeCh)
 
 	go SendHeartbeat(messageBroker.Connection, &messageBroker, connectionString)
-	db, _ := DB.GetDB()
+	db := pgsql.GetDB()
 
 	go func() {
 		err := messageBroker.SubscribeOnQueue("nsfw-validation", "nsfw-validation", db)
@@ -45,7 +45,6 @@ func CheckTagNSFW() {
 	messageBroker := MessageCli.MessageClient{}
 	var connectionString string
 	appEnv := os.Getenv("APP_ENV2")
-	db, _ := DB.GetDB()
 	if appEnv == "development" {
 		connectionString = utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION")
 		err := messageBroker.ConnectBroker(utils.ReadFromEnvFile(".env", "RABBITMQ_LOCAL_CONNECTION"))
@@ -64,6 +63,7 @@ func CheckTagNSFW() {
 	messageBroker.Connection.NotifyClose(closeCh)
 
 	go SendHeartbeat(messageBroker.Connection, &messageBroker, connectionString)
+	db := pgsql.GetDB()
 
 	go func() {
 		err := messageBroker.SubscribeOnQueue("tag-validation", "tag-validation", db)

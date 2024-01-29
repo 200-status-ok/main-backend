@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.5
 
 require (
-	github.com/200-status-ok/main-backend/src/pkg v0.0.0-20231226152106-dd0809984674
+	github.com/200-status-ok/main-backend/src/pkg v0.0.0-20240129121527-3f24869f29d5
 	github.com/aws/aws-sdk-go v1.44.258
 	github.com/elastic/go-elasticsearch/v8 v8.10.1
 	github.com/getsentry/sentry-go v0.21.0
@@ -23,6 +23,7 @@ require (
 	github.com/swaggo/swag v1.16.1
 	golang.org/x/crypto v0.13.0
 	golang.org/x/oauth2 v0.12.0
+	gorm.io/driver/postgres v1.5.3
 	gorm.io/gorm v1.25.5
 )
 
@@ -92,5 +93,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/postgres v1.5.3 // indirect
 )
