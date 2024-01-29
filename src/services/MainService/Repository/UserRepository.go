@@ -43,7 +43,7 @@ func (r *UserRepository) UserUpdate(user *Model.User, id uint) (*Model.User, err
 }
 
 func (r *UserRepository) UserCreate(user *Model.User) (*Model.User, error) {
-	result := r.tx.Create(&user)
+	result := r.db.Create(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
