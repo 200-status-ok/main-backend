@@ -2,6 +2,6 @@ go 1.21
 
 use (
 	services/WorkerService
-	services/MainService
 	pkg
+	services/MainService
 )
