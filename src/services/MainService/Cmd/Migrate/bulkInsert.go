@@ -1,14 +1,15 @@
 package Migrate
 
 import (
+	"github.com/200-status-ok/main-backend/src/MainService/Cmd/DB"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
-	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 )
 
 func InsertAllPostersInES() {
-	repository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	repository := Repository.NewPosterRepository(db)
 	allESPosters, err := repository.GetAllESPosters()
 
 	if err != nil {

@@ -3,11 +3,11 @@ package UseCase
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Cmd/DB"
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
-	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,7 +22,8 @@ func CreateTagResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	tagRepository := Repository.NewCategoryRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	tagRepository := Repository.NewCategoryRepository(db)
 	tags, err := tagRepository.CreateCategory(Model.Tag{
 		Name: tag.Name,
 	})
@@ -53,7 +54,8 @@ func UpdateTagByIdResponse(c *gin.Context) {
 		return
 	}
 
-	tagRepository := Repository.NewCategoryRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	tagRepository := Repository.NewCategoryRepository(db)
 	err := tagRepository.UpdateTag(id.ID, Model.Tag{
 		Name:  tag.Name,
 		State: tag.State,
@@ -76,7 +78,8 @@ func DeleteTagByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	tagRepository := Repository.NewCategoryRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	tagRepository := Repository.NewCategoryRepository(db)
 	err := tagRepository.DeleteCategory(id.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -95,7 +98,8 @@ func GetTagByIdResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	tagRepository := Repository.NewCategoryRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	tagRepository := Repository.NewCategoryRepository(db)
 	tags, err := tagRepository.GetCategoryById(int(id.ID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -115,7 +119,8 @@ func GetTagsResponse(c *gin.Context) {
 		return
 	}
 
-	tagRepository := Repository.NewCategoryRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	tagRepository := Repository.NewCategoryRepository(db)
 	tags, err := tagRepository.GetTags(request.State)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

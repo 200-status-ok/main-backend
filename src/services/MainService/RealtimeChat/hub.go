@@ -2,9 +2,9 @@ package RealtimeChat
 
 import (
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Cmd/DB"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
-	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/getsentry/sentry-go"
 	"time"
 )
@@ -30,7 +30,8 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
-	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	chatRepository := Repository.NewChatRepository(db)
 	localHub := sentry.CurrentHub().Clone()
 	localHub.ConfigureScope(func(scope *sentry.Scope) {
 		scope.SetTag("component", "realtime-chat")
