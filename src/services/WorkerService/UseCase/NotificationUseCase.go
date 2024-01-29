@@ -2,8 +2,8 @@ package UseCase
 
 import (
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Cmd/DB"
 	"github.com/200-status-ok/main-backend/src/WorkerService/MessageCli"
-	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
@@ -32,16 +32,17 @@ func SendToUser() {
 	messageBroker.Connection.NotifyClose(closeCh)
 
 	go SendHeartbeat(messageBroker.Connection, &messageBroker, connectionString)
+	db, _ := DB.GetDB()
 
 	go func() {
-		err := messageBroker.SubscribeOnQueue("email_notification", "email_notification", pgsql.GetDB())
+		err := messageBroker.SubscribeOnQueue("email_notification", "email_notification", db)
 		if err != nil {
 			fmt.Println("Error subscribing to email_notification queue:", err)
 		}
 	}()
 
 	go func() {
-		err := messageBroker.SubscribeOnQueue("sms_notification", "sms_notification", pgsql.GetDB())
+		err := messageBroker.SubscribeOnQueue("sms_notification", "sms_notification", db)
 		if err != nil {
 			fmt.Println("Error subscribing to sms_notification queue:", err)
 		}

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Cmd/DB"
 	"github.com/200-status-ok/main-backend/src/MainService/Model"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
@@ -13,7 +14,6 @@ import (
 	Utils2 "github.com/200-status-ok/main-backend/src/MainService/Utils"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
 	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
-	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/pquerna/otp"
@@ -146,7 +146,7 @@ func VerifyOtpResponse(c *gin.Context) {
 		redisClient = Utils2.NewRedisClient("redis", "6379", "", 0)
 	}
 
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	userRepository := Repository.NewUserRepository(DB.GetDB())
 	if err := c.ShouldBindJSON(&verifyReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -238,7 +238,8 @@ func GoogleLoginAndroidResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	db, tx := DB.GetDB()
+	userRepository := Repository.NewUserRepository(db, tx)
 	userExist, err := userRepository.FindByUsername(googleLoginReq.Email)
 	if err != nil && err.Error() != "user not found" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -336,7 +337,8 @@ func GoogleCallbackResponse(c *gin.Context) {
 		return
 	}
 
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	db, tx := DB.GetDB()
+	userRepository := Repository.NewUserRepository(db, tx)
 	var userID uint64
 	userExist, err := userRepository.FindByUsername(googleRes.Email)
 	if err != nil && err.Error() != "user not found" {
@@ -379,7 +381,8 @@ func GoogleCallbackResponse(c *gin.Context) {
 
 func GetUserByIdResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	db, tx := DB.GetDB()
+	userRepository := Repository.NewUserRepository(db, tx)
 	user, err := userRepository.FindById(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -399,8 +402,9 @@ func MarkPosterResponse(c *gin.Context) {
 		return
 	}
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, tx := DB.GetDB()
+	userRepository := Repository.NewUserRepository(db, tx)
+	posterRepository := Repository.NewPosterRepository(db)
 	user, err := userRepository.FindById(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -430,7 +434,8 @@ func UnmarkPosterResponse(c *gin.Context) {
 		return
 	}
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	db, tx := DB.GetDB()
+	userRepository := Repository.NewUserRepository(db, tx)
 	user, err := userRepository.FindById(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -451,7 +456,8 @@ type UpdateUserRequest struct {
 func UpdateUserByIdResponse(c *gin.Context) {
 	var updateUserReq UpdateUserRequest
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	db, tx := DB.GetDB()
+	userRepository := Repository.NewUserRepository(db, tx)
 
 	if err := c.ShouldBindJSON(&updateUserReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -482,7 +488,8 @@ type CreateUserRequest struct {
 
 func CreateUserResponse(c *gin.Context) {
 	var createUserReq CreateUserRequest
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	db, tx := DB.GetDB()
+	userRepository := Repository.NewUserRepository(db, tx)
 	if err := c.ShouldBindJSON(&createUserReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -503,7 +510,8 @@ func CreateUserResponse(c *gin.Context) {
 
 func DeleteUserByIdResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	db, tx := DB.GetDB()
+	userRepository := Repository.NewUserRepository(db, tx)
 	esDeletePostersByUserId := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
 	err := userRepository.DeleteUser(uint(payload.UserID))
 	if err != nil {
@@ -583,8 +591,9 @@ func PaymentResponse(c *gin.Context) {
 	var trackId = structResult["trackId"]
 	trackIdStringValue := fmt.Sprint(trackId)
 	resultStringValue := fmt.Sprint(resultNumber)
+	db, _ := DB.GetDB()
 	if resultStringValue == "100" {
-		PaymentRepository := Repository.NewPaymentRepository(pgsql.GetDB())
+		PaymentRepository := Repository.NewPaymentRepository(db)
 		_, err := PaymentRepository.CreatePayment(Model.Payment{
 			Amount:  paymentReq.Amount,
 			UserID:  uint(payload.UserID),
@@ -618,7 +627,8 @@ func PaymentVerifyResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	paymentRepository := Repository.NewPaymentRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	paymentRepository := Repository.NewPaymentRepository(db)
 	var merchant = "zibal"
 	payment, err := paymentRepository.GetPaymentByTrackID(paymentVerifyReq.TrackId)
 	if err != nil {
@@ -660,7 +670,8 @@ func PaymentVerifyResponse(c *gin.Context) {
 	if resultStringValue == "100" {
 		if statusStringValue == "1" {
 			payment.Status = "paid"
-			userRep := Repository.NewUserRepository(pgsql.GetDB())
+			db, tx := DB.GetDB()
+			userRep := Repository.NewUserRepository(db, tx)
 			_, err := userRep.UpdateWallet(payment.UserID, payment.Amount)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -695,7 +706,8 @@ func PaymentVerifyResponse(c *gin.Context) {
 
 func GetTransactionsResponse(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	paymentRepository := Repository.NewPaymentRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	paymentRepository := Repository.NewPaymentRepository(db)
 	payments, err := paymentRepository.GetPaymentsOfUser(uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

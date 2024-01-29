@@ -3,6 +3,7 @@ package UseCase
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Cmd/DB"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository/ElasticSearch"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
@@ -10,7 +11,6 @@ import (
 	"github.com/200-status-ok/main-backend/src/MainService/View"
 	DTO2 "github.com/200-status-ok/main-backend/src/MainService/dtos"
 	"github.com/200-status-ok/main-backend/src/pkg/elasticsearch"
-	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
@@ -86,7 +86,8 @@ type GetPosterByIdRequest struct {
 }
 
 func GetPosterByIdResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	posterRepository := Repository.NewPosterRepository(db)
 	var request GetPosterByIdRequest
 	if err := c.ShouldBindUri(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -105,7 +106,8 @@ type DeletePosterByIdRequest struct {
 }
 
 func DeletePosterByIdResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	posterRepository := Repository.NewPosterRepository(db)
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
 	var request DeletePosterByIdRequest
@@ -132,9 +134,10 @@ type CreatePosterRequest struct {
 
 func CreatePosterResponse(c *gin.Context) {
 	var specialAdsPrice = 100000.0
+	db, tx := DB.GetDB()
 	esPosterCli := ElasticSearch.NewPosterES(elasticsearch.GetElastic())
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
-	userRepository := Repository.NewUserRepository(pgsql.GetDB())
+	posterRepository := Repository.NewPosterRepository(db)
+	userRepository := Repository.NewUserRepository(db, tx)
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 	var request CreatePosterRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -226,7 +229,8 @@ type UpdatePosterByIdRequest struct {
 }
 
 func UpdatePosterResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	posterRepository := Repository.NewPosterRepository(db)
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
 	var request UpdatePosterRequest
@@ -318,7 +322,8 @@ type CreatePosterReportRequest struct {
 }
 
 func CreatePosterReportResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	posterRepository := Repository.NewPosterRepository(db)
 	var request CreatePosterReportRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -339,7 +344,8 @@ type getPosterReportsRequest struct {
 }
 
 func GetPosterReportsResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	posterRepository := Repository.NewPosterRepository(db)
 
 	var request getPosterReportsRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
@@ -365,7 +371,8 @@ type GetPosterReportByIdRequest struct {
 }
 
 func GetPosterReportByIdResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	posterRepository := Repository.NewPosterRepository(db)
 
 	var request GetPosterReportByIdRequest
 	if err := c.ShouldBindUri(&request); err != nil {
@@ -396,7 +403,8 @@ type UpdatePosterReportByIdRequest struct {
 }
 
 func UpdatePosterReportResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	posterRepository := Repository.NewPosterRepository(db)
 
 	var request UpdatePosterReportRequest
 	var id UpdatePosterReportByIdRequest
@@ -425,7 +433,8 @@ type UpdatePosterStateRequest struct {
 }
 
 func UpdatePosterStateResponse(c *gin.Context) {
-	posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	posterRepository := Repository.NewPosterRepository(db)
 
 	var request UpdatePosterStateRequest
 
@@ -474,6 +483,7 @@ type Data struct {
 }
 
 func MockPoster(count int, userID int, tagNames []string) error {
+	db, _ := DB.GetDB()
 	file, err := os.Open("Utils/Tehran.json")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -531,7 +541,7 @@ func MockPoster(count int, userID int, tagNames []string) error {
 					tagNames[randomNumber4],
 				},
 			}
-			posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+			posterRepository := Repository.NewPosterRepository(db)
 			model, err := posterRepository.CreatePoster(uint64(userID), request.Poster, request.Addresses, nil,
 				request.Tags, "normal")
 			if err != nil {
@@ -562,7 +572,7 @@ func MockPoster(count int, userID int, tagNames []string) error {
 					tagNames[randomNumber4],
 				},
 			}
-			posterRepository := Repository.NewPosterRepository(pgsql.GetDB())
+			posterRepository := Repository.NewPosterRepository(db)
 			model, err := posterRepository.CreatePoster(uint64(userID), request.Poster, request.Addresses, nil,
 				request.Tags, "normal")
 			if err != nil {

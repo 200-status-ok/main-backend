@@ -11,8 +11,8 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{db: db, tx: db.Begin()}
+func NewUserRepository(db *gorm.DB, tx *gorm.DB) *UserRepository {
+	return &UserRepository{db: db, tx: tx}
 }
 
 func (r *UserRepository) FindByUsername(username string) (*Model.User, error) {

@@ -2,12 +2,12 @@ package Api
 
 import (
 	"fmt"
+	"github.com/200-status-ok/main-backend/src/MainService/Cmd/DB"
 	"github.com/200-status-ok/main-backend/src/MainService/RealtimeChat"
 	"github.com/200-status-ok/main-backend/src/MainService/Repository"
 	"github.com/200-status-ok/main-backend/src/MainService/Token"
 	"github.com/200-status-ok/main-backend/src/MainService/View"
 	"github.com/200-status-ok/main-backend/src/MainService/dtos"
-	"github.com/200-status-ok/main-backend/src/pkg/pgsql"
 	"github.com/200-status-ok/main-backend/src/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -51,8 +51,9 @@ type MessageBody struct {
 // @Router /chat/authorize/message [post]
 func (wsUseCase *ChatWS) SendMessage(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
-	posterRepo := Repository.NewPosterRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	chatRepo := Repository.NewChatRepository(db)
+	posterRepo := Repository.NewPosterRepository(db)
 	var request MessageBody
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -141,7 +142,8 @@ type OpenWSConnection struct {
 // @Success 200 {object} string
 // @Router /chat/open-ws [get]
 func (wsUseCase *ChatWS) OpenWSConnection(c *gin.Context) {
-	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	chatRepo := Repository.NewChatRepository(db)
 	var request OpenWSConnection
 	secretKey := utils.ReadFromEnvFile(".env", "JWT_SECRET")
 	tokenMaker, _ := Token.NewJWTMaker(secretKey)
@@ -226,7 +228,8 @@ type ConversationInfo struct {
 // @Router /chat/authorize/conversation [get]
 func AllUserConversations(c *gin.Context) {
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
-	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	chatRepo := Repository.NewChatRepository(db)
 
 	user, err := chatRepo.GetAllUserConversations(uint(payload.UserID))
 	if err != nil {
@@ -258,7 +261,8 @@ func GetConversationById(c *gin.Context) {
 		return
 	}
 
-	chatRepo := Repository.NewChatRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	chatRepo := Repository.NewChatRepository(db)
 	conversation, err := chatRepo.GetUserConversationById(pathRequest.ConversationID, uint(payload.UserID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -289,7 +293,8 @@ type ConversationHistoryQueryRequest struct {
 // @Success 200 {array} Model.Conversation
 // @Router /chat/authorize/history/{conversation_id}/ [get]
 func ConversationHistory(c *gin.Context) {
-	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	chatRepository := Repository.NewChatRepository(db)
 	payload := c.MustGet("authorization_payload").(*Token.Payload)
 
 	var pathRequest ConversationIDPathRequest
@@ -330,7 +335,8 @@ type UpdateConversationBody struct {
 // @Success 200 {object} string
 // @Router /chat/authorize/conversation/{conversation_id} [patch]
 func UpdateConversation(c *gin.Context) {
-	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	chatRepository := Repository.NewChatRepository(db)
 
 	var pathRequest ConversationIDPathRequest
 	if err := c.ShouldBindUri(&pathRequest); err != nil {
@@ -367,7 +373,8 @@ type MessageIDsBody struct {
 // @Success 200 {object} string
 // @Router /chat/authorize/read [post]
 func (wsUseCase *ChatWS) ReadMessages(c *gin.Context) {
-	chatRepository := Repository.NewChatRepository(pgsql.GetDB())
+	db, _ := DB.GetDB()
+	chatRepository := Repository.NewChatRepository(db)
 	var request MessageIDsBody
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
